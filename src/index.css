@@ -1,6 +1,35 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  /* Paleta Oficial Inspirada na Igreja Presbiteriana do Brasil (IPB) */
+  --color-ipb-darkest: #082517; /* Fundo nobre e profundo para projeção */
+  --color-ipb-dark: #0d5131;    /* Verde institucional solene IPB */
+  --color-ipb-primary: #1b6b45; /* Verde principal vibrante */
+  --color-ipb-medium: #3c816a;  /* Verde folha oficial do portal IPB */
+  --color-ipb-light: #68b193;   /* Verde claro para realces e bordas */
+  --color-ipb-glow: #38af00;    /* Verde sarça / destaque luminoso */
+
+  /* Elementos Dourados (Símbolo da Sarça Ardente e celebração) */
+  --color-gold-light: #fde047;
+  --color-gold: #eab308;
+  --color-gold-dark: #ca8a04;
+  --color-gold-glow: #f59e0b;
+
+  /* Equipes da Gincana (Equipe Sarça Verde vs Equipe Dourada/Ouro) */
+  --color-equipeA-bg: #0f3f26;
+  --color-equipeA-border: #34d399;
+  --color-equipeA-text: #a7f3d0;
+
+  --color-equipeB-bg: #451a03;
+  --color-equipeB-border: #fbbf24;
+  --color-equipeB-text: #fef3c7;
+
+  --font-sans: Roboto, system-ui, -apple-system, sans-serif;
+
+  --shadow-glow-green: 0 0 25px rgba(56, 175, 0, 0.45);
+  --shadow-glow-gold: 0 0 25px rgba(245, 158, 11, 0.5);
+  --shadow-card-dark: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
 
 @layer base {
   html, body {
@@ -8,9 +37,9 @@
     padding: 0;
     width: 100%;
     height: 100%;
-    background-color: #082517;
-    color: #ffffff;
-    font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+    background-color: var(--color-ipb-darkest);
+    color: var(--color-white);
+    font-family: var(--font-sans);
     user-select: none;
     overflow: hidden;
   }
@@ -26,12 +55,12 @@
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #082517;
+  background: var(--color-ipb-darkest);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1b6b45;
+  background: var(--color-ipb-primary);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3c816a;
+  background: var(--color-ipb-medium);
 }

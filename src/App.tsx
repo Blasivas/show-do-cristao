@@ -5,7 +5,7 @@ export default function App() {
   const [contadorTeste, setContadorTeste] = useState(0);
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-ipb-darkest via-ipb-dark to-ipb-darkest flex flex-col justify-between p-8">
+    <div className="min-h-screen w-full bg-linear-to-br from-ipb-darkest via-ipb-dark to-ipb-darkest flex flex-col justify-between p-8">
       {/* Barra Superior Institucional */}
       <header className="flex items-center justify-between border-b border-ipb-medium/30 pb-4">
         <div className="flex items-center space-x-3">
@@ -15,7 +15,7 @@ export default function App() {
           <div>
             <h1 className="text-xl font-bold tracking-wider text-white uppercase flex items-center gap-2">
               Show do Cristão
-              <span className="text-xs px-2 py-0.5 rounded bg-ipb-medium text-white font-normal">IPB</span>
+              <span className="text-xs px-2 py-0.5 rounded-sm bg-ipb-medium text-white font-normal">IPB</span>
             </h1>
             <p className="text-xs text-ipb-light">Igreja Presbiteriana do Brasil — Gincana Bíblica</p>
           </div>
@@ -67,7 +67,7 @@ export default function App() {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => setContadorTeste(prev => prev + 1)}
-            className="flex items-center gap-2 bg-gradient-to-r from-ipb-medium to-ipb-primary hover:from-ipb-primary hover:to-ipb-dark text-white font-bold py-3 px-8 rounded-xl border border-ipb-light/40 shadow-glow-green transition-all transform hover:scale-105 active:scale-95"
+            className="flex items-center gap-2 bg-linear-to-r from-ipb-medium to-ipb-primary hover:from-ipb-primary hover:to-ipb-dark text-white font-bold py-3 px-8 rounded-xl border border-ipb-light/40 shadow-glow-green transition-all hover:scale-105 active:scale-95"
           >
             <Play className="w-5 h-5 text-gold fill-gold" />
             Testar Interatividade (Cliques: {contadorTeste})
@@ -77,9 +77,9 @@ export default function App() {
 
       {/* Rodapé Informativo */}
       <footer className="flex items-center justify-between text-xs text-ipb-light/60 border-t border-ipb-medium/20 pt-4">
-        <div>Etapa 1 Concluída: React + Vite + Tailwind + TypeScript</div>
+        <div>Etapa 2: React + Vite + Tailwind + TypeScript + Electron</div>
         <div className="flex items-center gap-2">
-          <span>Pronto para integrar com Electron</span>
+          <span>{window.showDoCristao?.isElectron ? 'Rodando na janela nativa (Electron)' : 'Rodando no navegador'}</span>
           <Settings className="w-3.5 h-3.5" />
         </div>
       </footer>
