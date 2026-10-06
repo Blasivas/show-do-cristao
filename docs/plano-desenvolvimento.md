@@ -4,6 +4,11 @@ Este documento serve como o **guia de acompanhamento** de todo o ciclo de desenv
 
 Cada etapa também traz uma seção **"Pontos a validar"**: são dúvidas e sugestões de melhoria que **ainda não foram decididas**. A ideia é discutir cada uma delas ao chegar na etapa correspondente, testando na própria aplicação, e registrar o resultado no [Registro de Decisões](#-registro-de-decisões).
 
+## Regras de Trabalho
+
+- **Commits e envio ao GitHub (`git commit` / `git push`) só são feitos após autorização explícita do Matheus**, depois que ele validar os arquivos alterados. Ao terminar uma etapa, o assistente apresenta o resumo das mudanças e aguarda a aprovação.
+- Antes de alterar código em uma nova etapa, a proposta da etapa e seus "Pontos a validar" são apresentados e discutidos primeiro.
+
 ---
 
 ## Progresso Geral
@@ -13,7 +18,7 @@ Cada etapa também traz uma seção **"Pontos a validar"**: são dúvidas e suge
 - [x] **Etapa 2:** Integração com o Electron (Janela Desktop Nativa, Segurança & Funcionamento Offline) *(Concluído)*
 - [x] **Etapa 2.1:** Migração do Tailwind CSS 3 → 4 *(Concluído)*
 - [x] **Etapa 2.2:** Atualização do Vite 6 → 8 *(Concluído)*
-- [ ] **Etapa 3:** Modelagem de Dados, Motor de Regras & Banco Inicial de Perguntas (com testes unitários)
+- [x] **Etapa 3:** Modelagem de Dados, Motor de Regras & Banco Inicial de Perguntas (com testes unitários) *(Concluído)*
 - [ ] **Etapa 4:** Armazenamento Local & Gerenciamento de Perguntas (CRUD do Apresentador)
 - [ ] **Etapa 5:** Estado Global, Navegação & Tela de Configuração da Partida
 - [ ] **Etapa 6:** O Mural de Perguntas (Grade Interativa de Números)
@@ -43,6 +48,13 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 | D8 | 2026-10-05 | **Node.js 22.12+** passa a ser obrigatório: todas as versões suportadas do Electron (42, 43 e 44) exigem essa versão, e o Node 20 está fora de suporte. Electron fixado em `44.4.5`. Ambiente de desenvolvimento atualizado para o Node **24 LTS** (gerenciado pelo nvm-windows). |
 | D9 | 2026-10-05 | Migração para o **Tailwind CSS 4** ainda no início do desenvolvimento (menos telas para revisar), usando o plugin `@tailwindcss/vite` no lugar do PostCSS. A configuração do tema passa a ficar no `@theme` do `src/index.css`. |
 | D10 | 2026-10-05 | Atualização para o **Vite 8** (Rolldown/Oxc) ainda no início do desenvolvimento. Remove os avisos do `vite-plugin-electron`, a dependência do `esbuild` e acelera os builds. |
+| D11 | 2026-10-06 | **Ordem das equipes:** as equipes se revezam a cada pergunta (A, B, A, B…), **independentemente de roubo**. Ex.: A erra a pergunta 1 e B rouba (acertando ou não); a pergunta 2 é de B. |
+| D12 | 2026-10-06 | O apresentador **define a ordem das equipes** na tela de configuração (arrastando para cima/baixo); a primeira da lista começa e a ordem se reveza a partir dela. |
+| D13 | 2026-10-06 | **Número de equipes configurável, de 2 a 4.** O roubo vale sempre 50%: **5, 10 ou 15 pontos** (sem arredondamento, já que as pontuações são fixas em 10/20/30). |
+| D14 | 2026-10-06 | A pergunta tem apenas **enunciado, 4 alternativas, resposta correta e dificuldade**. Sem categoria e sem referência bíblica, para facilitar a criação de perguntas. |
+| D15 | 2026-10-06 | As perguntas ficam em um **arquivo JSON separado** (`src/data/perguntas.json`), com chaves em português e a resposta correta como letra (A–D), fácil de editar à mão ou gerar por IA no futuro. As 20 perguntas atuais são dados de teste. |
+| D16 | 2026-10-06 | **Roubo sempre pela próxima equipe na ordem.** Ex. com A, B e C: A erra e B pode roubar; a próxima pergunta é de B; se B errar, C pode roubar. |
+| D17 | 2026-10-06 | A configuração da partida fica em **uma única tela**: quantidade e nomes das equipes, ordem (arrastar), roubo ativo e tempo para responder. |
 
 ---
 
@@ -114,23 +126,26 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 
 ---
 
-### 🔹 Etapa 3: Modelagem de Dados, Motor de Regras & Perguntas Iniciais
+### 🟩 Etapa 3: Modelagem de Dados, Motor de Regras & Perguntas Iniciais `[CONCLUÍDO]`
 **Objetivo:** Definir as regras de negócio em código TypeScript, de forma **isolada da interface** (funções puras), testável, e criar o catálogo de perguntas bíblicas padrão.
-- [ ] Criar `src/types/game.ts`:
-  - Interface `Question`: `id`, enunciado, 4 alternativas, índice da resposta correta, dificuldade (Fácil/Médio/Difícil) e, opcionalmente, `reference` (referência bíblica, ex.: "Gn 1:1") e `category`.
-  - A pontuação (10/20/30) é **derivada da dificuldade**, e não armazenada na pergunta, para evitar inconsistências.
-  - Interface `GameConfig`: nomes das equipes, tempo do cronômetro por pergunta, roubo ativo.
-  - Interface `GameState`: tela atual, equipe da vez, perguntas respondidas, pontuações secretas e histórico de jogadas.
-- [ ] Criar `src/game/engine.ts` com as regras como **funções puras** (acerto, erro, roubo, troca de vez, fim de jogo).
-- [ ] Instalar o **Vitest** e criar testes unitários do motor de regras (acerto = 100%, roubo = 50%, erro sem roubo = 0, troca de vez, empate).
-- [ ] Criar `src/data/defaultQuestions.json` com **20 perguntas bíblicas prontas** (distribuídas entre fáceis, médias e difíceis), cada uma com referência bíblica.
-- **Validação:** `tsc` sem erros de tipagem e todos os testes do Vitest passando (`npm test`).
+- [x] Criar `src/types/game.ts`:
+  - `Question`: `id`, enunciado, 4 alternativas, índice da resposta correta e dificuldade. **Sem** categoria ou referência bíblica (decisão D14).
+  - A pontuação (10/20/30) é **derivada da dificuldade**, e não armazenada na pergunta.
+  - `GameConfig`: lista de equipes (2 a 4) **na ordem de jogo**, tempo do cronômetro por pergunta e roubo ativo.
+  - `GameState`: configuração, perguntas, histórico de jogadas e se a partida foi encerrada. A pontuação, a equipe da vez e as perguntas respondidas são **calculadas a partir do histórico**, o que torna o "desfazer" trivial.
+- [x] Criar `src/game/engine.ts` com as regras como **funções puras**: criar partida, equipe da vez, próxima equipe, perguntas disponíveis, registrar resultado (acerto, erro, roubo), desfazer, encerrar, pontuação, ranking e vencedor(es)/empate.
+- [x] Criar `src/game/questions.ts`: leitura e validação do arquivo de perguntas, com mensagens de erro em português indicando o número da pergunta com problema.
+- [x] Criar `src/data/perguntas.json`, um **arquivo separado e editável**, com **20 perguntas bíblicas** (7 fáceis, 7 médias, 6 difíceis). Formato de cada pergunta:
+  ```json
+  { "pergunta": "Quem construiu a arca?", "alternativas": ["Moisés", "Noé", "Abraão", "Davi"], "correta": "B", "dificuldade": "facil" }
+  ```
+- [x] Instalar o **Vitest** (`5.0.2`) e criar 19 testes unitários (acerto = 100%, roubo = 50%, erro = 0, rodízio de equipes com e sem roubo, 3 equipes, validações, desfazer, fim de jogo, ranking e empate, leitura do arquivo de perguntas).
+- [x] Criar os scripts `test`, `test:watch` e `typecheck`.
+- **Validação:** `npm run typecheck` sem erros e todos os testes passando (`npm test`).
 
 **Pontos a validar:**
-- Após um roubo (com ou sem acerto), de quem é a vez de escolher a próxima pergunta?
-- O roubo de 50% em perguntas de pontuação ímpar: arredondar para cima ou para baixo? (Com 10/20/30 não ocorre, mas importa se as pontuações forem personalizáveis.)
-- O modelo deve suportar mais de 2 equipes no futuro? (Custo baixo se pensado agora.)
-- Usar categorias (ex.: Antigo Testamento, Novo Testamento, Personagens)?
+- ~~Quem rouba com mais de 2 equipes?~~ Sempre a próxima equipe na ordem (decisão D16).
+- ~~Revisar o conteúdo das 20 perguntas padrão.~~ São dados de teste; podem ser substituídos a qualquer momento (decisão D15).
 
 ---
 
@@ -140,14 +155,15 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
   - No Electron: arquivo JSON na pasta de dados do usuário (`app.getPath('userData')`), acessado pelo React via IPC exposto no `preload`.
   - No navegador (modo de desenvolvimento web): fallback para `localStorage`.
 - [ ] Criar página `src/pages/QuestionManager.tsx`:
-  - Formulário para **adicionar e editar** pergunta (seletor de dificuldade, marcação da alternativa correta, referência bíblica).
+  - Formulário para **adicionar e editar** pergunta (enunciado, 4 alternativas, marcação da alternativa correta e seletor de dificuldade).
   - Validação do formulário (enunciado e 4 alternativas obrigatórios, uma alternativa correta marcada).
   - Lista de perguntas cadastradas com contador, filtro por dificuldade e botões de editar e excluir (com confirmação).
   - Botão para restaurar perguntas padrão bíblicas (com confirmação).
 - **Validação:** Cadastrar e editar uma pergunta na interface, fechar e reabrir o aplicativo e conferir se as alterações permanecem salvas.
 
 **Pontos a validar:**
-- **Importar/Exportar** perguntas em arquivo JSON (backup e compartilhamento entre igrejas/departamentos).
+- **Importar/Exportar** perguntas em arquivo JSON (backup e compartilhamento entre igrejas/departamentos), usando o mesmo formato do `perguntas.json` e a validação de `src/game/questions.ts`.
+- **Gerar perguntas com IA** (ex.: chave de API do Gemini ou outra IA) produzindo um arquivo no mesmo formato. Avaliar em uma etapa futura.
 - Separar "banco de perguntas" de "perguntas da partida": escolher quais (ou quantas) perguntas entram em cada gincana.
 - Embaralhar a ordem das alternativas automaticamente?
 
@@ -160,7 +176,9 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
   - Sugestão: uma "máquina de telas" simples no estado global, sem biblioteca de rotas. Se for usado um roteador, deve ser `HashRouter` (compatível com arquivos locais `file://` do Electron).
 - [ ] Criar página `src/pages/MainMenu.tsx` (Iniciar Gincana, Gerenciar Perguntas, Sair).
 - [ ] Criar página `src/pages/GameConfig.tsx`:
-  - Inputs para nome da **Equipe A** e **Equipe B**.
+  - Tudo em **uma única tela** (decisão D17).
+  - Quantidade de equipes (2 a 4) e o nome de cada uma (decisão D13).
+  - **Ordem das equipes** arrastando para cima/baixo; a primeira da lista começa (decisão D12).
   - Seletor de tempo do cronômetro **por pergunta** (ex.: `Sem tempo`, `10s`, `15s`, `30s`, `45s`, `60s`).
   - Interruptor (toggle) para **"Permitir Roubo de Pergunta"**.
   - Botão de ação: **"Iniciar Gincana"**.
@@ -168,8 +186,8 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 
 **Pontos a validar:**
 - O tempo deve ser único para todas as perguntas da partida ou pode variar por pergunta/dificuldade (ex.: difíceis com mais tempo)?
-- Quantidade de perguntas da partida: sugerir número **par** e equilibrado por dificuldade, para ser justo com as duas equipes?
-- Qual equipe começa: sempre a Equipe A ou sorteio?
+- Quantidade de perguntas da partida: sugerir um múltiplo do número de equipes, equilibrado por dificuldade, para ser justo com todas?
+- Cores e identidade visual para mais de 2 equipes (hoje o tema só define Equipe A e Equipe B).
 - Lembrar a última configuração usada?
 
 ---
@@ -195,7 +213,7 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
   - Enunciado da pergunta com tipografia grande e clara para leitura à distância (tamanhos fluidos, adaptados à resolução da TV).
   - 4 alternativas (A, B, C, D) estilizadas.
   - Tag visual da dificuldade com **texto + cor** (Fácil: Verde, Médio: Amarelo, Difícil: Vermelho), pensando em pessoas daltônicas.
-  - Revelação da alternativa correta (e da referência bíblica, se houver) **somente após** a decisão final da pergunta, inclusive após o roubo.
+  - Revelação da alternativa correta **somente após** a decisão final da pergunta, inclusive após o roubo.
 - [ ] Criar componente `src/components/Timer.tsx`:
   - Barra ou círculo regressivo com contagem visual, reiniciado a cada pergunta.
   - Efeito de pulsar em vermelho nos últimos 5 segundos.

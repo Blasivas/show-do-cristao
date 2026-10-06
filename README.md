@@ -1,6 +1,6 @@
 # 🔥 Show do Cristão
 
-Aplicativo desktop de quiz bíblico interativo desenvolvido para a **Igreja Presbiteriana do Brasil (IPB)**, criado para ser usado em gincanas e eventos de auditório com duas equipes competindo em tempo real.
+Aplicativo desktop de quiz bíblico interativo desenvolvido para a **Igreja Presbiteriana do Brasil (IPB)**, criado para ser usado em gincanas e eventos de auditório com equipes (de 2 a 4) competindo em tempo real.
 
 ---
 
@@ -11,7 +11,8 @@ O **Show do Cristão** é um aplicativo instalável para Windows que permite ao 
 - **Mural de perguntas** estilo game show, onde as equipes escolhem o número da pergunta.
 - **Cronômetro regressivo por pergunta** (ex.: 10 segundos), apenas indicativo — o apresentador decide o resultado.
 - **Pontuação secreta** acumulada em segundo plano, revelada apenas ao final para gerar suspense.
-- **Regra de roubo**: se uma equipe errar, a adversária pode tentar e ganhar **50% dos pontos**.
+- **Regra de roubo**: se uma equipe errar, outra equipe pode tentar e ganhar **50% dos pontos**.
+- **Perguntas em arquivo JSON** simples e editável (`src/data/perguntas.json`).
 - **Tela de pódio** com revelação dramática do placar e confetes para a equipe campeã.
 - **Funcionamento 100% offline**, pensado para locais sem internet (uso em notebook espelhado na TV).
 
@@ -26,7 +27,7 @@ O **Show do Cristão** é um aplicativo instalável para Windows que permite ao 
 | **Tailwind CSS 4** | Estilização com paleta institucional da IPB |
 | **Electron** | Janela nativa do Windows (sem navegador) |
 | **Node.js** | Acesso ao sistema de arquivos local |
-| **Vitest** *(Etapa 3)* | Testes unitários do motor de regras |
+| **Vitest** | Testes unitários do motor de regras |
 | **electron-builder** *(Etapa 12)* | Geração do instalador `.exe` para Windows |
 
 ---
@@ -62,8 +63,8 @@ show-do-cristao/
 │   │   ├── audio/               # Efeitos sonoros do quiz
 │   │   └── images/              # Logos e imagens
 │   ├── components/              # Componentes reutilizáveis
-│   ├── data/                    # Banco de perguntas padrão (defaultQuestions.json)
-│   ├── game/                    # * Motor de regras (funções puras + testes) — Etapa 3
+│   ├── data/                    # Perguntas padrão (perguntas.json)
+│   ├── game/                    # Motor de regras e leitura das perguntas (funções puras + testes)
 │   ├── pages/                   # Telas do aplicativo
 │   ├── services/                # Serviços (áudio, armazenamento local)
 │   ├── types/                   # Interfaces TypeScript
@@ -104,6 +105,9 @@ npm run dev
 | `npm run dev:web` | Abre o app apenas no navegador (`http://localhost:5173`), útil para testes rápidos |
 | `npm run build` | Valida o TypeScript e gera o build de produção (`dist/` e `dist-electron/`) |
 | `npm start` | Abre o build de produção na janela do Electron (rodar `npm run build` antes) |
+| `npm test` | Executa os testes unitários (Vitest) |
+| `npm run test:watch` | Executa os testes em modo contínuo, rodando de novo a cada alteração |
+| `npm run typecheck` | Verifica a tipagem do TypeScript sem gerar build |
 
 ### Atalhos da janela
 
@@ -116,19 +120,19 @@ npm run dev
 
 ## 📋 Regras do Jogo
 
-1. O apresentador configura os nomes das equipes, o tempo do cronômetro por pergunta e se o "roubo de pergunta" está ativo.
-2. O mural exibe os números das perguntas disponíveis. A equipe da vez escolhe um número.
+1. Em uma única tela, o apresentador configura a quantidade e os nomes das equipes (2 a 4), a **ordem das equipes** (arrastando; a primeira começa), o tempo do cronômetro por pergunta e se o "roubo de pergunta" está ativo.
+2. O mural exibe os números das perguntas disponíveis. A equipe da vez escolhe um número. As equipes **se revezam a cada pergunta** na ordem definida (A, B, C, A, B, C…).
 3. A pergunta é exibida com 4 alternativas (A, B, C, D) e o cronômetro inicia.
 4. O cronômetro é **apenas indicativo**: ao chegar a zero ele sinaliza "Tempo esgotado", mas não conta como erro automaticamente.
 5. O apresentador valida a resposta:
    - ✅ **Acerto:** A equipe ganha **100%** dos pontos da questão.
-   - ❌ **Erro + Roubo ativo:** A equipe adversária pode tentar e, se acertar, ganha **50%** dos pontos.
+   - ❌ **Erro + Roubo ativo:** A **próxima equipe na ordem** pode tentar e, se acertar, ganha **50%** dos pontos. O roubo **não altera a ordem**: com A, B e C, se A errou e B roubou, a próxima pergunta é de B; se B errar, quem pode roubar é C.
    - ❌ **Erro sem Roubo:** Ninguém pontua.
 6. A resposta correta só é revelada depois da decisão final da pergunta (inclusive após o roubo).
 7. A pontuação é **mantida em segredo** até o encerramento da gincana.
 8. Ao final, o placar é revelado dramaticamente com animação de confetes para a equipe vencedora.
 
-> Algumas regras ainda estão em definição (ex.: de quem é a vez após um roubo, se o cronômetro reinicia no roubo). Veja os "Pontos a validar" no [plano de desenvolvimento](./docs/plano-desenvolvimento.md).
+> Algumas regras ainda estão em definição (ex.: se o cronômetro reinicia no roubo, onde ficam os controles do apresentador). Veja os "Pontos a validar" no [plano de desenvolvimento](./docs/plano-desenvolvimento.md).
 
 ---
 
@@ -159,8 +163,8 @@ npm run dev
 | 2 — Integração com Electron (segurança, F11, offline) | ✅ Concluído |
 | 2.1 — Migração do Tailwind CSS 3 → 4 | ✅ Concluído |
 | 2.2 — Atualização do Vite 6 → 8 | ✅ Concluído |
-| 3 — Modelagem de Dados, Motor de Regras & Perguntas | 🔄 Próxima |
-| 4 — Armazenamento Local & Cadastro de Perguntas (CRUD) | ⏳ Pendente |
+| 3 — Modelagem de Dados, Motor de Regras & Perguntas | ✅ Concluído |
+| 4 — Armazenamento Local & Cadastro de Perguntas (CRUD) | 🔄 Próxima |
 | 5 — Estado Global, Navegação & Configuração da Partida | ⏳ Pendente |
 | 6 — Mural de Perguntas | ⏳ Pendente |
 | 7 — Tela de Pergunta, Cronômetro & Controles do Apresentador | ⏳ Pendente |

@@ -1,0 +1,122 @@
+[
+  {
+    "pergunta": "Quem construiu a arca para escapar do dilúvio?",
+    "alternativas": ["Moisés", "Noé", "Abraão", "Davi"],
+    "correta": "B",
+    "dificuldade": "facil"
+  },
+  {
+    "pergunta": "Qual é o primeiro livro da Bíblia?",
+    "alternativas": ["Gênesis", "Êxodo", "Salmos", "Mateus"],
+    "correta": "A",
+    "dificuldade": "facil"
+  },
+  {
+    "pergunta": "Quem derrotou o gigante Golias?",
+    "alternativas": ["Saul", "Sansão", "Jônatas", "Davi"],
+    "correta": "D",
+    "dificuldade": "facil"
+  },
+  {
+    "pergunta": "Em que cidade Jesus nasceu?",
+    "alternativas": ["Nazaré", "Jerusalém", "Belém", "Cafarnaum"],
+    "correta": "C",
+    "dificuldade": "facil"
+  },
+  {
+    "pergunta": "Quantos apóstolos Jesus escolheu?",
+    "alternativas": ["7", "10", "12", "70"],
+    "correta": "C",
+    "dificuldade": "facil"
+  },
+  {
+    "pergunta": "Quem foi engolido por um grande peixe?",
+    "alternativas": ["Jonas", "Elias", "Pedro", "Daniel"],
+    "correta": "A",
+    "dificuldade": "facil"
+  },
+  {
+    "pergunta": "Por quantos dias e noites choveu durante o dilúvio?",
+    "alternativas": ["7", "12", "40", "100"],
+    "correta": "C",
+    "dificuldade": "facil"
+  },
+  {
+    "pergunta": "Quem foi vendido como escravo pelos próprios irmãos?",
+    "alternativas": ["Benjamim", "José", "Esaú", "Rúben"],
+    "correta": "B",
+    "dificuldade": "medio"
+  },
+  {
+    "pergunta": "Qual era a profissão de Mateus antes de seguir Jesus?",
+    "alternativas": ["Pescador", "Carpinteiro", "Cobrador de impostos", "Fabricante de tendas"],
+    "correta": "C",
+    "dificuldade": "medio"
+  },
+  {
+    "pergunta": "Qual era o nome da mãe do profeta Samuel?",
+    "alternativas": ["Ana", "Raquel", "Sara", "Rute"],
+    "correta": "A",
+    "dificuldade": "medio"
+  },
+  {
+    "pergunta": "Quantos livros tem a Bíblia protestante?",
+    "alternativas": ["27", "39", "73", "66"],
+    "correta": "D",
+    "dificuldade": "medio"
+  },
+  {
+    "pergunta": "Qual discípulo negou Jesus três vezes?",
+    "alternativas": ["Judas", "Pedro", "Tomé", "João"],
+    "correta": "B",
+    "dificuldade": "medio"
+  },
+  {
+    "pergunta": "Segundo o Evangelho de João, qual foi o primeiro milagre de Jesus?",
+    "alternativas": ["Multiplicar pães e peixes", "Curar um cego", "Andar sobre as águas", "Transformar água em vinho"],
+    "correta": "D",
+    "dificuldade": "medio"
+  },
+  {
+    "pergunta": "Qual profeta foi levado ao céu em um redemoinho?",
+    "alternativas": ["Eliseu", "Enoque", "Elias", "Isaías"],
+    "correta": "C",
+    "dificuldade": "medio"
+  },
+  {
+    "pergunta": "Quem era o pai de João Batista?",
+    "alternativas": ["Zacarias", "José", "Simeão", "Eli"],
+    "correta": "A",
+    "dificuldade": "dificil"
+  },
+  {
+    "pergunta": "Quantos anos viveu Matusalém?",
+    "alternativas": ["930", "950", "912", "969"],
+    "correta": "D",
+    "dificuldade": "dificil"
+  },
+  {
+    "pergunta": "Qual é o livro mais curto do Antigo Testamento?",
+    "alternativas": ["Ageu", "Obadias", "Naum", "Joel"],
+    "correta": "B",
+    "dificuldade": "dificil"
+  },
+  {
+    "pergunta": "Qual era o nome do servo do sumo sacerdote que teve a orelha cortada por Pedro?",
+    "alternativas": ["Barrabás", "Cornélio", "Malco", "Onésimo"],
+    "correta": "C",
+    "dificuldade": "dificil"
+  },
+  {
+    "pergunta": "Em qual ilha o apóstolo João recebeu a revelação do Apocalipse?",
+    "alternativas": ["Creta", "Patmos", "Malta", "Chipre"],
+    "correta": "B",
+    "dificuldade": "dificil"
+  },
+  {
+    "pergunta": "Qual rei viu uma mão escrevendo na parede durante um banquete?",
+    "alternativas": ["Belsazar", "Nabucodonosor", "Dario", "Ciro"],
+    "correta": "A",
+    "dificuldade": "dificil"
+  }
+]
