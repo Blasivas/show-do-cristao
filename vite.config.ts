@@ -22,14 +22,13 @@ const cspPlugin = (): Plugin => ({
 });
 
 // https://vitejs.dev/config/
-// `--mode web` roda apenas no navegador, sem abrir o Electron (o Vitest usa `mode: 'test'` e também não abre)
+// O Vitest usa `mode: 'test'` e não deve abrir o Electron
 export default defineConfig(async ({ mode }) => ({
   plugins: [
     react(),
     tailwindcss(),
     cspPlugin(),
-    mode !== 'web' &&
-      mode !== 'test' &&
+    mode !== 'test' &&
       (await electron({
         main: {
           entry: 'electron/main.ts',

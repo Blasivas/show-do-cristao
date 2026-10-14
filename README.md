@@ -12,7 +12,7 @@ O **Show do Cristão** é um aplicativo instalável para Windows que permite ao 
 - **Cronômetro regressivo por pergunta** (ex.: 10 segundos), apenas indicativo — o apresentador decide o resultado.
 - **Pontuação secreta** acumulada em segundo plano, revelada apenas ao final para gerar suspense.
 - **Regra de roubo**: se uma equipe errar, outra equipe pode tentar e ganhar **50% dos pontos**.
-- **Perguntas em arquivo JSON** simples e editável (`src/data/perguntas.json`).
+- **Cadastro de perguntas** dentro do app (criar, editar, excluir, importar e exportar), salvas em um arquivo JSON simples e editável.
 - **Tela de pódio** com revelação dramática do placar e confetes para a equipe campeã.
 - **Funcionamento 100% offline**, pensado para locais sem internet (uso em notebook espelhado na TV).
 
@@ -27,7 +27,7 @@ O **Show do Cristão** é um aplicativo instalável para Windows que permite ao 
 | **Tailwind CSS 4** | Estilização com paleta institucional da IPB |
 | **Electron** | Janela nativa do Windows (sem navegador) |
 | **Node.js** | Acesso ao sistema de arquivos local |
-| **Vitest** | Testes unitários do motor de regras |
+| **Vitest** | Testes unitários (regras do jogo, perguntas e armazenamento) |
 | **electron-builder** *(Etapa 12)* | Geração do instalador `.exe` para Windows |
 
 ---
@@ -57,13 +57,14 @@ show-do-cristao/
 │   └── plano-desenvolvimento.md # Roteiro completo de todas as etapas
 ├── electron/                    # Processo principal do Electron (janela nativa)
 │   ├── main.ts                  # Janela, ciclo de vida, tela cheia e segurança
-│   └── preload.ts               # Ponte segura entre o Electron e o React
+│   ├── preload.ts               # Ponte segura entre o Electron e o React
+│   └── questionsIpc.ts          # Leitura/gravação do arquivo de perguntas, importar/exportar
 ├── src/
 │   ├── assets/
 │   │   ├── audio/               # Efeitos sonoros do quiz
 │   │   └── images/              # Logos e imagens
 │   ├── components/              # Componentes reutilizáveis
-│   ├── data/                    # Perguntas padrão (perguntas.json)
+│   ├── data/                    # Perguntas padrão (perguntas.json), copiadas na primeira abertura
 │   ├── game/                    # Motor de regras e leitura das perguntas (funções puras + testes)
 │   ├── pages/                   # Telas do aplicativo
 │   ├── services/                # Serviços (áudio, armazenamento local)
@@ -102,7 +103,6 @@ npm run dev
 | Comando | Descrição |
 |---|---|
 | `npm run dev` | Abre o app na janela nativa do Electron com recarregamento automático |
-| `npm run dev:web` | Abre o app apenas no navegador (`http://localhost:5173`), útil para testes rápidos |
 | `npm run build` | Valida o TypeScript e gera o build de produção (`dist/` e `dist-electron/`) |
 | `npm start` | Abre o build de produção na janela do Electron (rodar `npm run build` antes) |
 | `npm test` | Executa os testes unitários (Vitest) |
@@ -115,6 +115,35 @@ npm run dev
 |---|---|
 | `F11` | Entra/sai da tela cheia |
 | `Esc` | Sai da tela cheia |
+
+---
+
+## ❓ Perguntas
+
+As perguntas são gerenciadas pela tela **Perguntas** do app (o botão **Abrir pasta das perguntas** abre a pasta direto no Explorador de Arquivos) e ficam salvas em:
+
+```
+%APPDATA%\show-do-cristao\perguntas\perguntas.json
+```
+
+Na primeira abertura, o arquivo é criado com as perguntas padrão de `src/data/perguntas.json` (dados de teste). Ele também pode ser editado à mão ou substituído (ex.: por um arquivo gerado por IA), desde que siga o formato:
+
+```json
+[
+  {
+    "pergunta": "Quem construiu a arca?",
+    "alternativas": ["Moisés", "Noé", "Abraão", "Davi"],
+    "correta": "B",
+    "dificuldade": "facil"
+  }
+]
+```
+
+- `correta`: letra da alternativa certa (`A`, `B`, `C` ou `D`).
+- `dificuldade`: `facil`, `medio` ou `dificil` (acentos e maiúsculas são aceitos).
+- As perguntas são **ordenadas automaticamente**: primeiro as fáceis, depois as médias, depois as difíceis. Uma pergunta nova (ou que mudou de dificuldade) vai para o final do grupo da sua dificuldade.
+- Se o arquivo tiver algum erro, o app mostra qual pergunta tem problema e permite restaurar as perguntas padrão (guardando uma cópia do arquivo com erro).
+- Antes de substituir todas as perguntas (restaurar ou importar), o app guarda uma cópia `perguntas.backup-<data>.json` na mesma pasta.
 
 ---
 
@@ -164,8 +193,8 @@ npm run dev
 | 2.1 — Migração do Tailwind CSS 3 → 4 | ✅ Concluído |
 | 2.2 — Atualização do Vite 6 → 8 | ✅ Concluído |
 | 3 — Modelagem de Dados, Motor de Regras & Perguntas | ✅ Concluído |
-| 4 — Armazenamento Local & Cadastro de Perguntas (CRUD) | 🔄 Próxima |
-| 5 — Estado Global, Navegação & Configuração da Partida | ⏳ Pendente |
+| 4 — Armazenamento Local & Cadastro de Perguntas (CRUD) | ✅ Concluído |
+| 5 — Estado Global, Navegação & Configuração da Partida | 🔄 Próxima |
 | 6 — Mural de Perguntas | ⏳ Pendente |
 | 7 — Tela de Pergunta, Cronômetro & Controles do Apresentador | ⏳ Pendente |
 | 8 — Pontuação Secreta, Roubo, Desfazer & Salvamento Automático | ⏳ Pendente |

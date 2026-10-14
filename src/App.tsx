@@ -1,8 +1,13 @@
 import { useState } from 'react';
-import { Flame, Play, Settings, Sparkles, BookOpen } from 'lucide-react';
+import { Flame, Play, Settings, Sparkles, BookOpen, ListChecks } from 'lucide-react';
+import QuestionManager from '@/pages/QuestionManager';
 
 export default function App() {
   const [contadorTeste, setContadorTeste] = useState(0);
+  // Navegação provisória até o menu principal da Etapa 5
+  const [screen, setScreen] = useState<'demo' | 'questions'>('demo');
+
+  if (screen === 'questions') return <QuestionManager onBack={() => setScreen('demo')} />;
 
   return (
     <div className="min-h-screen w-full bg-linear-to-br from-ipb-darkest via-ipb-dark to-ipb-darkest flex flex-col justify-between p-8">
@@ -72,14 +77,21 @@ export default function App() {
             <Play className="w-5 h-5 text-gold fill-gold" />
             Testar Interatividade (Cliques: {contadorTeste})
           </button>
+          <button
+            onClick={() => setScreen('questions')}
+            className="flex items-center gap-2 bg-gold/20 hover:bg-gold/30 text-gold-light font-bold py-3 px-8 rounded-xl border border-gold/50 shadow-glow-gold transition-all hover:scale-105 active:scale-95"
+          >
+            <ListChecks className="w-5 h-5" />
+            Gerenciar perguntas
+          </button>
         </div>
       </main>
 
       {/* Rodapé Informativo */}
       <footer className="flex items-center justify-between text-xs text-ipb-light/60 border-t border-ipb-medium/20 pt-4">
-        <div>Etapa 2: React + Vite + Tailwind + TypeScript + Electron</div>
+        <div>Etapa 4: Cadastro de perguntas</div>
         <div className="flex items-center gap-2">
-          <span>{window.showDoCristao?.isElectron ? 'Rodando na janela nativa (Electron)' : 'Rodando no navegador'}</span>
+          <span>Tela de demonstração provisória (o menu principal chega na Etapa 5)</span>
           <Settings className="w-3.5 h-3.5" />
         </div>
       </footer>

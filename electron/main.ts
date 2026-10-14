@@ -1,12 +1,16 @@
 import { app, BrowserWindow, Menu } from 'electron';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { registerQuestionsIpc } from './questionsIpc';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Em desenvolvimento o vite-plugin-electron injeta a URL do servidor do Vite
 const DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL;
 const RENDERER_DIST = path.join(__dirname, '../dist');
+const RENDERER_URL = pathToFileURL(path.join(RENDERER_DIST, 'index.html')).href;
+
+const isTrustedUrl = (url: string) => (DEV_SERVER_URL ? url.startsWith(DEV_SERVER_URL) : url.startsWith(RENDERER_URL));
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -53,6 +57,7 @@ function createWindow() {
 Menu.setApplicationMenu(null);
 
 app.whenReady().then(() => {
+  registerQuestionsIpc(isTrustedUrl);
   createWindow();
 
   app.on('activate', () => {

@@ -10,7 +10,6 @@
   },
   "scripts": {
     "dev": "vite",
-    "dev:web": "vite --mode web",
     "build": "tsc && vite build",
     "start": "electron .",
     "test": "vitest run",

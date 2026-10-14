@@ -48,6 +48,16 @@
     width: 100%;
     height: 100%;
   }
+
+  /* Campos de formulário continuam selecionáveis, apesar do `user-select: none` global */
+  input,
+  textarea {
+    user-select: text;
+  }
+
+  button:not(:disabled) {
+    cursor: pointer;
+  }
 }
 
 /* Custom Scrollbar */

@@ -19,7 +19,7 @@ Cada etapa também traz uma seção **"Pontos a validar"**: são dúvidas e suge
 - [x] **Etapa 2.1:** Migração do Tailwind CSS 3 → 4 *(Concluído)*
 - [x] **Etapa 2.2:** Atualização do Vite 6 → 8 *(Concluído)*
 - [x] **Etapa 3:** Modelagem de Dados, Motor de Regras & Banco Inicial de Perguntas (com testes unitários) *(Concluído)*
-- [ ] **Etapa 4:** Armazenamento Local & Gerenciamento de Perguntas (CRUD do Apresentador)
+- [x] **Etapa 4:** Armazenamento Local & Gerenciamento de Perguntas (CRUD do Apresentador) *(Concluído)*
 - [ ] **Etapa 5:** Estado Global, Navegação & Tela de Configuração da Partida
 - [ ] **Etapa 6:** O Mural de Perguntas (Grade Interativa de Números)
 - [ ] **Etapa 7:** Tela de Pergunta Ativa, Cronômetro & Controles do Apresentador
@@ -44,7 +44,7 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 | D4 | 2026-10-05 | A forma de exibir os controles do apresentador (tela única, duas janelas ou atalhos de teclado) será decidida na Etapa 7. |
 | D5 | 2026-10-05 | O app será usado em **notebook espelhado em uma TV** (não em projetor). Janela mínima mantida em **1280×720**; o tamanho poderá ser revisto depois. |
 | D6 | 2026-10-05 | O app abre em **janela maximizada**; a tela cheia é ativada pelo apresentador com **F11**. |
-| D7 | 2026-10-05 | Mantido o **modo navegador** para desenvolvimento rápido (`npm run dev:web`). |
+| D7 | 2026-10-05 | ~~Mantido o **modo navegador** para desenvolvimento rápido (`npm run dev:web`).~~ Substituída pela D18. |
 | D8 | 2026-10-05 | **Node.js 22.12+** passa a ser obrigatório: todas as versões suportadas do Electron (42, 43 e 44) exigem essa versão, e o Node 20 está fora de suporte. Electron fixado em `44.4.5`. Ambiente de desenvolvimento atualizado para o Node **24 LTS** (gerenciado pelo nvm-windows). |
 | D9 | 2026-10-05 | Migração para o **Tailwind CSS 4** ainda no início do desenvolvimento (menos telas para revisar), usando o plugin `@tailwindcss/vite` no lugar do PostCSS. A configuração do tema passa a ficar no `@theme` do `src/index.css`. |
 | D10 | 2026-10-05 | Atualização para o **Vite 8** (Rolldown/Oxc) ainda no início do desenvolvimento. Remove os avisos do `vite-plugin-electron`, a dependência do `esbuild` e acelera os builds. |
@@ -55,6 +55,14 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 | D15 | 2026-10-06 | As perguntas ficam em um **arquivo JSON separado** (`src/data/perguntas.json`), com chaves em português e a resposta correta como letra (A–D), fácil de editar à mão ou gerar por IA no futuro. As 20 perguntas atuais são dados de teste. |
 | D16 | 2026-10-06 | **Roubo sempre pela próxima equipe na ordem.** Ex. com A, B e C: A erra e B pode roubar; a próxima pergunta é de B; se B errar, C pode roubar. |
 | D17 | 2026-10-06 | A configuração da partida fica em **uma única tela**: quantidade e nomes das equipes, ordem (arrastar), roubo ativo e tempo para responder. |
+| D18 | 2026-10-13 | **Só existirá o aplicativo instalado (Electron).** O modo navegador (`npm run dev:web`) foi removido. |
+| D19 | 2026-10-13 | **Importar e exportar** perguntas em JSON já na Etapa 4. Ao importar, o apresentador escolhe entre *substituir todas* ou *adicionar às atuais* (cada uma no final do grupo da sua dificuldade, D24). |
+| D20 | 2026-10-13 | As perguntas são **salvas automaticamente ao fechar o formulário** com Salvar (não a cada tecla digitada). Excluir, restaurar e importar salvam na hora, após confirmação. |
+| D21 | 2026-10-13 | **Não embaralhar** as alternativas: a ordem cadastrada é a ordem exibida. |
+| D22 | 2026-10-13 | **A gincana usa todas as perguntas cadastradas**; não há seleção de perguntas por partida. As equipes escolhem pelo número no mural (ex.: "quero a pergunta 5"). |
+| D23 | 2026-10-13 | As perguntas ficam em uma **pasta própria** (`%APPDATA%\show-do-cristao\perguntas\`), separada dos arquivos internos do Electron, e o botão se chama **"Abrir pasta das perguntas"**, para o usuário encontrar facilmente o arquivo a editar. |
+| D24 | 2026-10-13 | **Ordenação automática por dificuldade:** primeiro todas as fáceis, depois as médias, depois as difíceis. Pergunta nova, ou que mudou de dificuldade, vai para o **final do grupo** da sua dificuldade (ex.: a pergunta 3, fácil, que vira média passa a ser a última média). Arquivos editados à mão ou importados também são organizados. |
+| D25 | 2026-10-13 | **Padrão visual do cabeçalho das telas:** textos em branco; botões com fundo verde, texto branco e borda verde-clara (variação `light`); botão principal com fundo branco, texto e borda verde-escuros (variação `highlight`). Filtros seguem o mesmo padrão. O conteúdo das telas (listas, formulários) mantém a paleta verde. |
 
 ---
 
@@ -91,7 +99,7 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 - [x] Empacotar a fonte **Roboto localmente** (`@fontsource/roboto`, apenas o subconjunto latino) e remover o carregamento pelo Google Fonts no `index.html`.
 - [x] Aplicar uma Política de Segurança de Conteúdo (CSP) no build de produção.
 - [x] Ajustar `tsconfig.json` para tipar também a pasta `electron/`.
-- [x] Criar scripts no `package.json`: `dev` (janela do Electron), `dev:web` (somente navegador), `build` (React + Electron) e `start` (abre o build de produção no Electron).
+- [x] Criar scripts no `package.json`: `dev` (janela do Electron), `dev:web` (somente navegador, removido na Etapa 4), `build` (React + Electron) e `start` (abre o build de produção no Electron).
 - [x] Atualizar o Node.js para **22.12+** (decisão D8) e reinstalar as dependências. Instalado o Node **24.21.0 LTS** via nvm-windows.
 - **Validação:** Executar `npm run dev` e ver a janela nativa do Windows abrindo maximizada, sem barras de navegador e sem menu, com o rodapé indicando "Rodando na janela nativa (Electron)"; F11 alterna a tela cheia e Esc sai; a fonte continua correta com a internet desligada; `npm run build && npm start` abre a versão de produção.
 
@@ -149,23 +157,36 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 
 ---
 
-### 🔹 Etapa 4: Armazenamento Local & Gerenciamento de Perguntas (Apresentador)
+### 🟩 Etapa 4: Armazenamento Local & Gerenciamento de Perguntas (Apresentador) `[CONCLUÍDO]`
 **Objetivo:** Permitir que o apresentador cadastre, edite, visualize e exclua perguntas antes de começar a gincana, com os dados salvos no computador.
-- [ ] Criar `src/services/storageService.ts` para salvar e carregar perguntas:
-  - No Electron: arquivo JSON na pasta de dados do usuário (`app.getPath('userData')`), acessado pelo React via IPC exposto no `preload`.
-  - No navegador (modo de desenvolvimento web): fallback para `localStorage`.
-- [ ] Criar página `src/pages/QuestionManager.tsx`:
-  - Formulário para **adicionar e editar** pergunta (enunciado, 4 alternativas, marcação da alternativa correta e seletor de dificuldade).
-  - Validação do formulário (enunciado e 4 alternativas obrigatórios, uma alternativa correta marcada).
-  - Lista de perguntas cadastradas com contador, filtro por dificuldade e botões de editar e excluir (com confirmação).
-  - Botão para restaurar perguntas padrão bíblicas (com confirmação).
-- **Validação:** Cadastrar e editar uma pergunta na interface, fechar e reabrir o aplicativo e conferir se as alterações permanecem salvas.
+- [x] Criar `electron/questionsIpc.ts` (processo principal), com canais de IPC que só aceitam chamadas da página do próprio app:
+  - Ler e gravar o arquivo `perguntas.json` na **pasta das perguntas** (`%APPDATA%\show-do-cristao\perguntas\`, decisão D23), no **mesmo formato** do `src/data/perguntas.json`. A gravação é segura: grava em arquivo temporário e depois substitui.
+  - Guardar uma cópia de segurança (`perguntas.backup-<data>.json`) antes de substituir todas as perguntas.
+  - Importar e exportar pelas janelas nativas "Abrir" e "Salvar como" do Windows (limite de 5 MB na importação).
+  - Abrir a pasta das perguntas no Explorador de Arquivos.
+  - Mover automaticamente arquivos gravados no local antigo (raiz da pasta de dados) para a pasta das perguntas.
+- [x] Expor essas funções no `electron/preload.ts` (`window.showDoCristao`), sem expor o Node ao React.
+- [x] Criar `src/services/questionStorage.ts`: carregar (na primeira abertura cria o arquivo com as perguntas padrão), salvar, substituir com cópia de segurança, importar e exportar.
+- [x] Ampliar `src/game/questions.ts`: conversão para o formato do arquivo, leitura de JSON com mensagem amigável, validação do formulário (campos obrigatórios e alternativas repetidas) e adição de perguntas importadas.
+- [x] Criar a página `src/pages/QuestionManager.tsx`:
+  - Lista com o número da pergunta (o mesmo do mural), etiqueta de dificuldade, enunciado e resposta correta; filtro por dificuldade com contadores.
+  - Botões **Nova pergunta**, **Importar** (pergunta se deve *substituir todas* ou *adicionar às atuais*), **Exportar**, **Restaurar padrão** e **Abrir pasta das perguntas**.
+  - Editar e excluir (com confirmação) em cada pergunta; avisos rápidos de sucesso ou erro.
+  - Se o arquivo tiver erro (ex.: editado à mão), mostra a mensagem com o número da pergunta e oferece **Abrir pasta das perguntas**, **Tentar novamente** ou **Restaurar padrão** (com cópia do arquivo com problema).
+- [x] Criar os componentes `QuestionForm` (janela sobreposta), `ConfirmDialog`, `Modal` e `Button`.
+  - O formulário salva ao fechar com **Salvar** ou **Salvar e adicionar outra** (decisão D20). **Cancelar** com alterações pede confirmação antes de descartar.
+- [x] **Ordenação automática** fáceis → médias → difíceis (decisão D24), aplicada ao salvar, importar, restaurar e ao abrir um arquivo editado à mão. O aviso informa quando a pergunta muda de posição (ex.: "movida da posição 3 para a 14").
+- [x] Botão provisório **"Gerenciar perguntas"** na tela de demonstração (será substituído pelo menu da Etapa 5).
+- [x] Remover o modo navegador (`npm run dev:web`) (decisão D18).
+- [x] 19 novos testes (38 no total): formato do arquivo, formulário, ordenação por dificuldade, armazenamento com o arquivo simulado, arquivo com erro, cópia de segurança, importação e exportação.
+- **Validação:** cadastrar, editar e excluir perguntas, fechar e reabrir o app e conferir que tudo foi mantido; editar o `perguntas.json` com erro e ver a mensagem e a restauração; `npm test`, `npm run typecheck` e `npm run build` sem erros.
 
 **Pontos a validar:**
-- **Importar/Exportar** perguntas em arquivo JSON (backup e compartilhamento entre igrejas/departamentos), usando o mesmo formato do `perguntas.json` e a validação de `src/game/questions.ts`.
-- **Gerar perguntas com IA** (ex.: chave de API do Gemini ou outra IA) produzindo um arquivo no mesmo formato. Avaliar em uma etapa futura.
-- Separar "banco de perguntas" de "perguntas da partida": escolher quais (ou quantas) perguntas entram em cada gincana.
-- Embaralhar a ordem das alternativas automaticamente?
+- ~~Importar/Exportar perguntas em JSON~~ Implementado nesta etapa (decisão D19).
+- **Gerar perguntas com IA** (ex.: chave de API do Gemini ou outra IA) produzindo um arquivo no mesmo formato, que poderá ser trazido pelo botão Importar. Avaliar em uma etapa futura.
+- ~~Escolher quais perguntas entram em cada gincana~~ Não será feito: a gincana usa todas as perguntas cadastradas (decisão D22).
+- ~~Embaralhar a ordem das alternativas~~ Não será feito (decisão D21).
+- ~~Reordenar as perguntas na lista?~~ A lista é ordenada automaticamente por dificuldade (decisão D24).
 
 ---
 
@@ -174,7 +195,7 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 - [ ] Criar o estado global do jogo com `useReducer` + Context, usando o motor de regras da Etapa 3.
 - [ ] Criar a navegação entre telas (Menu Inicial → Perguntas → Configuração → Mural → Pergunta → Pódio).
   - Sugestão: uma "máquina de telas" simples no estado global, sem biblioteca de rotas. Se for usado um roteador, deve ser `HashRouter` (compatível com arquivos locais `file://` do Electron).
-- [ ] Criar página `src/pages/MainMenu.tsx` (Iniciar Gincana, Gerenciar Perguntas, Sair).
+- [ ] Criar página `src/pages/MainMenu.tsx` (Iniciar Gincana, Gerenciar Perguntas, Sair), substituindo a tela de demonstração e o botão provisório da Etapa 4.
 - [ ] Criar página `src/pages/GameConfig.tsx`:
   - Tudo em **uma única tela** (decisão D17).
   - Quantidade de equipes (2 a 4) e o nome de cada uma (decisão D13).
@@ -186,7 +207,7 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 
 **Pontos a validar:**
 - O tempo deve ser único para todas as perguntas da partida ou pode variar por pergunta/dificuldade (ex.: difíceis com mais tempo)?
-- Quantidade de perguntas da partida: sugerir um múltiplo do número de equipes, equilibrado por dificuldade, para ser justo com todas?
+- Quantidade de perguntas: a gincana usa todas as cadastradas (D22). Avisar o apresentador quando o total não for múltiplo do número de equipes (algumas equipes responderiam uma pergunta a mais)?
 - Cores e identidade visual para mais de 2 equipes (hoje o tema só define Equipe A e Equipe B).
 - Lembrar a última configuração usada?
 

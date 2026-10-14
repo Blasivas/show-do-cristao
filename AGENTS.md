@@ -14,7 +14,11 @@
 - `npm test`: testes unitários (Vitest)
 - `npm run typecheck`: tipagem TypeScript
 - `npm run build`: build de produção (React + Electron)
-- `npm run dev`: janela do Electron; `npm run dev:web`: somente navegador; `npm start`: abre o build de produção
+- `npm run dev`: janela do Electron; `npm start`: abre o build de produção (só existe o app Electron, sem modo navegador)
+
+## Testes manuais no Electron
+- Para não mexer nas perguntas reais do usuário (`%APPDATA%\show-do-cristao\perguntas\perguntas.json`), abrir o app com uma pasta de dados temporária: `node_modules\electron\dist\electron.exe . --user-data-dir=<pasta temporária>`.
+- `--remote-debugging-port=<porta>` permite inspecionar e automatizar a janela pelo protocolo de depuração (CDP).
 
 ## Observações
 - Ao rodar o Electron a partir do Devin Desktop, remover a variável `ELECTRON_RUN_AS_NODE` herdada do ambiente.
