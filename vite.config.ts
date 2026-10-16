@@ -21,6 +21,8 @@ const cspPlugin = (): Plugin => ({
   ],
 });
 
+delete process.env.ELECTRON_RUN_AS_NODE;
+
 // https://vitejs.dev/config/
 // O Vitest usa `mode: 'test'` e não deve abrir o Electron
 export default defineConfig(async ({ mode }) => ({
@@ -34,7 +36,9 @@ export default defineConfig(async ({ mode }) => ({
           entry: 'electron/main.ts',
           // Inicia sem o argumento padrão `--no-sandbox`, mantendo o sandbox ativo também em desenvolvimento
           onstart: ({ startup }) => {
-            startup(['.']);
+            const env = { ...process.env };
+            delete env.ELECTRON_RUN_AS_NODE;
+            startup(['.'], { env });
           },
         },
         preload: {

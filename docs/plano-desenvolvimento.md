@@ -63,6 +63,7 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 | D23 | 2026-10-13 | As perguntas ficam em uma **pasta própria** (`%APPDATA%\show-do-cristao\perguntas\`), separada dos arquivos internos do Electron, e o botão se chama **"Abrir pasta das perguntas"**, para o usuário encontrar facilmente o arquivo a editar. |
 | D24 | 2026-10-13 | **Ordenação automática por dificuldade:** primeiro todas as fáceis, depois as médias, depois as difíceis. Pergunta nova, ou que mudou de dificuldade, vai para o **final do grupo** da sua dificuldade (ex.: a pergunta 3, fácil, que vira média passa a ser a última média). Arquivos editados à mão ou importados também são organizados. |
 | D25 | 2026-10-13 | **Padrão visual do cabeçalho das telas:** textos em branco; botões com fundo verde, texto branco e borda verde-clara (variação `light`); botão principal com fundo branco, texto e borda verde-escuros (variação `highlight`). Filtros seguem o mesmo padrão. O conteúdo das telas (listas, formulários) mantém a paleta verde. |
+| D26 | 2026-10-15 | **Identidade Visual: Bíblia Sagrada & Cânon de Escriba.** Descarte do estilo "Tech Bento" e adoção oficial da metáfora de uma Bíblia Sagrada encadernada em couro nobre, com bifólio (duas páginas espelhadas), tipografia clássica serifada, versículos numerados com rubrica carmesim (`§ 1.`), alternativas em medalhões e efeito tridimensional de virada de página com som de folhear papel bíblia. Especificações completas documentadas em `docs/identidade-visual.md`. |
 
 ---
 

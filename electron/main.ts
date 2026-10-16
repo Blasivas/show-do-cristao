@@ -20,7 +20,7 @@ function createWindow() {
     minHeight: 720,
     show: false,
     title: 'Show do Cristão',
-    backgroundColor: '#082517',
+    backgroundColor: '#090b0e',
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),

@@ -8,9 +8,12 @@ export const DIFFICULTY_LABEL: Record<Difficulty, string> = {
   dificil: 'Difícil',
 };
 
-// Cor + texto sempre juntos, pensando em pessoas daltônicas
+// Cor + texto sempre juntos, com suporte a modo claro e escuro (Tech Bento)
 export const DIFFICULTY_BADGE: Record<Difficulty, string> = {
-  facil: 'bg-emerald-500/20 border-emerald-400/60 text-emerald-200',
-  medio: 'bg-amber-500/20 border-amber-400/60 text-amber-200',
-  dificil: 'bg-red-500/20 border-red-400/60 text-red-200',
+  facil:
+    'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:border-emerald-500/30 dark:text-emerald-300',
+  medio:
+    'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:border-amber-500/30 dark:text-amber-300',
+  dificil:
+    'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/15 dark:border-rose-500/30 dark:text-rose-300',
 };

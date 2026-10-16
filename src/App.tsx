@@ -1,98 +1,117 @@
 import { useState } from 'react';
-import { Flame, Play, Settings, Sparkles, BookOpen, ListChecks } from 'lucide-react';
+import { Flame, Play, Settings, BookOpen } from 'lucide-react';
 import QuestionManager from '@/pages/QuestionManager';
 
 export default function App() {
   const [contadorTeste, setContadorTeste] = useState(0);
-  // Navegação provisória até o menu principal da Etapa 5
   const [screen, setScreen] = useState<'demo' | 'questions'>('demo');
 
   if (screen === 'questions') return <QuestionManager onBack={() => setScreen('demo')} />;
 
   return (
-    <div className="min-h-screen w-full bg-linear-to-br from-ipb-darkest via-ipb-dark to-ipb-darkest flex flex-col justify-between p-8">
-      {/* Barra Superior Institucional */}
-      <header className="flex items-center justify-between border-b border-ipb-medium/30 pb-4">
+    <div className="min-h-screen w-full bg-gradient-to-b from-[#1a100b] via-[#140b07] to-[#0d0704] text-[#faf7f0] flex flex-col justify-between p-6 md:p-8 font-serif select-none">
+      {/* Barra Superior Institucional Púlpito IPB */}
+      <header className="flex items-center justify-between border-b-2 border-[#3d281a] pb-4">
         <div className="flex items-center space-x-3">
-          <div className="h-10 w-10 rounded-full bg-ipb-primary flex items-center justify-center border-2 border-gold shadow-glow-gold">
-            <Flame className="w-6 h-6 text-gold" />
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#8b1e1e] to-[#591313] flex items-center justify-center text-amber-200 shadow-md border border-[#c5a059]/40">
+            <Flame className="w-6 h-6 fill-current text-amber-300" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-wider text-white uppercase flex items-center gap-2">
+            <h1 className="text-base font-bold tracking-widest text-amber-100 uppercase flex items-center gap-2">
               Show do Cristão
-              <span className="text-xs px-2 py-0.5 rounded-sm bg-ipb-medium text-white font-normal">IPB</span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-[#c5a059]/40 bg-[#2d1d13] text-amber-300 font-bold">
+                IPB
+              </span>
             </h1>
-            <p className="text-xs text-ipb-light">Igreja Presbiteriana do Brasil — Gincana Bíblica</p>
+            <p className="text-xs text-amber-200/60 font-serif">
+              Igreja Presbiteriana do Brasil • Gincana de Auditório
+            </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2 text-sm text-ipb-light">
-            <BookOpen className="w-4 h-4 text-gold" />
-            <span>Edição Especial de Auditório</span>
-          </div>
+        <div className="flex items-center space-x-2 text-xs text-amber-200/70 font-serif">
+          <BookOpen className="w-4 h-4 text-[#d4af37]" />
+          <span>Cânon Sagrado Oficial</span>
         </div>
       </header>
 
-      {/* Conteúdo Central de Boas-Vindas e Demonstração da Paleta */}
-      <main className="flex-1 flex flex-col items-center justify-center text-center my-6">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-ipb-primary/40 border border-gold/40 text-gold-light text-sm mb-6 animate-pulse">
-          <Sparkles className="w-4 h-4" />
-          Identidade Visual IPB Ativada (Verde Solene, Dourado & Branco)
+      {/* Conteúdo Central Nobre Bíblico */}
+      <main className="flex-1 flex flex-col items-center justify-center text-center my-8 max-w-4xl mx-auto w-full">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-[#241710] text-amber-300 text-xs font-serif font-bold mb-6 shadow-sm">
+          <span className="text-sm">✟</span>
+          Identidade Visual: Bíblia Sagrada & Cânon de Escriba
         </div>
 
-        <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight mb-4 drop-shadow-md">
-          A GRANDE GINCANA BÍBLICA
+        <h2 className="text-3xl md:text-5xl font-black text-amber-100 tracking-wider mb-3 uppercase drop-shadow-md">
+          A Grande Gincana Bíblica
         </h2>
 
-        <p className="text-lg text-emerald-100/80 max-w-2xl mb-8">
-          Ambiente base configurado com sucesso! Teste abaixo a interação dos componentes do React e as cores temáticas das duas equipes.
+        <p className="text-sm md:text-base text-amber-200/80 max-w-xl mb-8 leading-relaxed font-serif">
+          Aplicativo oficial para auditório e projeção na igreja, com pontuação secreta, cronômetro regressivo e suporte a equipes competindo no conhecimento das Sagradas Escrituras.
         </p>
 
-        {/* Demonstração dos Cards das Equipes */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl mb-8">
-          {/* Card Equipe Verde (Sarça Ardente) */}
-          <div className="bg-ipb-primary/30 border-2 border-emerald-400/50 rounded-2xl p-6 shadow-card-dark flex flex-col items-center">
-            <div className="text-xs font-bold uppercase tracking-wider text-emerald-300 mb-1">Equipe 1</div>
-            <h3 className="text-2xl font-black text-white mb-2">SARÇA VERDE</h3>
-            <div className="text-3xl font-bold text-emerald-300">0 pts</div>
-            <span className="text-xs text-emerald-400/70 mt-2">Paleta Institucional Verde</span>
+        {/* Demonstração dos Estandartes das Equipes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-8">
+          {/* Estandarte Equipe Sarça Verde */}
+          <div className="rounded-2xl border-2 border-[#166534]/50 bg-gradient-to-br from-[#0c2417] to-[#081910] p-6 text-left shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl pointer-events-none" />
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-serif font-bold uppercase tracking-wider text-emerald-400">
+                ● Equipe I
+              </span>
+              <span className="text-xs font-serif font-bold tracking-widest text-emerald-300/80">
+                SARÇA VERDE
+              </span>
+            </div>
+            <div className="text-3xl font-black text-emerald-100 mb-1 font-serif">0 TALENTOS</div>
+            <p className="text-xs text-emerald-200/60 font-serif">
+              Estandarte com o verde solene institucional da IPB
+            </p>
           </div>
 
-          {/* Card Equipe Dourada (Chama do Altar) */}
-          <div className="bg-amber-950/30 border-2 border-gold/50 rounded-2xl p-6 shadow-card-dark flex flex-col items-center">
-            <div className="text-xs font-bold uppercase tracking-wider text-amber-300 mb-1">Equipe 2</div>
-            <h3 className="text-2xl font-black text-white mb-2">CHAMA DOURADA</h3>
-            <div className="text-3xl font-bold text-gold">0 pts</div>
-            <span className="text-xs text-amber-400/70 mt-2">Paleta Dourada da Sarça</span>
+          {/* Estandarte Equipe Chama Dourada */}
+          <div className="rounded-2xl border-2 border-[#b45309]/50 bg-gradient-to-br from-[#2a1708] to-[#1a0f05] p-6 text-left shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-xl pointer-events-none" />
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-serif font-bold uppercase tracking-wider text-amber-400">
+                ● Equipe II
+              </span>
+              <span className="text-xs font-serif font-bold tracking-widest text-amber-300/80">
+                CHAMA DOURADA
+              </span>
+            </div>
+            <div className="text-3xl font-black text-amber-100 mb-1 font-serif">0 TALENTOS</div>
+            <p className="text-xs text-amber-200/60 font-serif">
+              Estandarte com o ouro da revelação e sabedoria
+            </p>
           </div>
         </div>
 
-        {/* Botão de Teste de Interatividade React */}
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={() => setContadorTeste(prev => prev + 1)}
-            className="flex items-center gap-2 bg-linear-to-r from-ipb-medium to-ipb-primary hover:from-ipb-primary hover:to-ipb-dark text-white font-bold py-3 px-8 rounded-xl border border-ipb-light/40 shadow-glow-green transition-all hover:scale-105 active:scale-95"
-          >
-            <Play className="w-5 h-5 text-gold fill-gold" />
-            Testar Interatividade (Cliques: {contadorTeste})
-          </button>
+        {/* Ações Centrais */}
+        <div className="flex flex-wrap items-center justify-center gap-3">
           <button
             onClick={() => setScreen('questions')}
-            className="flex items-center gap-2 bg-gold/20 hover:bg-gold/30 text-gold-light font-bold py-3 px-8 rounded-xl border border-gold/50 shadow-glow-gold transition-all hover:scale-105 active:scale-95"
+            className="flex items-center gap-2.5 bg-gradient-to-r from-[#8b1e1e] to-[#a62424] hover:brightness-110 text-amber-50 font-serif font-bold py-3 px-8 rounded-xl shadow-xl border border-amber-400/40 transition-all hover:scale-102 active:scale-98 text-sm"
           >
-            <ListChecks className="w-5 h-5" />
-            Gerenciar perguntas
+            <BookOpen className="w-5 h-5 text-amber-300" />
+            Abrir o Livro de Perguntas (Cânon)
+          </button>
+          <button 
+            onClick={() => setContadorTeste(prev => prev + 1)}
+            className="flex items-center gap-2 border border-[#c5a059]/40 bg-[#241710] hover:bg-[#332014] text-amber-200 font-serif font-semibold py-3 px-6 rounded-xl transition-all hover:scale-102 active:scale-98 text-sm shadow-md"
+          >
+            <Play className="w-4 h-4 text-emerald-400 fill-current" />
+            Testar Cliques ({contadorTeste})
           </button>
         </div>
       </main>
 
-      {/* Rodapé Informativo */}
-      <footer className="flex items-center justify-between text-xs text-ipb-light/60 border-t border-ipb-medium/20 pt-4">
-        <div>Etapa 4: Cadastro de perguntas</div>
+      {/* Rodapé Púlpito */}
+      <footer className="flex flex-wrap items-center justify-between text-xs font-serif text-amber-200/60 border-t border-[#3d281a] pt-4">
+        <div>Estilo: Bíblia Sagrada Edição Canônica • v1.0.0</div>
         <div className="flex items-center gap-2">
-          <span>Tela de demonstração provisória (o menu principal chega na Etapa 5)</span>
-          <Settings className="w-3.5 h-3.5" />
+          <span>Pronto para a Etapa 5 (Configuração da Partida)</span>
+          <Settings className="w-3.5 h-3.5 text-amber-400" />
         </div>
       </footer>
     </div>

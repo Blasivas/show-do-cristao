@@ -34,27 +34,21 @@ O **Show do Cristão** é um aplicativo instalável para Windows que permite ao 
 
 ## 🎨 Identidade Visual
 
-A paleta de cores é inspirada na identidade oficial da **Igreja Presbiteriana do Brasil** e fica definida no bloco `@theme` do `src/index.css` (usada como classes, ex.: `bg-ipb-darkest`, ou como variáveis CSS, ex.: `var(--color-ipb-darkest)`):
+O design do **Show do Cristão** segue a metáfora visual de uma **Bíblia Sagrada aberta sobre o púlpito**, com páginas em bifólio (duas páginas espelhadas), tipografia clássica serifada, versículos numerados com rubricas carmesim (`§ 1.`), encadernação de couro com relevo dourado e animação tridimensional de virada de folha com áudio de folhear papel bíblia sintetizado offline via Web Audio API.
 
-| Token | Hex | Uso |
-|---|---|---|
-| `ipb-darkest` | `#082517` | Fundo principal (projeção) |
-| `ipb-dark` | `#0d5131` | Verde solene institucional |
-| `ipb-primary` | `#1b6b45` | Verde principal |
-| `ipb-medium` | `#3c816a` | Verde folha (portal oficial IPB) |
-| `ipb-glow` | `#38af00` | Verde sarça ardente (destaque) |
-| `gold` | `#eab308` | Dourado (símbolo e celebração) |
+A especificação completa das fontes, paleta de cores e componentes está documentada em [`docs/identidade-visual.md`](docs/identidade-visual.md).
 
 ---
 
 ## 📁 Estrutura do Projeto
 
-Estrutura planejada (itens marcados com `*` ainda serão criados nas próximas etapas):
+Estrutura do projeto:
 
 ```
 show-do-cristao/
 ├── docs/                        # Documentação do projeto
-│   └── plano-desenvolvimento.md # Roteiro completo de todas as etapas
+│   ├── identidade-visual.md     # Guia oficial de cores, tipografia e layout da Bíblia
+│   └── plano-desenvolvimento.md # Roteiro completo de todas as etapas e decisões
 ├── electron/                    # Processo principal do Electron (janela nativa)
 │   ├── main.ts                  # Janela, ciclo de vida, tela cheia e segurança
 │   ├── preload.ts               # Ponte segura entre o Electron e o React

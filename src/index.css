@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* Paleta Oficial Inspirada na Igreja Presbiteriana do Brasil (IPB) */
   --color-ipb-darkest: #082517; /* Fundo nobre e profundo para projeção */
@@ -24,11 +26,25 @@
   --color-equipeB-border: #fbbf24;
   --color-equipeB-text: #fef3c7;
 
+  --font-serif: "Palatino Linotype", "Book Antiqua", Palatino, "Baskerville", Georgia, serif;
   --font-sans: Roboto, system-ui, -apple-system, sans-serif;
+
+  /* Paleta Bíblia Sagrada & Tradição Presbiteriana */
+  --color-bible-paper: #faf7f0;
+  --color-bible-paper-dark: #f2ebd9;
+  --color-bible-leather: #1c120c;
+  --color-bible-leather-deep: #120b07;
+  --color-bible-leather-border: #3d281a;
+  --color-bible-gold: #c5a059;
+  --color-bible-gold-bright: #d4af37;
+  --color-bible-rubric: #8b1e1e;
+  --color-bible-ink: #1c1917;
+  --color-bible-ink-muted: #5c4738;
 
   --shadow-glow-green: 0 0 25px rgba(56, 175, 0, 0.45);
   --shadow-glow-gold: 0 0 25px rgba(245, 158, 11, 0.5);
   --shadow-card-dark: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --shadow-bible-book: 0 35px 80px rgba(0, 0, 0, 0.85), 0 10px 25px rgba(0, 0, 0, 0.6);
 }
 
 @layer base {
@@ -37,11 +53,21 @@
     padding: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--color-ipb-darkest);
-    color: var(--color-white);
-    font-family: var(--font-sans);
+    font-family: var(--font-serif);
     user-select: none;
     overflow: hidden;
+    background: radial-gradient(ellipse at center, #241610 0%, #0d0805 100%);
+    color: #faf7f0;
+  }
+
+  html.dark, html.dark body {
+    background-color: #090b0e;
+    color: #f1f5f9;
+  }
+
+  html.light, html.light body {
+    background-color: #ffffff;
+    color: #0f172a;
   }
 
   #root {
@@ -73,4 +99,27 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-ipb-medium);
+}
+
+/* Animação realista 3D de Virar Página Bíblica */
+@keyframes pageTurnRight {
+  0% { transform: perspective(1400px) rotateY(0deg); opacity: 1; filter: brightness(1); }
+  50% { transform: perspective(1400px) rotateY(-70deg); opacity: 0.85; filter: brightness(0.88); }
+  100% { transform: perspective(1400px) rotateY(0deg); opacity: 1; filter: brightness(1); }
+}
+
+@keyframes pageTurnLeft {
+  0% { transform: perspective(1400px) rotateY(0deg); opacity: 1; filter: brightness(1); }
+  50% { transform: perspective(1400px) rotateY(70deg); opacity: 0.85; filter: brightness(0.88); }
+  100% { transform: perspective(1400px) rotateY(0deg); opacity: 1; filter: brightness(1); }
+}
+
+.animate-turn-next {
+  animation: pageTurnRight 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: left center;
+}
+
+.animate-turn-prev {
+  animation: pageTurnLeft 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: right center;
 }
