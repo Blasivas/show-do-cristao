@@ -28,13 +28,14 @@ interface QuestionFormProps {
 }
 
 const FieldError = ({ message }: { message?: string }) =>
-  message ? <p className="mt-1 text-xs font-serif font-bold text-[#8b1e1e]">{message}</p> : null;
+  message ? <p className="mt-1 text-xs font-serif font-bold text-[#8b1e1e] dark:text-[#f87171]">{message}</p> : null;
 
 const inputClass = (invalid: boolean) =>
   clsx(
     'w-full rounded-lg border px-3 py-2 text-sm font-serif transition-all focus:outline-none focus:ring-2',
     'bg-white border-[#d5c6b0] text-[#1c1917] placeholder:text-[#8c786a] focus:ring-[#8b1e1e] focus:border-[#8b1e1e]',
-    invalid && '!border-[#8b1e1e] focus:!ring-[#8b1e1e]',
+    'dark:bg-[#231b15] dark:border-[#3d2a1d] dark:text-[#f5efe4] dark:placeholder:text-[#8a7667] dark:focus:ring-amber-500/60 dark:focus:border-amber-500',
+    invalid && '!border-[#8b1e1e] dark:!border-[#f87171] focus:!ring-[#8b1e1e] dark:focus:!ring-[#f87171]',
   );
 
 export default function QuestionForm({ question, number, onSave, onClose }: QuestionFormProps) {
@@ -83,7 +84,7 @@ export default function QuestionForm({ question, number, onSave, onClose }: Ques
           }}
         >
           <div>
-            <label htmlFor="question-text" className="mb-1.5 block text-xs font-serif font-bold uppercase tracking-wider text-[#3d2f26]">
+            <label htmlFor="question-text" className="mb-1.5 block text-xs font-serif font-bold uppercase tracking-wider text-[#3d2f26] dark:text-[#ede6d8]">
               Enunciado do Versículo
             </label>
             <textarea
@@ -99,8 +100,8 @@ export default function QuestionForm({ question, number, onSave, onClose }: Ques
           </div>
 
           <fieldset>
-            <legend className="mb-1.5 text-xs font-serif font-bold uppercase tracking-wider text-[#3d2f26]">
-              Alternativas <span className="font-normal text-[#6b584a] normal-case">(clique na letra para marcar a correta)</span>
+            <legend className="mb-1.5 text-xs font-serif font-bold uppercase tracking-wider text-[#3d2f26] dark:text-[#ede6d8]">
+              Alternativas <span className="font-normal text-[#6b584a] dark:text-[#a89682] normal-case">(clique na letra para marcar a correta)</span>
             </legend>
             <div className="space-y-2">
               {LETTERS.map((letter, i) => {
@@ -117,8 +118,8 @@ export default function QuestionForm({ question, number, onSave, onClose }: Ques
                         className={clsx(
                           'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border font-serif font-bold text-sm transition-all',
                           isCorrect
-                            ? 'border-[#15803d] bg-[#15803d] text-white shadow-xs'
-                            : 'border-[#d5c6b0] bg-[#f4efe4] text-[#3d2f26] hover:border-[#8b1e1e]',
+                            ? 'border-[#15803d] bg-[#15803d] text-white shadow-xs dark:border-emerald-500 dark:bg-emerald-600'
+                            : 'border-[#d5c6b0] bg-[#f4efe4] text-[#3d2f26] hover:border-[#8b1e1e] dark:border-[#3d2a1d] dark:bg-[#271d16] dark:text-[#dfd4c5] dark:hover:border-amber-400',
                         )}
                       >
                         {isCorrect ? <Check className="h-4 w-4 stroke-[3]" /> : letter}
@@ -140,8 +141,8 @@ export default function QuestionForm({ question, number, onSave, onClose }: Ques
           </fieldset>
 
           <fieldset>
-            <legend className="mb-1.5 text-xs font-serif font-bold uppercase tracking-wider text-[#3d2f26]">
-              Dificuldade <span className="font-normal text-[#6b584a] normal-case">(organizada automaticamente)</span>
+            <legend className="mb-1.5 text-xs font-serif font-bold uppercase tracking-wider text-[#3d2f26] dark:text-[#ede6d8]">
+              Dificuldade <span className="font-normal text-[#6b584a] dark:text-[#a89682] normal-case">(organizada automaticamente)</span>
             </legend>
             <div className="grid grid-cols-3 gap-2">
               {DIFFICULTY_ORDER.map((d) => (
@@ -154,7 +155,7 @@ export default function QuestionForm({ question, number, onSave, onClose }: Ques
                     'rounded-lg border px-3 py-2 text-xs font-serif font-bold transition-all',
                     DIFFICULTY_BADGE[d],
                     draft.difficulty === d
-                      ? 'ring-2 ring-[#8b1e1e] font-bold shadow-xs'
+                      ? 'ring-2 ring-[#8b1e1e] dark:ring-amber-400 font-bold shadow-xs'
                       : 'opacity-70 hover:opacity-100',
                   )}
                 >

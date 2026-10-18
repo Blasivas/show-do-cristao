@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import clsx from 'clsx';
 import {
   ArrowLeft,
-  BookOpen,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -18,6 +17,7 @@ import type { Difficulty, Question } from '@/types/game';
 import { LETTERS } from '@/game/questions';
 import { getPoints } from '@/game/engine';
 import { DIFFICULTY_LABEL, DIFFICULTY_ORDER } from './difficulty';
+import ThemeToggle from './ThemeToggle';
 
 type Filter = Difficulty | 'todas';
 
@@ -88,23 +88,28 @@ export default function BibleLayout({
   onDeleteQuestion,
   onReload,
 }: BibleLayoutProps) {
-  // spread: 0 = Prólogo/Capa interna, 1 = Folha 1 (Q1-Q4), 2 = Folha 2 (Q5-Q8), 3 = Folha 3 (Q9-Q12)...
+  // 4 perguntas por página = 8 perguntas por folha aberta (bifólio)
+  const QUESTIONS_PER_PAGE = 4;
+  const QUESTIONS_PER_SPREAD = QUESTIONS_PER_PAGE * 2; // 8
+
+  // spreadIndex: 0 = Folha 1 (Q1-Q6), 1 = Folha 2 (Q7-Q12), 2 = Folha 3 (Q13-Q18)...
   const [spreadIndex, setSpreadIndex] = useState(0);
   const [flipDirection, setFlipDirection] = useState<'next' | 'prev' | null>(null);
   const isAnimating = useRef(false);
 
-  const QUESTIONS_PER_SPREAD = 4; // 2 na página esquerda, 2 na página direita
-  const totalQuestionSpreads = Math.max(1, Math.ceil(visible.length / QUESTIONS_PER_SPREAD));
-  const totalSpreads = totalQuestionSpreads + 1; // +1 para o Prólogo (spread 0)
+  const totalSpreads = Math.max(1, Math.ceil(visible.length / QUESTIONS_PER_SPREAD));
 
-  // Perguntas da folha atual (se spreadIndex > 0)
-  const currentSpreadQuestions =
-    spreadIndex > 0
-      ? visible.slice((spreadIndex - 1) * QUESTIONS_PER_SPREAD, spreadIndex * QUESTIONS_PER_SPREAD)
-      : [];
+  // Perguntas da folha atual
+  const currentSpreadQuestions = visible.slice(
+    spreadIndex * QUESTIONS_PER_SPREAD,
+    (spreadIndex + 1) * QUESTIONS_PER_SPREAD,
+  );
 
-  const leftPageQuestions = currentSpreadQuestions.slice(0, 2);
-  const rightPageQuestions = currentSpreadQuestions.slice(2, 4);
+  const leftPageQuestions = currentSpreadQuestions.slice(0, QUESTIONS_PER_PAGE);
+  const rightPageQuestions = currentSpreadQuestions.slice(QUESTIONS_PER_PAGE, QUESTIONS_PER_SPREAD);
+
+  const isLeftFull = leftPageQuestions.length >= QUESTIONS_PER_PAGE;
+  const isRightFull = rightPageQuestions.length >= QUESTIONS_PER_PAGE;
 
   const goToSpread = useCallback((nextIndex: number, direction: 'next' | 'prev') => {
     if (isAnimating.current || nextIndex === spreadIndex || nextIndex < 0 || nextIndex >= totalSpreads) return;
@@ -112,13 +117,15 @@ export default function BibleLayout({
     setFlipDirection(direction);
     playPageRustleSound();
 
+    // Troca de conteúdo no ponto médio exato (190ms de 380ms) enquanto a folha está angulada
     setTimeout(() => {
       setSpreadIndex(nextIndex);
+      // Finalização suave e liberação de trava após os 380ms completos da animação
       setTimeout(() => {
         setFlipDirection(null);
         isAnimating.current = false;
-      }, 180);
-    }, 160);
+      }, 190);
+    }, 190);
   }, [spreadIndex, totalSpreads]);
 
   // Navegação por teclado: Setas Esquerda e Direita folheiam as páginas
@@ -136,336 +143,251 @@ export default function BibleLayout({
   }, [spreadIndex, totalSpreads, goToSpread]);
 
   return (
-    <div className="flex h-full w-full flex-col bg-[#140e0a] text-[#1c1917] font-serif select-none relative overflow-hidden">
+    <div className="flex h-full w-full flex-col bg-[#140e0a] text-[#1c1917] dark:bg-[#0c0805] dark:text-[#ede6d8] font-serif select-none relative overflow-hidden transition-colors duration-200">
       {/* ======================================================== */}
-      {/* BARRA SUPERIOR ESTILO PÚLPITO & ENCADERNAÇÃO             */}
+      {/* BARRA SUPERIOR ESTILO PÚLPITO EM UM NÍVEL SÓ (SEM SCROLL) */}
       {/* ======================================================== */}
-      <header className="shrink-0 border-b-2 border-[#3d281a] bg-gradient-to-b from-[#241710] to-[#1a100b] px-6 py-2.5 text-xs text-amber-100 shadow-xl z-20">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+      <header className="shrink-0 border-b-2 border-[#3d281a] dark:border-[#2b1b11] bg-gradient-to-b from-[#241710] to-[#1a100b] dark:from-[#1b1009] dark:to-[#120a06] px-4 py-2 text-xs text-amber-100 shadow-xl z-20">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 overflow-x-auto">
+          {/* Esquerda: Voltar (ícone apenas) + Filtro compacto + Marcadores de Folhas */}
+          <div className="flex items-center gap-2.5 shrink-0">
             <button
+              type="button"
               onClick={onBack}
-              className="flex items-center gap-1.5 rounded-lg border border-[#c5a059]/40 bg-[#2d1d13] px-3 py-1.5 font-serif text-xs font-bold text-amber-200 shadow-sm transition-all hover:bg-[#3d2719] hover:border-amber-400 active:scale-98"
+              aria-label="Voltar ao início"
+              title="Voltar ao início"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#c5a059]/40 bg-[#2d1d13] text-amber-200 shadow-sm transition-all hover:bg-[#3d2719] hover:border-amber-400 active:scale-95 shrink-0"
             >
-              <ArrowLeft className="h-3.5 w-3.5" /> Voltar ao Início
+              <ArrowLeft className="h-4 w-4" />
             </button>
 
-            <div className="flex items-center gap-2 border-l border-[#3d281a] pl-3">
-              <BookOpen className="h-4 w-4 text-[#d4af37]" />
-              <span className="font-bold tracking-widest uppercase text-amber-200 text-xs">
-                Cânon do Show do Cristão
+            <div className="h-5 w-px bg-[#3d281a]" />
+
+            {/* Filtro compacto */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-[11px] uppercase tracking-wider text-amber-400/90 font-serif font-bold mr-0.5">
+                Filtro:
               </span>
-              <span className="rounded-full border border-amber-600/40 bg-amber-950/80 px-2 py-0.5 text-[11px] font-mono text-amber-300">
-                {questions.length} versículos
+              {(['todas', ...DIFFICULTY_ORDER] as Filter[]).map((f) => {
+                const active = filter === f;
+                return (
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => {
+                      setFilter(f);
+                      setSpreadIndex(0);
+                    }}
+                    className={clsx(
+                      'rounded-md px-2.5 py-1 text-xs font-serif font-bold transition-all shrink-0',
+                      active
+                        ? 'bg-[#d4af37] text-[#1c120c] shadow-md border border-amber-300'
+                        : 'bg-[#241710] text-amber-200/80 border border-[#3d281a] hover:bg-[#332014] hover:text-white',
+                    )}
+                  >
+                    {f === 'todas' ? `Todos (${questions.length})` : `${DIFFICULTY_LABEL[f]} (${counts[f]})`}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="h-5 w-px bg-[#3d281a] hidden sm:block" />
+
+            {/* Marcadores de Folhas Rápidas */}
+            <div className="flex items-center gap-1 font-serif text-xs shrink-0">
+              <span className="text-[11px] uppercase tracking-wider text-amber-400/80 mr-0.5 hidden lg:inline font-bold">
+                Folhas:
               </span>
+              {Array.from({ length: totalSpreads }).map((_, i) => {
+                const spNum = i + 1;
+                const isActive = spreadIndex === i;
+                return (
+                  <button
+                    key={spNum}
+                    type="button"
+                    onClick={() => goToSpread(i, i > spreadIndex ? 'next' : 'prev')}
+                    className={clsx(
+                      'rounded px-2 py-0.5 transition-all font-serif font-bold text-xs shrink-0',
+                      isActive
+                        ? 'bg-[#d4af37] text-[#1c120c] shadow-xs'
+                        : 'text-amber-200/70 hover:bg-[#2d1d13] hover:text-amber-100',
+                    )}
+                    title={`Folha ${spNum}`}
+                  >
+                    Folha {spNum}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Ações Canônicas (Pasta, Importar, Exportar, Restaurar, Novo Versículo) */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Direita: Ações apenas com ícones + Novo Versículo (sem duplo mais) + Switch Noturno */}
+          <div className="flex items-center gap-2 shrink-0">
             <button
+              type="button"
               onClick={onOpenFolder}
-              className="flex items-center gap-1.5 rounded-lg border border-[#c5a059]/30 bg-[#2d1d13]/90 px-3 py-1.5 font-serif text-xs text-amber-200 transition-colors hover:bg-[#3d2719]"
+              aria-label="Abrir pasta de perguntas"
+              title="Abrir pasta de dados"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#c5a059]/30 bg-[#2d1d13]/90 text-amber-200 transition-colors hover:bg-[#3d2719] hover:border-amber-400 shrink-0"
             >
-              <FolderOpen className="h-3.5 w-3.5 text-[#d4af37]" /> Pasta
+              <FolderOpen className="h-4 w-4 text-[#d4af37]" />
             </button>
             {load.status === 'ok' && (
               <>
                 <button
+                  type="button"
                   onClick={onImport}
-                  className="flex items-center gap-1.5 rounded-lg border border-[#c5a059]/30 bg-[#2d1d13]/90 px-3 py-1.5 font-serif text-xs text-amber-200 transition-colors hover:bg-[#3d2719]"
+                  aria-label="Importar perguntas"
+                  title="Importar perguntas de arquivo JSON"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#c5a059]/30 bg-[#2d1d13]/90 text-amber-200 transition-colors hover:bg-[#3d2719] hover:border-amber-400 shrink-0"
                 >
-                  <Upload className="h-3.5 w-3.5 text-[#d4af37]" /> Importar
+                  <Upload className="h-4 w-4 text-[#d4af37]" />
                 </button>
                 <button
+                  type="button"
                   onClick={onExport}
                   disabled={questions.length === 0}
-                  className="flex items-center gap-1.5 rounded-lg border border-[#c5a059]/30 bg-[#2d1d13]/90 px-3 py-1.5 font-serif text-xs text-amber-200 transition-colors hover:bg-[#3d2719] disabled:opacity-40"
+                  aria-label="Exportar perguntas"
+                  title="Exportar perguntas para arquivo JSON"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#c5a059]/30 bg-[#2d1d13]/90 text-amber-200 transition-colors hover:bg-[#3d2719] hover:border-amber-400 disabled:opacity-40 shrink-0"
                 >
-                  <Download className="h-3.5 w-3.5 text-[#d4af37]" /> Exportar
+                  <Download className="h-4 w-4 text-[#d4af37]" />
                 </button>
                 <button
+                  type="button"
                   onClick={onRestore}
-                  className="flex items-center gap-1.5 rounded-lg border border-[#c5a059]/30 bg-[#2d1d13]/90 px-3 py-1.5 font-serif text-xs text-amber-200 transition-colors hover:bg-[#3d2719]"
+                  aria-label="Restaurar perguntas originais"
+                  title="Restaurar perguntas originais de fábrica"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#c5a059]/30 bg-[#2d1d13]/90 text-amber-200 transition-colors hover:bg-[#3d2719] hover:border-amber-400 shrink-0"
                 >
-                  <RotateCcw className="h-3.5 w-3.5 text-[#d4af37]" /> Restaurar
+                  <RotateCcw className="h-4 w-4 text-[#d4af37]" />
                 </button>
+
+                <div className="h-5 w-px bg-[#3d281a]" />
+
                 <button
+                  type="button"
                   onClick={onNewQuestion}
-                  className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#8b1e1e] to-[#a62424] px-4 py-1.5 font-serif text-xs font-bold text-amber-50 shadow-md border border-amber-500/40 transition-all hover:brightness-110 hover:scale-102 active:scale-98"
+                  className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#8b1e1e] to-[#a62424] px-3.5 py-1.5 font-serif text-xs font-bold text-amber-50 shadow-md border border-amber-500/40 transition-all hover:brightness-110 active:scale-95 shrink-0"
                 >
-                  <Plus className="h-3.5 w-3.5 stroke-[2.5]" /> + Novo Versículo
+                  <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
+                  <span>Novo Versículo</span>
                 </button>
               </>
             )}
-          </div>
-        </div>
 
-        {/* Fita de Filtros Canônicos e Índice das Folhas */}
-        <div className="mx-auto mt-2 flex max-w-7xl flex-wrap items-center justify-between gap-2 border-t border-[#3d281a]/60 pt-2 text-xs">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] uppercase tracking-wider text-amber-400/90 font-serif mr-1">
-              Filtro Canônico:
-            </span>
-            {(['todas', ...DIFFICULTY_ORDER] as Filter[]).map((f) => {
-              const active = filter === f;
-              return (
-                <button
-                  key={f}
-                  type="button"
-                  onClick={() => {
-                    setFilter(f);
-                    setSpreadIndex(1); // pula direto para as perguntas do filtro
-                  }}
-                  className={clsx(
-                    'rounded-md px-3 py-1 text-xs font-serif font-bold transition-all',
-                    active
-                      ? 'bg-[#d4af37] text-[#1c120c] shadow-md border border-amber-300'
-                      : 'bg-[#241710] text-amber-200/80 border border-[#3d281a] hover:bg-[#332014] hover:text-white',
-                  )}
-                >
-                  {f === 'todas' ? `Todos (${questions.length})` : `${DIFFICULTY_LABEL[f]} (${counts[f]})`}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Marcadores de Folhas Rápidas */}
-          <div className="flex items-center gap-1 font-serif text-xs">
-            <span className="text-[11px] uppercase tracking-wider text-amber-400/80 mr-1 hidden sm:inline">
-              Folhas:
-            </span>
-            <button
-              onClick={() => goToSpread(0, 'prev')}
-              className={clsx(
-                'rounded px-2.5 py-0.5 transition-all font-serif font-bold text-xs',
-                spreadIndex === 0
-                  ? 'bg-[#d4af37] text-[#1c120c] shadow-xs'
-                  : 'text-amber-200/70 hover:bg-[#2d1d13] hover:text-amber-100',
-              )}
-            >
-              Prólogo
-            </button>
-            {Array.from({ length: totalQuestionSpreads }).map((_, i) => {
-              const spNum = i + 1;
-              const isActive = spreadIndex === spNum;
-              return (
-                <button
-                  key={spNum}
-                  onClick={() => goToSpread(spNum, spNum > spreadIndex ? 'next' : 'prev')}
-                  className={clsx(
-                    'rounded px-2 py-0.5 transition-all font-serif font-bold text-xs',
-                    isActive
-                      ? 'bg-[#d4af37] text-[#1c120c] shadow-xs'
-                      : 'text-amber-200/70 hover:bg-[#2d1d13] hover:text-amber-100',
-                  )}
-                  title={`Folha ${spNum}`}
-                >
-                  {spNum}
-                </button>
-              );
-            })}
+            {/* Switch Deslizante de Modo Noturno / Claro */}
+            <div className="pl-1 border-l border-[#3d281a]">
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </header>
 
       {/* ======================================================== */}
-      {/* O LIVRO SAGRADO ABERTO (BIFÓLIO)                         */}
+      {/* O LIVRO SAGRADO ABERTO (4 PERGUNTAS POR PÁGINA = 8/FOLHA)*/}
       {/* ======================================================== */}
-      <main className="flex-1 flex items-center justify-center p-3 md:p-6 overflow-y-auto">
-        <div className="w-full max-w-6xl relative my-auto">
+      <main className="flex-1 min-h-0 flex items-center justify-center p-1.5 sm:p-2 overflow-hidden">
+        <div className="w-full max-w-6xl h-full max-h-[calc(100vh-4.25rem)] relative flex flex-col justify-center min-h-0">
           {/* Fita Marcadora de Cetim Rubra com reflexo dourado */}
-          <div className="hidden md:block absolute -top-5 left-1/2 -translate-x-1/2 w-7 h-28 bg-gradient-to-r from-[#7f1d1d] via-[#b91c1c] to-[#7f1d1d] shadow-[0_10px_25px_rgba(0,0,0,0.8)] z-40 rounded-b-sm border-b-6 border-[#d4af37]"></div>
+          <div className="hidden md:block absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-20 bg-gradient-to-r from-[#7f1d1d] via-[#b91c1c] to-[#7f1d1d] shadow-[0_10px_25px_rgba(0,0,0,0.8)] z-40 rounded-b-sm border-b-4 border-[#d4af37] pointer-events-none"></div>
 
           {/* Encadernação de Couro Imperial com relevo dourado */}
-          <div className="w-full bg-[#1c120c] p-3 md:p-5 rounded-3xl shadow-[0_35px_80px_rgba(0,0,0,0.95),0_15px_30px_rgba(0,0,0,0.7)] border-4 border-[#3a2517] relative">
-            <div className="border border-[#c5a059]/40 rounded-2xl p-1 bg-[#140b07] shadow-inner">
+          <div className="w-full h-full bg-[#1c120c] dark:bg-[#120b07] p-1.5 md:p-2 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.95),0_10px_20px_rgba(0,0,0,0.7)] border-4 border-[#3a2517] dark:border-[#2a1a10] relative transition-colors duration-200 flex flex-col min-h-0">
+            <div className="border border-[#c5a059]/40 rounded-xl p-0.5 bg-[#140b07] dark:bg-[#0b0604] shadow-inner flex-1 min-h-0 flex flex-col">
               
-              {/* Miolo de Papel Bíblia com animação 3D de virada */}
+              {/* Miolo do Livro: Modo Claro (Papel Marfim) vs Modo Noturno (Códice Escuro) */}
               <div
                 className={clsx(
-                  'grid grid-cols-1 md:grid-cols-2 rounded-xl overflow-hidden min-h-[580px] bg-[#faf7f0] text-[#1c1917] relative transition-transform duration-300 shadow-[inset_0_0_80px_rgba(180,160,130,0.3)]',
-                  flipDirection === 'next' && 'animate-turn-next',
-                  flipDirection === 'prev' && 'animate-turn-prev',
+                  'grid grid-cols-1 md:grid-cols-2 rounded-lg overflow-hidden flex-1 min-h-0 relative transition-colors duration-300',
+                  'bg-[#faf7f0] text-[#1c1917] shadow-[inset_0_0_80px_rgba(180,160,130,0.3)]',
+                  'dark:bg-[#18130e] dark:text-[#ede6d8] dark:shadow-[inset_0_0_80px_rgba(0,0,0,0.8)]',
                 )}
               >
                 {load.status === 'invalid' && (
-                  <div className="col-span-2 p-12 text-center my-auto">
-                    <div className="w-14 h-14 mx-auto mb-3 rounded-full border-2 border-[#8b1e1e] flex items-center justify-center text-[#8b1e1e] text-2xl font-bold">
+                  <div className="col-span-2 p-8 text-center my-auto">
+                    <div className="w-12 h-12 mx-auto mb-2 rounded-full border-2 border-[#8b1e1e] flex items-center justify-center text-[#8b1e1e] text-xl font-bold">
                       ⚠
                     </div>
-                    <h3 className="text-xl font-bold text-[#8b1e1e] mb-2 font-serif">Problema no Perguntas.json</h3>
-                    <p className="text-sm text-[#5c4738] mb-4 font-serif max-w-md mx-auto">{load.error}</p>
+                    <h3 className="text-lg font-bold text-[#8b1e1e] dark:text-[#f87171] mb-1 font-serif">Problema no Perguntas.json</h3>
+                    <p className="text-xs text-[#5c4738] dark:text-[#c4b59d] mb-3 font-serif max-w-md mx-auto">{load.error}</p>
                     <div className="flex justify-center gap-3">
-                      <button onClick={onReload} className="px-4 py-2 bg-[#8b1e1e] text-white rounded-lg font-serif text-xs font-bold hover:bg-[#a62424]">
+                      <button onClick={onReload} className="px-3 py-1.5 bg-[#8b1e1e] text-white rounded-lg font-serif text-xs font-bold hover:bg-[#a62424]">
                         Tentar Novamente
                       </button>
-                      <button onClick={onRestore} className="px-4 py-2 bg-[#2d1d13] text-amber-200 rounded-lg font-serif text-xs font-bold hover:bg-[#3d2719]">
+                      <button onClick={onRestore} className="px-3 py-1.5 bg-[#2d1d13] text-amber-200 rounded-lg font-serif text-xs font-bold hover:bg-[#3d2719]">
                         Restaurar Padrão
                       </button>
                     </div>
                   </div>
                 )}
 
-                {/* ==================================================== */}
-                {/* SPREAD 0: PRÓLOGO & CAPA INTERNA                     */}
-                {/* ==================================================== */}
-                {load.status === 'ok' && spreadIndex === 0 && (
+                {load.status === 'ok' && (
                   <>
-                    {/* Página Esquerda: Frontispício Sagrado */}
-                    <div className="p-8 md:p-12 flex flex-col justify-between border-r-2 border-[#d5c6b0] relative bg-[#faf7f0]">
-                      {/* Sombra da Medianiz (Dobra central do livro) */}
-                      <div className="absolute top-0 right-0 bottom-0 w-16 bg-gradient-to-r from-transparent via-black/[0.04] to-black/[0.14] pointer-events-none"></div>
-
-                      <div className="border-b-2 border-double border-[#8b1e1e]/40 pb-2 text-center text-xs tracking-widest text-[#73533e] uppercase font-serif font-bold">
-                        O Livro do Show do Cristão • Prólogo
-                      </div>
-
-                      <div className="text-center my-auto py-6">
-                        <div className="w-16 h-16 mx-auto mb-4 border-2 border-[#8b1e1e] rounded-full flex items-center justify-center text-[#8b1e1e] text-3xl font-serif shadow-inner">
-                          ✟
-                        </div>
-
-                        <div className="text-xs tracking-[0.25em] uppercase text-[#73533e] mb-2 font-serif font-bold">
-                          Igreja Presbiteriana do Brasil
-                        </div>
-
-                        <h1 className="text-3xl md:text-4xl font-bold text-[#1c120c] tracking-wider mb-2 uppercase font-serif">
-                          CÂNON DO QUIZ BÍBLICO
-                        </h1>
-
-                        <p className="text-sm italic text-[#5c4738] mb-6 font-serif">
-                          Acervo oficial de perguntas e respostas para a grande gincana de auditório
-                        </p>
-
-                        <div className="w-32 h-[2px] bg-gradient-to-r from-transparent via-[#8b1e1e] to-transparent mx-auto my-6"></div>
-
-                        <div className="text-xs text-[#5c4738] space-y-1.5 italic max-w-sm mx-auto font-serif">
-                          <p>“Lâmpada para os meus pés é tua palavra e luz, para o meu caminho.”</p>
-                          <p className="font-bold text-[#8b1e1e] not-italic tracking-wider text-[11px] font-serif">
-                            — SALMO 119:105
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="border-t border-[#d5c6b0] pt-2 flex justify-between text-xs text-[#73533e] font-serif">
-                        <span>Anno Domini MMXXVI</span>
-                        <span>Frontispício</span>
-                      </div>
-                    </div>
-
-                    {/* Página Direita: Instruções Canônicas */}
-                    <div className="p-8 md:p-12 flex flex-col justify-between relative bg-[#faf7f0]">
-                      {/* Sombra da Medianiz (Dobra central do livro) */}
-                      <div className="absolute top-0 left-0 bottom-0 w-16 bg-gradient-to-l from-transparent via-black/[0.04] to-black/[0.14] pointer-events-none"></div>
-
-                      <div className="border-b-2 border-double border-[#8b1e1e]/40 pb-2 text-center text-xs tracking-widest text-[#73533e] uppercase font-serif font-bold">
-                        Capítulo I • Da Organização
-                      </div>
-
-                      <div className="my-auto py-4">
-                        <div className="text-center mb-6">
-                          <span className="text-xs text-[#8b1e1e] font-bold tracking-widest uppercase font-serif">
-                            CAPÍTULO PRIMEIRO
-                          </span>
-                          <h2 className="text-2xl font-bold text-[#1c120c] font-serif">
-                            Das Instruções aos Escribas
-                          </h2>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-justify text-xs leading-relaxed text-[#2c221b] font-serif">
-                          <div>
-                            <p className="mb-3">
-                              <span className="float-left text-5xl leading-none font-bold text-[#8b1e1e] pr-2 pt-1 font-serif">
-                                E
-                              </span>
-                              ste acervo reúne todas as questões bíblicas devidamente catalogadas por ordem de dificuldade e recompensa de talentos.
-                            </p>
-                            <p className="text-[#5c4738]">
-                              <sup className="font-bold text-[#8b1e1e] text-[11px]">1</sup> As perguntas dividem-se em três graus canônicos: fáceis (10 talentos), médias (20 talentos) e difíceis (30 talentos).
-                            </p>
-                          </div>
-
-                          <div>
-                            <p className="text-[#5c4738] mb-4">
-                              <sup className="font-bold text-[#8b1e1e] text-[11px]">2</sup> Você pode folhear as páginas do livro usando as setas do teclado (◀ e ▶) ou os botões de rodapé.
-                            </p>
-
-                            <button
-                              onClick={() => goToSpread(1, 'next')}
-                              className="w-full py-3 px-4 bg-gradient-to-r from-[#8b1e1e] to-[#a62424] hover:brightness-110 text-amber-50 rounded-lg font-serif font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 hover:scale-102 active:scale-98 border border-amber-400/30"
-                            >
-                              <span>Abrir os Versículos (Folha 1)</span>
-                              <ChevronRight className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="border-t border-[#d5c6b0] pt-2 flex justify-between text-xs text-[#73533e] font-serif">
-                        <span>Página II</span>
-                        <button
-                          onClick={() => goToSpread(1, 'next')}
-                          className="font-bold text-[#8b1e1e] hover:underline flex items-center gap-1"
-                        >
-                          Ir para as Perguntas ⟶
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {/* ==================================================== */}
-                {/* SPREADS > 0: PÁGINAS DE PERGUNTAS (BIFÓLIO REAL)     */}
-                {/* ==================================================== */}
-                {load.status === 'ok' && spreadIndex > 0 && (
-                  <>
-                    {/* Página Esquerda: 2 Perguntas */}
-                    <div className="p-6 md:p-8 flex flex-col justify-between border-r-2 border-[#d5c6b0] relative bg-[#faf7f0]">
+                    {/* Página Esquerda: 4 Perguntas */}
+                    <div
+                      className={clsx(
+                        'px-3 md:px-3.5 py-1.5 md:py-2 flex flex-col justify-between border-r-2 border-[#d5c6b0] dark:border-[#382618] relative bg-[#faf7f0] dark:bg-[#18130e] min-h-0 transition-colors duration-200',
+                        flipDirection === 'prev' && 'animate-turn-prev',
+                      )}
+                    >
                       {/* Sombra da Medianiz */}
-                      <div className="absolute top-0 right-0 bottom-0 w-16 bg-gradient-to-r from-transparent via-black/[0.04] to-black/[0.14] pointer-events-none"></div>
+                      <div className="absolute top-0 right-0 bottom-0 w-16 bg-gradient-to-r from-transparent via-black/[0.04] to-black/[0.14] dark:via-black/[0.15] dark:to-black/[0.5] pointer-events-none"></div>
 
                       {/* Cabeçalho da Página Esquerda */}
-                      <div className="border-b-2 border-double border-[#8b1e1e]/40 pb-2 flex justify-between items-center text-xs text-[#665040] uppercase tracking-wider font-serif">
-                        <span className="font-bold text-[#1c120c]">LIVRO DAS PERGUNTAS</span>
-                        <span className="italic text-[#73533e]">Edição Canônica</span>
+                      <div className="border-b border-[#8b1e1e]/30 dark:border-[#c5a059]/30 pb-0.5 flex justify-between items-center text-[10px] text-[#665040] dark:text-[#c4b59d] uppercase tracking-wider font-serif shrink-0">
+                        <span className="font-bold text-[#1c120c] dark:text-[#faf7f0]">LIVRO DAS PERGUNTAS</span>
+                        <span className="italic text-[#73533e] dark:text-[#bdae9c]">Cânon Sagrado</span>
                         <span>PÁG. {spreadIndex * 2 + 1}</span>
                       </div>
 
-                      {/* Lista de Perguntas da Página Esquerda */}
-                      <div className="my-auto space-y-6 py-4">
+                      {/* Lista de até 4 Perguntas na Página Esquerda */}
+                      <div
+                        className={clsx(
+                          'flex-1 flex flex-col py-0.5 min-h-0 overflow-hidden',
+                          isLeftFull ? '' : 'justify-start space-y-1',
+                        )}
+                      >
                         {leftPageQuestions.length === 0 ? (
-                          <div className="text-center py-12 text-[#73533e] italic font-serif">
-                            Fim das perguntas desta folha.
+                          <div className="text-center py-8 text-[#73533e] dark:text-[#a89682] italic font-serif text-xs">
+                            Nenhuma pergunta encontrada nesta folha.
                           </div>
                         ) : (
                           leftPageQuestions.map(({ q, number }) => (
-                            <article key={q.id} className="border-b border-[#e2d8c6] pb-5 last:border-b-0">
-                              <div className="flex items-start justify-between gap-2 mb-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-lg font-bold text-[#8b1e1e] font-serif">§ {number}.</span>
+                            <article
+                              key={q.id}
+                              className={clsx(
+                                'border-b border-[#e2d8c6] dark:border-[#2d1e14] last:border-b-0',
+                                isLeftFull
+                                  ? 'flex-1 min-h-0 flex flex-col justify-center py-1'
+                                  : 'py-2.5 first:pt-0',
+                              )}
+                            >
+                              <div className="flex items-start justify-between gap-1 mb-0.5">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-sm font-bold text-[#8b1e1e] dark:text-[#f87171] font-serif">§ {number}.</span>
                                   <span
                                     className={clsx(
-                                      'text-[10px] font-serif font-bold uppercase px-2 py-0.5 rounded-full border shadow-xs',
-                                      q.difficulty === 'facil' && 'bg-emerald-50 text-emerald-800 border-emerald-300',
-                                      q.difficulty === 'medio' && 'bg-amber-50 text-amber-900 border-amber-300',
-                                      q.difficulty === 'dificil' && 'bg-rose-50 text-rose-900 border-rose-300',
+                                      'text-[9px] font-serif font-bold uppercase px-2 py-0.5 rounded-full border shadow-xs',
+                                      q.difficulty === 'facil' && 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-600/50',
+                                      q.difficulty === 'medio' && 'bg-amber-50 text-amber-900 border-amber-300 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-600/50',
+                                      q.difficulty === 'dificil' && 'bg-rose-50 text-rose-900 border-rose-300 dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-600/50',
                                     )}
                                   >
                                     ● {DIFFICULTY_LABEL[q.difficulty]} • {getPoints(q.difficulty)} Talentos
                                   </span>
                                 </div>
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-0.5">
                                   <button
                                     onClick={() => onEditQuestion(q)}
-                                    className="p-1 rounded text-[#73533e] hover:bg-amber-100 hover:text-black transition-colors"
+                                    className="p-1 rounded text-[#73533e] hover:bg-amber-100 hover:text-black dark:text-[#a89682] dark:hover:bg-amber-950/60 dark:hover:text-amber-200 transition-colors"
                                     title="Editar versículo"
                                   >
                                     <Pencil className="w-3.5 h-3.5" />
                                   </button>
                                   <button
                                     onClick={() => onDeleteQuestion(q, number)}
-                                    className="p-1 rounded text-[#73533e] hover:bg-rose-100 hover:text-[#8b1e1e] transition-colors"
+                                    className="p-1 rounded text-[#73533e] hover:bg-rose-100 hover:text-[#8b1e1e] dark:text-[#a89682] dark:hover:bg-rose-950/60 dark:hover:text-rose-300 transition-colors"
                                     title="Excluir versículo"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
@@ -473,33 +395,35 @@ export default function BibleLayout({
                                 </div>
                               </div>
 
-                              <p className="font-semibold text-[15px] text-[#1c1917] mb-3 leading-relaxed font-serif">
+                              <p className="font-semibold text-[12px] sm:text-[12.5px] text-[#1c1917] dark:text-[#faf7f0] mb-1 leading-snug font-serif">
                                 {q.text}
                               </p>
 
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs">
                                 {q.options.map((opt, i) => {
                                   const isCorrect = i === q.correctIndex;
                                   return (
                                     <div
                                       key={i}
                                       className={clsx(
-                                        'px-2.5 py-1.5 rounded-lg transition-all flex items-center justify-between border font-serif',
+                                        'px-2 py-0.5 sm:py-1 rounded transition-all flex items-center justify-between border font-serif text-[10.5px] sm:text-[11px] leading-tight',
                                         isCorrect
-                                          ? 'bg-amber-100/90 text-[#8b1e1e] font-bold border-amber-400 shadow-xs ring-1 ring-amber-300'
-                                          : 'bg-white/80 text-[#3d2f26] border-[#e2d8c6] hover:border-amber-400/60',
+                                          ? 'bg-amber-100/90 text-[#8b1e1e] font-bold border-amber-400 shadow-xs ring-1 ring-amber-300 dark:bg-[#341d13] dark:text-[#fca5a5] dark:border-amber-500/80 dark:ring-amber-500/30'
+                                          : 'bg-white/80 text-[#3d2f26] border-[#e2d8c6] hover:border-amber-400/60 dark:bg-[#221a14]/90 dark:text-[#dfd5c6] dark:border-[#382618] dark:hover:border-amber-400/50',
                                       )}
                                     >
-                                      <div className="flex items-center gap-2">
+                                      <div className="flex items-center gap-1.5 min-w-0">
                                         <span className={clsx(
-                                          'flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold',
-                                          isCorrect ? 'bg-[#8b1e1e] text-white' : 'bg-[#e9ded0] text-[#5c4738]',
+                                          'inline-flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full font-sans text-[10px] font-bold leading-none select-none text-center pt-[1px]',
+                                          isCorrect
+                                            ? 'bg-[#8b1e1e] text-white dark:bg-[#b91c1c] dark:text-amber-100'
+                                            : 'bg-[#e9ded0] text-[#5c4738] dark:bg-[#332318] dark:text-[#c5a059]',
                                         )}>
                                           {LETTERS[i]}
                                         </span>
-                                        <span>{opt}</span>
+                                        <span className="truncate text-[10.5px] sm:text-[11px]">{opt}</span>
                                       </div>
-                                      {isCorrect && <Check className="w-4 h-4 text-[#8b1e1e] stroke-[3] shrink-0 ml-1" />}
+                                      {isCorrect && <Check className="w-3 h-3 text-[#8b1e1e] dark:text-[#f87171] stroke-[3] shrink-0 ml-1" />}
                                     </div>
                                   );
                                 })}
@@ -510,64 +434,86 @@ export default function BibleLayout({
                       </div>
 
                       {/* Rodapé da Página Esquerda */}
-                      <div className="border-t border-[#d5c6b0] pt-2 flex justify-between items-center text-xs text-[#73533e] font-serif">
-                        <button
-                          onClick={() => goToSpread(spreadIndex - 1, 'prev')}
-                          className="font-bold text-[#8b1e1e] hover:underline flex items-center gap-1"
-                        >
-                          <ChevronLeft className="w-4 h-4" />
-                          <span>{spreadIndex === 1 ? 'Prólogo' : `Folha ${spreadIndex - 1}`}</span>
-                        </button>
-                        <span>Folha {spreadIndex} de {totalQuestionSpreads}</span>
+                      <div className="border-t border-[#d5c6b0] dark:border-[#382618] pt-1 flex justify-between items-center text-xs text-[#73533e] dark:text-[#a89682] font-serif shrink-0">
+                        {spreadIndex > 0 ? (
+                          <button
+                            onClick={() => goToSpread(spreadIndex - 1, 'prev')}
+                            className="font-bold text-[#8b1e1e] dark:text-[#f87171] hover:underline flex items-center gap-1"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                            <span>Folha {spreadIndex}</span>
+                          </button>
+                        ) : (
+                          <span className="text-xs text-[#73533e]/60 dark:text-[#a89682]/60 italic">Início do Cânon</span>
+                        )}
+                        <span>Folha {spreadIndex + 1} de {totalSpreads}</span>
                       </div>
                     </div>
 
-                    {/* Página Direita: 2 Perguntas */}
-                    <div className="p-6 md:p-8 flex flex-col justify-between relative bg-[#faf7f0]">
+                    {/* Página Direita: 4 Perguntas */}
+                    <div
+                      className={clsx(
+                        'px-3 md:px-3.5 py-1.5 md:py-2 flex flex-col justify-between relative bg-[#faf7f0] dark:bg-[#18130e] min-h-0 transition-colors duration-200',
+                        flipDirection === 'next' && 'animate-turn-next',
+                      )}
+                    >
                       {/* Sombra da Medianiz */}
-                      <div className="absolute top-0 left-0 bottom-0 w-16 bg-gradient-to-l from-transparent via-black/[0.04] to-black/[0.14] pointer-events-none"></div>
+                      <div className="absolute top-0 left-0 bottom-0 w-16 bg-gradient-to-l from-transparent via-black/[0.04] to-black/[0.14] dark:via-black/[0.15] dark:to-black/[0.5] pointer-events-none"></div>
 
                       {/* Cabeçalho da Página Direita */}
-                      <div className="border-b-2 border-double border-[#8b1e1e]/40 pb-2 flex justify-between items-center text-xs text-[#665040] uppercase tracking-wider font-serif">
+                      <div className="border-b border-[#8b1e1e]/30 dark:border-[#c5a059]/30 pb-0.5 flex justify-between items-center text-[10px] text-[#665040] dark:text-[#c4b59d] uppercase tracking-wider font-serif shrink-0">
                         <span>PÁG. {spreadIndex * 2 + 2}</span>
-                        <span className="italic text-[#73533e]">Versículos Canônicos</span>
-                        <span className="font-bold text-[#1c120c]">SHOW DO CRISTÃO</span>
+                        <span className="italic text-[#73533e] dark:text-[#bdae9c]">Versículos Canônicos</span>
+                        <span className="font-bold text-[#1c120c] dark:text-[#faf7f0]">SHOW DO CRISTÃO</span>
                       </div>
 
-                      {/* Lista de Perguntas da Página Direita */}
-                      <div className="my-auto space-y-6 py-4">
+                      {/* Lista de até 4 Perguntas na Página Direita */}
+                      <div
+                        className={clsx(
+                          'flex-1 flex flex-col py-0.5 min-h-0 overflow-hidden',
+                          isRightFull ? '' : 'justify-start space-y-1',
+                        )}
+                      >
                         {rightPageQuestions.length === 0 ? (
-                          <div className="text-center py-12 text-[#73533e] italic font-serif">
+                          <div className="text-center py-8 text-[#73533e] dark:text-[#a89682] italic font-serif text-xs">
                             Fim das perguntas cadastradas neste cânon.
                           </div>
                         ) : (
                           rightPageQuestions.map(({ q, number }) => (
-                            <article key={q.id} className="border-b border-[#e2d8c6] pb-5 last:border-b-0">
-                              <div className="flex items-start justify-between gap-2 mb-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-lg font-bold text-[#8b1e1e] font-serif">§ {number}.</span>
+                            <article
+                              key={q.id}
+                              className={clsx(
+                                'border-b border-[#e2d8c6] dark:border-[#2d1e14] last:border-b-0',
+                                isRightFull
+                                  ? 'flex-1 min-h-0 flex flex-col justify-center py-1'
+                                  : 'py-2.5 first:pt-0',
+                              )}
+                            >
+                              <div className="flex items-start justify-between gap-1 mb-0.5">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-sm font-bold text-[#8b1e1e] dark:text-[#f87171] font-serif">§ {number}.</span>
                                   <span
                                     className={clsx(
-                                      'text-[10px] font-serif font-bold uppercase px-2 py-0.5 rounded-full border shadow-xs',
-                                      q.difficulty === 'facil' && 'bg-emerald-50 text-emerald-800 border-emerald-300',
-                                      q.difficulty === 'medio' && 'bg-amber-50 text-amber-900 border-amber-300',
-                                      q.difficulty === 'dificil' && 'bg-rose-50 text-rose-900 border-rose-300',
+                                      'text-[9px] font-serif font-bold uppercase px-2 py-0.5 rounded-full border shadow-xs',
+                                      q.difficulty === 'facil' && 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-600/50',
+                                      q.difficulty === 'medio' && 'bg-amber-50 text-amber-900 border-amber-300 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-600/50',
+                                      q.difficulty === 'dificil' && 'bg-rose-50 text-rose-900 border-rose-300 dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-600/50',
                                     )}
                                   >
                                     ● {DIFFICULTY_LABEL[q.difficulty]} • {getPoints(q.difficulty)} Talentos
                                   </span>
                                 </div>
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-0.5">
                                   <button
                                     onClick={() => onEditQuestion(q)}
-                                    className="p-1 rounded text-[#73533e] hover:bg-amber-100 hover:text-black transition-colors"
+                                    className="p-1 rounded text-[#73533e] hover:bg-amber-100 hover:text-black dark:text-[#a89682] dark:hover:bg-amber-950/60 dark:hover:text-amber-200 transition-colors"
                                     title="Editar versículo"
                                   >
                                     <Pencil className="w-3.5 h-3.5" />
                                   </button>
                                   <button
                                     onClick={() => onDeleteQuestion(q, number)}
-                                    className="p-1 rounded text-[#73533e] hover:bg-rose-100 hover:text-[#8b1e1e] transition-colors"
+                                    className="p-1 rounded text-[#73533e] hover:bg-rose-100 hover:text-[#8b1e1e] dark:text-[#a89682] dark:hover:bg-rose-950/60 dark:hover:text-rose-300 transition-colors"
                                     title="Excluir versículo"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
@@ -575,33 +521,35 @@ export default function BibleLayout({
                                 </div>
                               </div>
 
-                              <p className="font-semibold text-[15px] text-[#1c1917] mb-3 leading-relaxed font-serif">
+                              <p className="font-semibold text-[12px] sm:text-[12.5px] text-[#1c1917] dark:text-[#faf7f0] mb-1 leading-snug font-serif">
                                 {q.text}
                               </p>
 
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs">
                                 {q.options.map((opt, i) => {
                                   const isCorrect = i === q.correctIndex;
                                   return (
                                     <div
                                       key={i}
                                       className={clsx(
-                                        'px-2.5 py-1.5 rounded-lg transition-all flex items-center justify-between border font-serif',
+                                        'px-2 py-0.5 sm:py-1 rounded transition-all flex items-center justify-between border font-serif text-[10.5px] sm:text-[11px] leading-tight',
                                         isCorrect
-                                          ? 'bg-amber-100/90 text-[#8b1e1e] font-bold border-amber-400 shadow-xs ring-1 ring-amber-300'
-                                          : 'bg-white/80 text-[#3d2f26] border-[#e2d8c6] hover:border-amber-400/60',
+                                          ? 'bg-amber-100/90 text-[#8b1e1e] font-bold border-amber-400 shadow-xs ring-1 ring-amber-300 dark:bg-[#341d13] dark:text-[#fca5a5] dark:border-amber-500/80 dark:ring-amber-500/30'
+                                          : 'bg-white/80 text-[#3d2f26] border-[#e2d8c6] hover:border-amber-400/60 dark:bg-[#221a14]/90 dark:text-[#dfd5c6] dark:border-[#382618] dark:hover:border-amber-400/50',
                                       )}
                                     >
-                                      <div className="flex items-center gap-2">
+                                      <div className="flex items-center gap-1.5 min-w-0">
                                         <span className={clsx(
-                                          'flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold',
-                                          isCorrect ? 'bg-[#8b1e1e] text-white' : 'bg-[#e9ded0] text-[#5c4738]',
+                                          'inline-flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full font-sans text-[10px] font-bold leading-none select-none text-center pt-[1px]',
+                                          isCorrect
+                                            ? 'bg-[#8b1e1e] text-white dark:bg-[#b91c1c] dark:text-amber-100'
+                                            : 'bg-[#e9ded0] text-[#5c4738] dark:bg-[#332318] dark:text-[#c5a059]',
                                         )}>
                                           {LETTERS[i]}
                                         </span>
-                                        <span>{opt}</span>
+                                        <span className="truncate text-[10.5px] sm:text-[11px]">{opt}</span>
                                       </div>
-                                      {isCorrect && <Check className="w-4 h-4 text-[#8b1e1e] stroke-[3] shrink-0 ml-1" />}
+                                      {isCorrect && <Check className="w-3 h-3 text-[#8b1e1e] dark:text-[#f87171] stroke-[3] shrink-0 ml-1" />}
                                     </div>
                                   );
                                 })}
@@ -612,18 +560,18 @@ export default function BibleLayout({
                       </div>
 
                       {/* Rodapé da Página Direita com Navegação para Próxima Folha */}
-                      <div className="border-t border-[#d5c6b0] pt-2 flex justify-between items-center text-xs text-[#73533e] font-serif">
+                      <div className="border-t border-[#d5c6b0] dark:border-[#382618] pt-1 flex justify-between items-center text-xs text-[#73533e] dark:text-[#a89682] font-serif shrink-0">
                         <span>Página {spreadIndex * 2 + 2}</span>
-                        {spreadIndex < totalQuestionSpreads ? (
+                        {spreadIndex < totalSpreads - 1 ? (
                           <button
                             onClick={() => goToSpread(spreadIndex + 1, 'next')}
-                            className="font-bold text-[#8b1e1e] hover:underline flex items-center gap-1"
+                            className="font-bold text-[#8b1e1e] dark:text-[#f87171] hover:underline flex items-center gap-1"
                           >
-                            <span>Próxima Folha ({spreadIndex + 1})</span>
+                            <span>Próxima Folha ({spreadIndex + 2})</span>
                             <ChevronRight className="w-4 h-4" />
                           </button>
                         ) : (
-                          <span className="text-[#73533e]/70 italic">Última folha do cânon</span>
+                          <span className="text-[#73533e]/70 dark:text-[#a89682]/70 italic">Última folha do cânon</span>
                         )}
                       </div>
                     </div>
@@ -637,7 +585,7 @@ export default function BibleLayout({
       </main>
 
       {/* Rodapé Geral da Aplicação */}
-      <footer className="shrink-0 border-t border-[#3d281a] bg-[#1a100b] px-6 py-2 text-center text-xs text-amber-200/60 font-serif">
+      <footer className="shrink-0 border-t border-[#3d281a] dark:border-[#2b1b11] bg-[#1a100b] dark:bg-[#120a06] px-4 py-1.5 text-center text-[11px] text-amber-200/60 font-serif">
         Show do Cristão • Cânon Sagrado da Igreja Presbiteriana do Brasil • Folheie com ◀ e ▶
       </footer>
     </div>

@@ -97,6 +97,20 @@ A tipografia é o coração da identidade bíblica, estabelecendo a nobreza de c
 - **Médio (20 Pontos):** Selo ouro velho / âmbar (`#854d0e` / fundo `#fefce8` suave).
 - **Difícil (30 Pontos):** Selo rubi carmesim (`#991b1b` / fundo `#fef2f2` suave).
 
+### 3.6 Modo Noturno ("Códice Noturno")
+
+Para ambientes escuros ou projeção com luz apagada, o aplicativo conta com o **Códice Noturno**, ativado pelo botão Sol ☀️ / Lua 🌙:
+
+| Elemento | Modo Claro (Papel Marfim - Padrão) | Modo Noturno (Códice Noturno) |
+| :--- | :--- | :--- |
+| **Páginas do Livro** | Marfim suave `#faf7f0` | Carvão/café profundo `#18130e` |
+| **Texto dos Versículos** | Grafite bíblico `#1c1917` | Marfim dourado `#ede6d8` / `#faf7f0` |
+| **Rubricas de Versículo** | Carmesim clássico `#8b1e1e` | Carmesim luminoso `#f87171` |
+| **Alternativas (Comum)** | Fundo `#ffffff/80`, borda `#e2d8c6` | Fundo `#221a14/90`, borda `#382618` |
+| **Alternativa Correta** | Fundo `#fef3c7`, borda `#fbbf24` | Fundo `#341d13`, borda `#f59e0b` |
+| **Ambiente Externo** | Madeira de púlpito `#241610` | Ébano profundo `#120905` |
+| **Formulários & Modais** | Fundo marfim `#faf6ee` | Fundo códice `#1a1410` |
+
 ---
 
 ## 4. Estrutura e Componentes da Interface Bíblica
@@ -112,13 +126,13 @@ A tipografia é o coração da identidade bíblica, estabelecendo a nobreza de c
 - **Som de Papel Bíblia:** Síntese sonora em tempo real via Web Audio API (filtro passa-faixa com envelope exponencial suave de ruído branco), funcionando 100% offline sem nenhum arquivo de áudio pesado.
 
 ### 4.3 Ferramentas e Ações
-- As ações de controle (Voltar, Nova Pergunta, Importar, Exportar, Restaurar, Pasta) são esculpidas em uma barra de ferramentas superior discreta em tom de encadernação/couro, com botões de acabamento metálico bronze/dourado escovado.
+- As ações de controle (Voltar, Nova Pergunta, Importar, Exportar, Restaurar, Pasta, Alternador de Modo Noturno) são esculpidas em uma barra de ferramentas superior discreta em tom de encadernação/couro, com botões de acabamento metálico bronze/dourado escovado.
 - Os modais de edição e criação de perguntas assumem a forma de uma **"Ficha de Escriba / Caderno Canônico"**, mantendo a mesma estética de papel bíblia e encadernação de couro.
 
 ---
 
 ## 5. Diretrizes de Implementação
 
-1. **Descarte do Tech Bento:** Toda a aplicação adota exclusivamente a identidade visual da Bíblia Sagrada. Não há alternador de estilos ou modo bento.
-2. **Cores Fixas de Livro:** O design de livro bíblico possui contraste e luminosidade próprios (fundo marfim suave com ambiente escuro de púlpito), garantindo excelente visualização tanto em telas de notebook quanto em projeção de igreja.
+1. **Descarte do Tech Bento:** Toda a aplicação adota exclusivamente a identidade visual da Bíblia Sagrada.
+2. **Alternância Claro/Escuro Sagrada:** O Modo Claro (Papel Marfim) é o padrão de fábrica. O Modo Noturno (Códice Noturno) preserva toda a atmosfera editorial clássica do livro sagrado, invertendo suavemente a luminosidade das páginas sem romper a imersão.
 3. **Preservação de Código:** Nenhuma alteração no motor de jogo ([`src/game/engine.ts`](file:///c:/Users/Matheus/Desktop/show%20do%20crist%C3%A3o/src/game/engine.ts)), no armazenamento ([`src/services/questionStorage.ts`](file:///c:/Users/Matheus/Desktop/show%20do%20crist%C3%A3o/src/services/questionStorage.ts)) ou nos testes automatizados.

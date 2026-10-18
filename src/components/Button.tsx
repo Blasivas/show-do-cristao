@@ -7,15 +7,15 @@ const VARIANTS: Record<Variant, string> = {
   primary:
     'bg-[#8b1e1e] hover:bg-[#a62424] text-amber-50 border-amber-900/60 shadow-md font-serif font-bold',
   secondary:
-    'bg-[#f4efe4] hover:bg-[#e9ded0] border-[#d4c5ae] text-[#3d2f26] font-serif font-semibold shadow-xs',
+    'bg-[#f4efe4] hover:bg-[#e9ded0] border-[#d4c5ae] text-[#3d2f26] dark:bg-[#251b14] dark:hover:bg-[#322319] dark:border-[#3d2a1d] dark:text-[#dfd4c5] font-serif font-semibold shadow-xs',
   danger:
     'bg-[#7f1d1d] hover:bg-[#991b1b] border-[#991b1b] text-white font-serif font-bold shadow-xs',
   ghost:
-    'bg-transparent hover:bg-black/10 border-transparent text-[#5c4738] hover:text-[#1c1917] font-serif',
+    'bg-transparent hover:bg-black/10 dark:hover:bg-white/10 border-transparent text-[#5c4738] hover:text-[#1c1917] dark:text-[#a89682] dark:hover:text-[#ede6d8] font-serif',
   light:
-    'bg-[#f4efe4] hover:bg-[#e9ded0] border-[#d4c5ae] text-[#3d2f26] font-serif font-semibold shadow-xs',
+    'bg-[#f4efe4] hover:bg-[#e9ded0] border-[#d4c5ae] text-[#3d2f26] dark:bg-[#251b14] dark:hover:bg-[#322319] dark:border-[#3d2a1d] dark:text-[#dfd4c5] font-serif font-semibold shadow-xs',
   lightGhost:
-    'bg-transparent hover:bg-black/10 border-transparent text-[#5c4738] hover:text-[#1c1917] font-serif',
+    'bg-transparent hover:bg-black/10 dark:hover:bg-white/10 border-transparent text-[#5c4738] hover:text-[#1c1917] dark:text-[#a89682] dark:hover:text-[#ede6d8] font-serif',
   highlight:
     'bg-[#8b1e1e] hover:bg-[#a62424] text-amber-50 border-amber-900/60 shadow-md font-serif font-bold',
   gold:

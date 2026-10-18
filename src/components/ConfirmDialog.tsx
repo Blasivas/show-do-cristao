@@ -37,7 +37,7 @@ export default function ConfirmDialog({ title, message, actions = [], cancelLabe
         </>
       }
     >
-      <div className="space-y-2 text-sm font-serif leading-relaxed text-[#2c221b]">{message}</div>
+      <div className="space-y-2 text-sm font-serif leading-relaxed text-[#2c221b] dark:text-[#ede6d8]">{message}</div>
     </Modal>
   );
 }

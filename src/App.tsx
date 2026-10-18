@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Flame, Play, Settings, BookOpen } from 'lucide-react';
+import ThemeToggle from '@/components/ThemeToggle';
 import QuestionManager from '@/pages/QuestionManager';
 
 export default function App() {
@@ -9,9 +10,9 @@ export default function App() {
   if (screen === 'questions') return <QuestionManager onBack={() => setScreen('demo')} />;
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-[#1a100b] via-[#140b07] to-[#0d0704] text-[#faf7f0] flex flex-col justify-between p-6 md:p-8 font-serif select-none">
+    <div className="min-h-screen w-full bg-gradient-to-b from-[#1a100b] via-[#140b07] to-[#0d0704] dark:from-[#120a06] dark:via-[#0c0604] dark:to-[#050201] text-[#faf7f0] dark:text-[#ede6d8] flex flex-col justify-between p-6 md:p-8 font-serif select-none transition-colors duration-200">
       {/* Barra Superior Institucional Púlpito IPB */}
-      <header className="flex items-center justify-between border-b-2 border-[#3d281a] pb-4">
+      <header className="flex items-center justify-between border-b-2 border-[#3d281a] dark:border-[#2b1b11] pb-4">
         <div className="flex items-center space-x-3">
           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#8b1e1e] to-[#591313] flex items-center justify-center text-amber-200 shadow-md border border-[#c5a059]/40">
             <Flame className="w-6 h-6 fill-current text-amber-300" />
@@ -29,9 +30,12 @@ export default function App() {
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 text-xs text-amber-200/70 font-serif">
-          <BookOpen className="w-4 h-4 text-[#d4af37]" />
-          <span>Cânon Sagrado Oficial</span>
+        <div className="flex items-center space-x-3 text-xs text-amber-200/70 font-serif">
+          <div className="hidden sm:flex items-center space-x-2">
+            <BookOpen className="w-4 h-4 text-[#d4af37]" />
+            <span>Cânon Sagrado Oficial</span>
+          </div>
+          <ThemeToggle />
         </div>
       </header>
 

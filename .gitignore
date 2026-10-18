@@ -34,3 +34,7 @@ lerna-debug.log*
 Thumbs.db
 [Dd]esktop.ini
 .DS_Store
+
+# Temporários e testes locais
+scratch/
+

@@ -188,7 +188,8 @@ Na primeira abertura, o arquivo é criado com as perguntas padrão de `src/data/
 | 2.2 — Atualização do Vite 6 → 8 | ✅ Concluído |
 | 3 — Modelagem de Dados, Motor de Regras & Perguntas | ✅ Concluído |
 | 4 — Armazenamento Local & Cadastro de Perguntas (CRUD) | ✅ Concluído |
-| 5 — Estado Global, Navegação & Configuração da Partida | 🔄 Próxima |
+| 4.1 — Identidade Visual Bíblia Sagrada & Design System | 🔄 Em andamento |
+| 5 — Estado Global, Navegação & Configuração da Partida | ⏳ Pendente |
 | 6 — Mural de Perguntas | ⏳ Pendente |
 | 7 — Tela de Pergunta, Cronômetro & Controles do Apresentador | ⏳ Pendente |
 | 8 — Pontuação Secreta, Roubo, Desfazer & Salvamento Automático | ⏳ Pendente |

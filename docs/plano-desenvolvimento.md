@@ -20,6 +20,7 @@ Cada etapa também traz uma seção **"Pontos a validar"**: são dúvidas e suge
 - [x] **Etapa 2.2:** Atualização do Vite 6 → 8 *(Concluído)*
 - [x] **Etapa 3:** Modelagem de Dados, Motor de Regras & Banco Inicial de Perguntas (com testes unitários) *(Concluído)*
 - [x] **Etapa 4:** Armazenamento Local & Gerenciamento de Perguntas (CRUD do Apresentador) *(Concluído)*
+- [ ] **Etapa 4.1:** Refinamento da Identidade Visual & Design System Bíblia Sagrada *(Em andamento)*
 - [ ] **Etapa 5:** Estado Global, Navegação & Tela de Configuração da Partida
 - [ ] **Etapa 6:** O Mural de Perguntas (Grade Interativa de Números)
 - [ ] **Etapa 7:** Tela de Pergunta Ativa, Cronômetro & Controles do Apresentador
@@ -64,6 +65,10 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 | D24 | 2026-10-13 | **Ordenação automática por dificuldade:** primeiro todas as fáceis, depois as médias, depois as difíceis. Pergunta nova, ou que mudou de dificuldade, vai para o **final do grupo** da sua dificuldade (ex.: a pergunta 3, fácil, que vira média passa a ser a última média). Arquivos editados à mão ou importados também são organizados. |
 | D25 | 2026-10-13 | **Padrão visual do cabeçalho das telas:** textos em branco; botões com fundo verde, texto branco e borda verde-clara (variação `light`); botão principal com fundo branco, texto e borda verde-escuros (variação `highlight`). Filtros seguem o mesmo padrão. O conteúdo das telas (listas, formulários) mantém a paleta verde. |
 | D26 | 2026-10-15 | **Identidade Visual: Bíblia Sagrada & Cânon de Escriba.** Descarte do estilo "Tech Bento" e adoção oficial da metáfora de uma Bíblia Sagrada encadernada em couro nobre, com bifólio (duas páginas espelhadas), tipografia clássica serifada, versículos numerados com rubrica carmesim (`§ 1.`), alternativas em medalhões e efeito tridimensional de virada de página com som de folhear papel bíblia. Especificações completas documentadas em `docs/identidade-visual.md`. |
+| D27 | 2026-10-17 | **Modo Noturno (Códice Escuro) e Header Compacto em Nível Único.** Introdução do suporte ao Modo Claro (Papel Marfim) / Modo Noturno (Códice Escuro) com switch deslizante de largura fixa; abertura direta no Livro das Perguntas (6 perguntas por folha aberta / 3 por página); cabeçalho simplificado em uma única linha horizontal com botões de ação em ícones (pasta, importação, exportação, restauração), eliminação de barras de rolagem verticais na tela e ajuste do botão "Novo Versículo". |
+| D28 | 2026-10-17 | **Diagramação em 4 Versículos por Página (8 por Folha) e Alinhamento Vertical Dinâmico.** Adoção de 4 perguntas por página (totalizando 8 perguntas no bifólio aberto), centralização óptica das letras (A, B, C, D) nos medalhões circulares (`font-sans`, `pt-[1px]`) e distribuição vertical dinâmica: páginas completas distribuem-se de ponta a ponta (`justify-between`) ocupando harmoniosamente toda a altura sem deixar vácuo no rodapé, enquanto páginas parciais agrupam-se no topo (`justify-start`). |
+| D29 | 2026-10-17 | **Animação Fluida 3D de Virada de Página Ancorada na Medianiz.** Substituição da rotação do livro inteiro por um giro 3D de alta performance (`will-change: transform, filter, opacity`) aplicado exclusivamente à página ativa (página direita no avanço; página esquerda no retorno), com ponto de giro centrado na costura/medianiz (`transform-origin: left/right center`), sombras dinâmicas de curvatura de papel e sincronização precisa da troca de dados no ápice de 50% (190ms de 380ms), eliminando solavancos e engasgos. |
+| D30 | 2026-10-18 | **Distribuição Proporcional dos Versículos por Quadrante (`flex-1`).** Eliminação dos vácuos brancos entre perguntas causados pelo `justify-between` com cards compactos. Quando a página possui 4 versículos, cada `<article>` ocupa exatamente 25% da altura (`flex-1 min-h-0 flex flex-col justify-center py-1`), centralizando verticalmente o cabeçalho, texto e alternativas, posicionando a linha divisória de forma equidistante e simétrica (~10px acima e abaixo) e garantindo preenchimento harmônico sem qualquer barra de rolagem em todas as alturas de tela (de 600px a 1080p). Em páginas parciais (< 4 perguntas), o alinhamento mantém-se no topo (`justify-start space-y-1`). |
 
 ---
 
@@ -188,6 +193,23 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 - ~~Escolher quais perguntas entram em cada gincana~~ Não será feito: a gincana usa todas as perguntas cadastradas (decisão D22).
 - ~~Embaralhar a ordem das alternativas~~ Não será feito (decisão D21).
 - ~~Reordenar as perguntas na lista?~~ A lista é ordenada automaticamente por dificuldade (decisão D24).
+
+---
+
+### 🟩 Etapa 4.1: Refinamento da Identidade Visual & Design System Bíblia Sagrada `[CONCLUÍDO COM PENDÊNCIA]`
+**Objetivo:** Consolidar e refinar a experiência visual completa no estilo Bíblia Sagrada (decisão D26) antes de avançar para as telas da partida (Etapa 5), garantindo que todo o design system (fontes, paleta de papel e couro, proporções do bifólio, animações e componentes) sirva de padrão consolidado para o restante do app.
+- [x] Criar `docs/identidade-visual.md` com a documentação de layout, tipografia, tokens e metáfora do livro sagrado.
+- [x] Implementar o componente `src/components/BibleLayout.tsx` com paginação em bifólio, animação 3D de virada e sintetizador Web Audio API para o folhear de páginas.
+- [x] Refatorar `src/pages/QuestionManager.tsx` e componentes de formulário/diálogo para adotarem o estilo Bíblia, descartando o visual Tech Bento.
+- [x] Implementar alternador de tema Claro (Papel Marfim) / Noturno (Códice Escuro) com switch deslizante de largura estritamente fixa (`ThemeToggle.tsx`).
+- [x] Redesenhar o cabeçalho superior em um único nível sem scroll: botão voltar apenas com ícone, filtro encurtado, botões de ação em ícones limpos e ajuste no botão "Novo Versículo".
+- [x] Atualizar a diagramação para 4 versículos por página (8 por folha aberta), centralização óptica das letras das alternativas (A, B, C, D) e preenchimento vertical harmônico (`flex-1 min-h-0` proporcional nos 4 quadrantes quando cheia / `justify-start` quando parcial) sem vácuos brancos entre perguntas nem no rodapé (decisões D28 e D30).
+- [x] Refatorar a animação de virada de página para giro 3D com pivô na medianiz (`transform-origin: left/right center`), sombras dinâmicas e sincronização aos 190ms (decisão D29).
+- [x] Refinar estética, diagramação, proporções, margens e contraste dos elementos da Bíblia nos modos Claro e Noturno.
+- **Validação:** Navegação pelas folhas de perguntas aprovada, 100% sem scrollbars e com distribuição harmônica validada via CDP e testes unitários.
+
+**Pontos em aberto / pendências:**
+- **Melhoria da animação ao virar a página:** Ficou registrado como pendência para aprimoramento futuro deixar a animação de passagem de páginas ainda mais fluida e orgânica.
 
 ---
 
