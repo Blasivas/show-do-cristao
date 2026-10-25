@@ -2,13 +2,13 @@ import { Sun, Moon } from 'lucide-react';
 import clsx from 'clsx';
 import { useTheme } from '@/contexts/ThemeContext';
 
-export default function ThemeToggle({ className }: { className?: string }) {
+export default function ThemeToggle({ className, labelClassName }: { className?: string; labelClassName?: string }) {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
 
   return (
     <div className={clsx('inline-flex items-center justify-end gap-2 font-serif text-xs shrink-0 w-[124px] select-none', className)}>
-      <span className="w-[64px] text-right whitespace-nowrap text-amber-200/80 text-[11px] uppercase tracking-wider font-semibold inline-block shrink-0">
+      <span className={clsx("w-[64px] text-right whitespace-nowrap text-[11px] uppercase tracking-wider font-semibold inline-block shrink-0", labelClassName ? labelClassName : "text-amber-200/80")}>
         {isDark ? 'Noturno' : 'Claro'}
       </span>
       <button

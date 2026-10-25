@@ -65,3 +65,18 @@ export function createQuestionStorage(api: QuestionsFileApi) {
 }
 
 export type QuestionStorage = ReturnType<typeof createQuestionStorage>;
+
+/** Carrega as perguntas salvas para a partida com fallback automático para as perguntas padrão */
+export async function getGameQuestions(): Promise<Question[]> {
+  if (typeof window !== 'undefined' && window.showDoCristao?.questions) {
+    try {
+      const storage = createQuestionStorage(window.showDoCristao.questions);
+      const res = await storage.load();
+      if (res.status === 'ok') return res.questions;
+    } catch {
+      // Em caso de erro, usa as perguntas padrão
+    }
+  }
+  return getDefaultQuestions();
+}
+

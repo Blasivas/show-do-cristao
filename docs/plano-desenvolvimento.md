@@ -20,8 +20,8 @@ Cada etapa também traz uma seção **"Pontos a validar"**: são dúvidas e suge
 - [x] **Etapa 2.2:** Atualização do Vite 6 → 8 *(Concluído)*
 - [x] **Etapa 3:** Modelagem de Dados, Motor de Regras & Banco Inicial de Perguntas (com testes unitários) *(Concluído)*
 - [x] **Etapa 4:** Armazenamento Local & Gerenciamento de Perguntas (CRUD do Apresentador) *(Concluído)*
-- [ ] **Etapa 4.1:** Refinamento da Identidade Visual & Design System Bíblia Sagrada *(Em andamento)*
-- [ ] **Etapa 5:** Estado Global, Navegação & Tela de Configuração da Partida
+- [x] **Etapa 4.1:** Refinamento da Identidade Visual & Design System Bíblia Sagrada *(Concluído com pendência)*
+- [x] **Etapa 5:** Estado Global, Navegação & Tela de Configuração da Partida *(Concluído)*
 - [ ] **Etapa 6:** O Mural de Perguntas (Grade Interativa de Números)
 - [ ] **Etapa 7:** Tela de Pergunta Ativa, Cronômetro & Controles do Apresentador
 - [ ] **Etapa 8:** Pontuação Secreta, Roubo a 50%, Desfazer & Salvamento Automático
@@ -69,6 +69,11 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 | D28 | 2026-10-17 | **Diagramação em 4 Versículos por Página (8 por Folha) e Alinhamento Vertical Dinâmico.** Adoção de 4 perguntas por página (totalizando 8 perguntas no bifólio aberto), centralização óptica das letras (A, B, C, D) nos medalhões circulares (`font-sans`, `pt-[1px]`) e distribuição vertical dinâmica: páginas completas distribuem-se de ponta a ponta (`justify-between`) ocupando harmoniosamente toda a altura sem deixar vácuo no rodapé, enquanto páginas parciais agrupam-se no topo (`justify-start`). |
 | D29 | 2026-10-17 | **Animação Fluida 3D de Virada de Página Ancorada na Medianiz.** Substituição da rotação do livro inteiro por um giro 3D de alta performance (`will-change: transform, filter, opacity`) aplicado exclusivamente à página ativa (página direita no avanço; página esquerda no retorno), com ponto de giro centrado na costura/medianiz (`transform-origin: left/right center`), sombras dinâmicas de curvatura de papel e sincronização precisa da troca de dados no ápice de 50% (190ms de 380ms), eliminando solavancos e engasgos. |
 | D30 | 2026-10-18 | **Distribuição Proporcional dos Versículos por Quadrante (`flex-1`).** Eliminação dos vácuos brancos entre perguntas causados pelo `justify-between` com cards compactos. Quando a página possui 4 versículos, cada `<article>` ocupa exatamente 25% da altura (`flex-1 min-h-0 flex flex-col justify-center py-1`), centralizando verticalmente o cabeçalho, texto e alternativas, posicionando a linha divisória de forma equidistante e simétrica (~10px acima e abaixo) e garantindo preenchimento harmônico sem qualquer barra de rolagem em todas as alturas de tela (de 600px a 1080p). Em páginas parciais (< 4 perguntas), o alinhamento mantém-se no topo (`justify-start space-y-1`). |
+| D31 | 2026-10-18 | **Parâmetros da Partida e Identidade das 4 Equipes (Etapa 5).** O tempo do cronômetro é único para todas as perguntas da partida (não proporcional por dificuldade), selecionado na tela de configuração. Não há persistência local dos nomes das equipes entre sessões (inicia com os nomes padrão a cada nova gincana). Identidades visuais oficiais definidas para as 4 equipes: Equipe I (Sarça Verde - verde IPB), Equipe II (Chama Dourada - ouro/âmbar), Equipe III (Vinho Carmesim - rubrica/vermelho nobre) e Equipe IV (Safira Celeste - azul reformado). |
+| D32 | 2026-10-18 | **Metáfora da Bíblia Sagrada Unificada em Toda a Aplicação.** A tela inicial (`MainMenu.tsx`) é modelada como a **Capa Fechada da Bíblia**, com encadernação em couro, cantoneiras e títulos dourados, fitilho vermelho, corte de páginas dourado e as opções centrais "INICIAR GINCANA" e "Configurar Perguntas". Ao selecionar uma opção, o livro abre com áudio sintetizado e transição suave. A tela de Configuração (`GameConfig.tsx`) também segue o visual de Bíblia aberta (bifólio com duas páginas sobre encadernação de couro, medianiz e fitilho central), eliminando caixas isoladas e mantendo a atmosfera sacra e clássica em todo o aplicativo. |
+| D33 | 2026-10-25 | **Animação 3D Realista de Abertura da Bíblia na Transição do Menu Inicial.** A transição entre o menu inicial (`MainMenu.tsx` - Capa Fechada) e as janelas de Configuração da Gincana (`GameConfig.tsx`) ou Banco de Perguntas (`QuestionManager.tsx`) ocorre mediante uma animação tridimensional física da capa se abrindo em perspectiva 3D (`perspective: 2400px`). Ao acionar "INICIAR GINCANA" ou "Configurar Perguntas", a Bíblia sincroniza um deslocamento horizontal suave (`translateX(50%)`) enquanto a capa gira $-180^\circ$ em torno da lombada (`transform-origin: left center`), acompanhada de projeção de sombra dinâmica (`animate-cover-shadow`), revelação do fitilho de cetim no centro e reprodução do efeito sonoro sintetizado de abertura solene e farfalhar de páginas (`playBookOpenSound()`). As páginas internas do bifólio revelado são folhas limpas em pergaminho/papel sagrado (sem textos preliminares), garantindo que o carregamento da tela de destino ocorra com total naturalidade sem sobreposição ou troca abrupta de texto. |
+| D34 | 2026-10-25 | **Animação 3D de Fechamento da Bíblia ao Retornar ao Menu Inicial.** Ao retornar para a tela inicial (`MainMenu.tsx`) a partir de qualquer janela (`GameConfig.tsx` ou `QuestionManager.tsx`), a Bíblia inicia no estado de bifólio aberto e executa a animação tridimensional inversa de fechamento: a capa gira de $-180^\circ$ de volta a $0^\circ$ cobrindo as páginas, a lombada translada de volta ao centro (`translateX(0)`), a sombra de fechamento (`animate-cover-close-shadow`) projeta-se sobre o volume e é disparado o efeito sonoro de fechamento solene (`playBookCloseSound()`) combinando o farfalhar das folhas ao recolher e o impacto aveludado do couro nobre se fechando. O estado prévio é rastreado automaticamente no `GameContext`, garantindo que na primeira abertura do app o livro permaneça fechado e apenas execute o fechamento quando o usuário estiver efetivamente retornando ao menu. |
+| D35 | 2026-10-25 | **Unificação do Fundo da Aplicação no Modo Claro e Noturno.** O fundo externo que envolve a Bíblia é rigorosamente padronizado em todas as telas (`MainMenu`, `GameConfig`, `QuestionManager`/`BibleLayout` e `BoardPlaceholder`), garantindo continuidade visual sem quebras de cor: no Modo Claro, adota-se o degradê quente de papel bíblia/marfim (`from-[#fdfbf7] via-[#faf7f0] to-[#f3ebd9]`) tanto com o livro fechado quanto com ele aberto, e as barras superiores adotam acabamento translúcido claro com tipografia e bordas sépia; no Modo Noturno, adota-se o degradê solene de códice escuro/madeira de púlpito (`dark:from-[#18110b] dark:via-[#120a06] dark:to-[#0a0503]`). O `html, body` do `src/index.css` foi atualizado para eliminar fundos pretos residuais no modo claro. |
 
 ---
 
@@ -213,26 +218,27 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 
 ---
 
-### 🔹 Etapa 5: Estado Global, Navegação & Tela de Configuração da Partida
+### 🟩 Etapa 5: Estado Global, Navegação & Tela de Configuração da Partida `[CONCLUÍDO]`
 **Objetivo:** Definir como as telas se comunicam e preparar as regras antes de a gincana começar.
-- [ ] Criar o estado global do jogo com `useReducer` + Context, usando o motor de regras da Etapa 3.
-- [ ] Criar a navegação entre telas (Menu Inicial → Perguntas → Configuração → Mural → Pergunta → Pódio).
-  - Sugestão: uma "máquina de telas" simples no estado global, sem biblioteca de rotas. Se for usado um roteador, deve ser `HashRouter` (compatível com arquivos locais `file://` do Electron).
-- [ ] Criar página `src/pages/MainMenu.tsx` (Iniciar Gincana, Gerenciar Perguntas, Sair), substituindo a tela de demonstração e o botão provisório da Etapa 4.
-- [ ] Criar página `src/pages/GameConfig.tsx`:
-  - Tudo em **uma única tela** (decisão D17).
-  - Quantidade de equipes (2 a 4) e o nome de cada uma (decisão D13).
-  - **Ordem das equipes** arrastando para cima/baixo; a primeira da lista começa (decisão D12).
-  - Seletor de tempo do cronômetro **por pergunta** (ex.: `Sem tempo`, `10s`, `15s`, `30s`, `45s`, `60s`).
-  - Interruptor (toggle) para **"Permitir Roubo de Pergunta"**.
-  - Botão de ação: **"Iniciar Gincana"**.
-- **Validação:** Ao clicar em iniciar, os dados configurados são repassados com sucesso para o estado global do jogo e o mural é exibido.
+- [x] Criar o estado global do jogo com `useReducer` + Context (`src/contexts/GameContext.tsx`), integrando o motor de regras da Etapa 3.
+- [x] Criar a navegação entre telas no estado global (`'menu'` | `'questions'` | `'config'` | `'board'` | `'question-view'` | `'podium'`), 100% compatível com desktop offline sem conflitos de rotas.
+- [x] Criar a página inicial `src/pages/MainMenu.tsx` no design da **Capa da Bíblia Fechada** (decisão D32), com textura de couro nobre, cantoneiras douradas, brasão da sarça e os botões **"INICIAR GINCANA"** e **"Configurar Perguntas"**.
+- [x] Implementar a **animação 3D de abertura da Bíblia** (decisão D33) com giro de $-180^\circ$ ancorado na lombada, perspectiva tátil e páginas internas limpas em pergaminho sagrado para transição fluida sem sobreposição de textos.
+- [x] Implementar a **animação 3D de fechamento da Bíblia** (decisão D34) com som solene de encadernação e folhas (`playBookCloseSound`) ao retornar ao menu inicial de qualquer tela.
+- [x] Unificar rigorosamente o fundo da aplicação nos modos Claro e Noturno (decisão D35).
+- [x] Criar `src/game/teams.ts` com as identidades visuais oficiais das 4 equipes (Sarça Verde, Chama Dourada, Vinho Carmesim, Safira Celeste) e testes unitários.
+- [x] Criar página `src/pages/GameConfig.tsx` no estilo de **Bíblia Aberta (Bifólio)** (decisão D32):
+  - Folha I (Página Esquerda): Seleção de 2 a 4 equipes e ordenação de saída com botões subir/descer e estandartes coloridos para cada equipe.
+  - Folha II (Página Direita): Seletor de tempo único para a partida (`Sem limite`, `10s`, `15s`, `30s`, `45s`, `60s`), interruptor para Roubo de Pergunta a 50%, resumo de versículos por equipe e botão principal **"INICIAR GINCANA BÍBLICA"**.
+  - Layout 100% responsivo para 720p sem barras de rolagem e com suporte a Modo Claro e Modo Noturno.
+- [x] Criar componente `src/pages/BoardPlaceholder.tsx` para validação end-to-end do fluxo de início de partida, banner da equipe da vez e diálogo de encerramento.
+- **Validação:** Fluxo completo automatizado e verificado no Electron via CDP (Capa Fechada ➔ Abertura 3D ➔ Configuração Bifólio 2/4 equipes ➔ Iniciar Gincana ➔ Encerrar Partida ➔ Fechamento 3D ➔ Capa Fechada ➔ Configurar Perguntas) e 42 testes unitários passando.
 
-**Pontos a validar:**
-- O tempo deve ser único para todas as perguntas da partida ou pode variar por pergunta/dificuldade (ex.: difíceis com mais tempo)?
-- Quantidade de perguntas: a gincana usa todas as cadastradas (D22). Avisar o apresentador quando o total não for múltiplo do número de equipes (algumas equipes responderiam uma pergunta a mais)?
-- Cores e identidade visual para mais de 2 equipes (hoje o tema só define Equipe A e Equipe B).
-- Lembrar a última configuração usada?
+**Decisões validadas:**
+- Tempo único para todas as perguntas da partida (decisão D31).
+- Sem persistência local de nomes entre partidas (decisão D31).
+- Identidades visuais aprovadas para as 4 equipes (Sarça Verde, Chama Dourada, Vinho Carmesim, Safira Celeste - D31).
+- Design System da Bíblia Sagrada aplicado à Capa Inicial e à Configuração da Partida (decisão D32).
 
 ---
 

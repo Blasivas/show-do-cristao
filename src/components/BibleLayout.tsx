@@ -143,11 +143,11 @@ export default function BibleLayout({
   }, [spreadIndex, totalSpreads, goToSpread]);
 
   return (
-    <div className="flex h-full w-full flex-col bg-[#140e0a] text-[#1c1917] dark:bg-[#0c0805] dark:text-[#ede6d8] font-serif select-none relative overflow-hidden transition-colors duration-200">
+    <div className="flex h-full w-full flex-col bg-gradient-to-b from-[#fdfbf7] via-[#faf7f0] to-[#f3ebd9] text-[#2c1d11] dark:from-[#18110b] dark:via-[#120a06] dark:to-[#0a0503] dark:text-[#ede6d8] font-serif select-none relative overflow-hidden transition-colors duration-200">
       {/* ======================================================== */}
       {/* BARRA SUPERIOR ESTILO PÚLPITO EM UM NÍVEL SÓ (SEM SCROLL) */}
       {/* ======================================================== */}
-      <header className="shrink-0 border-b-2 border-[#3d281a] dark:border-[#2b1b11] bg-gradient-to-b from-[#241710] to-[#1a100b] dark:from-[#1b1009] dark:to-[#120a06] px-4 py-2 text-xs text-amber-100 shadow-xl z-20">
+      <header className="shrink-0 border-b border-[#d5c6b0] dark:border-[#2b1b11] bg-white/85 dark:bg-gradient-to-b dark:from-[#1b1009] dark:to-[#120a06] px-4 py-2 text-xs text-[#423125] dark:text-amber-100 shadow-xs dark:shadow-xl z-20 backdrop-blur-xs transition-colors">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 overflow-x-auto">
           {/* Esquerda: Voltar (ícone apenas) + Filtro compacto + Marcadores de Folhas */}
           <div className="flex items-center gap-2.5 shrink-0">
@@ -156,16 +156,16 @@ export default function BibleLayout({
               onClick={onBack}
               aria-label="Voltar ao início"
               title="Voltar ao início"
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#c5a059]/40 bg-[#2d1d13] text-amber-200 shadow-sm transition-all hover:bg-[#3d2719] hover:border-amber-400 active:scale-95 shrink-0"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#d5c6b0] dark:border-[#c5a059]/40 bg-white dark:bg-[#2d1d13] text-[#73533e] dark:text-amber-200 shadow-xs transition-all hover:bg-[#f5ebd7] dark:hover:bg-[#3d2719] active:scale-95 shrink-0"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
 
-            <div className="h-5 w-px bg-[#3d281a]" />
+            <div className="h-5 w-px bg-[#d5c6b0] dark:bg-[#3d281a]" />
 
             {/* Filtro compacto */}
             <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-[11px] uppercase tracking-wider text-amber-400/90 font-serif font-bold mr-0.5">
+              <span className="text-[11px] uppercase tracking-wider text-[#8b1e1e] dark:text-amber-400/90 font-serif font-bold mr-0.5">
                 Filtro:
               </span>
               {(['todas', ...DIFFICULTY_ORDER] as Filter[]).map((f) => {
@@ -181,8 +181,8 @@ export default function BibleLayout({
                     className={clsx(
                       'rounded-md px-2.5 py-1 text-xs font-serif font-bold transition-all shrink-0',
                       active
-                        ? 'bg-[#d4af37] text-[#1c120c] shadow-md border border-amber-300'
-                        : 'bg-[#241710] text-amber-200/80 border border-[#3d281a] hover:bg-[#332014] hover:text-white',
+                        ? 'bg-[#d4af37] text-[#1c120c] shadow-xs border border-amber-400'
+                        : 'bg-white/90 dark:bg-[#241710] text-[#73533e] dark:text-amber-200/80 border border-[#d5c6b0] dark:border-[#3d281a] hover:bg-[#f5ebd7] dark:hover:bg-[#332014] hover:text-[#1c120c] dark:hover:text-white',
                     )}
                   >
                     {f === 'todas' ? `Todos (${questions.length})` : `${DIFFICULTY_LABEL[f]} (${counts[f]})`}
@@ -191,11 +191,11 @@ export default function BibleLayout({
               })}
             </div>
 
-            <div className="h-5 w-px bg-[#3d281a] hidden sm:block" />
+            <div className="h-5 w-px bg-[#d5c6b0] dark:bg-[#3d281a] hidden sm:block" />
 
             {/* Marcadores de Folhas Rápidas */}
             <div className="flex items-center gap-1 font-serif text-xs shrink-0">
-              <span className="text-[11px] uppercase tracking-wider text-amber-400/80 mr-0.5 hidden lg:inline font-bold">
+              <span className="text-[11px] uppercase tracking-wider text-[#8b1e1e] dark:text-amber-400/80 mr-0.5 hidden lg:inline font-bold">
                 Folhas:
               </span>
               {Array.from({ length: totalSpreads }).map((_, i) => {
@@ -210,7 +210,7 @@ export default function BibleLayout({
                       'rounded px-2 py-0.5 transition-all font-serif font-bold text-xs shrink-0',
                       isActive
                         ? 'bg-[#d4af37] text-[#1c120c] shadow-xs'
-                        : 'text-amber-200/70 hover:bg-[#2d1d13] hover:text-amber-100',
+                        : 'text-[#73533e] dark:text-amber-200/70 hover:bg-[#f5ebd7] dark:hover:bg-[#2d1d13] hover:text-[#1c120c] dark:hover:text-amber-100',
                     )}
                     title={`Folha ${spNum}`}
                   >
@@ -228,7 +228,7 @@ export default function BibleLayout({
               onClick={onOpenFolder}
               aria-label="Abrir pasta de perguntas"
               title="Abrir pasta de dados"
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#c5a059]/30 bg-[#2d1d13]/90 text-amber-200 transition-colors hover:bg-[#3d2719] hover:border-amber-400 shrink-0"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#d5c6b0] dark:border-[#c5a059]/30 bg-white dark:bg-[#2d1d13]/90 text-[#73533e] dark:text-amber-200 transition-colors hover:bg-[#f5ebd7] dark:hover:bg-[#3d2719] shadow-xs shrink-0"
             >
               <FolderOpen className="h-4 w-4 text-[#d4af37]" />
             </button>
@@ -239,7 +239,7 @@ export default function BibleLayout({
                   onClick={onImport}
                   aria-label="Importar perguntas"
                   title="Importar perguntas de arquivo JSON"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#c5a059]/30 bg-[#2d1d13]/90 text-amber-200 transition-colors hover:bg-[#3d2719] hover:border-amber-400 shrink-0"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#d5c6b0] dark:border-[#c5a059]/30 bg-white dark:bg-[#2d1d13]/90 text-[#73533e] dark:text-amber-200 transition-colors hover:bg-[#f5ebd7] dark:hover:bg-[#3d2719] shadow-xs shrink-0"
                 >
                   <Upload className="h-4 w-4 text-[#d4af37]" />
                 </button>
@@ -249,7 +249,7 @@ export default function BibleLayout({
                   disabled={questions.length === 0}
                   aria-label="Exportar perguntas"
                   title="Exportar perguntas para arquivo JSON"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#c5a059]/30 bg-[#2d1d13]/90 text-amber-200 transition-colors hover:bg-[#3d2719] hover:border-amber-400 disabled:opacity-40 shrink-0"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#d5c6b0] dark:border-[#c5a059]/30 bg-white dark:bg-[#2d1d13]/90 text-[#73533e] dark:text-amber-200 transition-colors hover:bg-[#f5ebd7] dark:hover:bg-[#3d2719] shadow-xs disabled:opacity-40 shrink-0"
                 >
                   <Download className="h-4 w-4 text-[#d4af37]" />
                 </button>
@@ -258,12 +258,12 @@ export default function BibleLayout({
                   onClick={onRestore}
                   aria-label="Restaurar perguntas originais"
                   title="Restaurar perguntas originais de fábrica"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#c5a059]/30 bg-[#2d1d13]/90 text-amber-200 transition-colors hover:bg-[#3d2719] hover:border-amber-400 shrink-0"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#d5c6b0] dark:border-[#c5a059]/30 bg-white dark:bg-[#2d1d13]/90 text-[#73533e] dark:text-amber-200 transition-colors hover:bg-[#f5ebd7] dark:hover:bg-[#3d2719] shadow-xs shrink-0"
                 >
                   <RotateCcw className="h-4 w-4 text-[#d4af37]" />
                 </button>
 
-                <div className="h-5 w-px bg-[#3d281a]" />
+                <div className="h-5 w-px bg-[#d5c6b0] dark:bg-[#3d281a]" />
 
                 <button
                   type="button"
@@ -277,8 +277,8 @@ export default function BibleLayout({
             )}
 
             {/* Switch Deslizante de Modo Noturno / Claro */}
-            <div className="pl-1 border-l border-[#3d281a]">
-              <ThemeToggle />
+            <div className="pl-1 border-l border-[#d5c6b0] dark:border-[#3d281a]">
+              <ThemeToggle labelClassName="text-[#73533e] dark:text-amber-200/80 font-medium" />
             </div>
           </div>
         </div>

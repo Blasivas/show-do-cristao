@@ -177,7 +177,12 @@ Na primeira abertura, o arquivo é criado com as perguntas padrão de `src/data/
 
 ## 📅 Status de Desenvolvimento
 
-> Projeto em desenvolvimento ativo. Veja o [plano de desenvolvimento](./docs/plano-desenvolvimento.md) para acompanhar o progresso de cada etapa.
+- ✅ **Etapa 0 a Etapa 4:** Infraestrutura base, Electron offline, regras puras e CRUD completo de perguntas.
+- ✅ **Etapa 4.1:** Identidade visual Bíblia Sagrada (bifólio, virada 3D ancorada na medianiz, áudio de folhear páginas, modo claro/noturno e 4 versículos por página com distribuição harmônica).
+- ✅ **Etapa 5:** Estado global com Context + Reducer, transições de tela, tela inicial em Capa da Bíblia Fechada, animações 3D de abertura e fechamento da Bíblia com áudio sintetizado, fundo unificado nos modos Claro e Noturno, tela de Configuração da Partida em Bíblia Aberta (bifólio), seleção e ordenação de 2 a 4 equipes com estandartes visuais, tempo do cronômetro único e regra de roubo.
+- 🔜 **Próximas etapas:** Etapa 6 (Mural de Perguntas interativo), Etapa 7 (Tela da Pergunta Ativa & Controles), Etapas 8 a 13.
+
+> Veja o [plano de desenvolvimento](./docs/plano-desenvolvimento.md) para acompanhar o progresso detalhado de cada etapa.
 
 | Etapa | Status |
 |---|---|
@@ -188,8 +193,8 @@ Na primeira abertura, o arquivo é criado com as perguntas padrão de `src/data/
 | 2.2 — Atualização do Vite 6 → 8 | ✅ Concluído |
 | 3 — Modelagem de Dados, Motor de Regras & Perguntas | ✅ Concluído |
 | 4 — Armazenamento Local & Cadastro de Perguntas (CRUD) | ✅ Concluído |
-| 4.1 — Identidade Visual Bíblia Sagrada & Design System | 🔄 Em andamento |
-| 5 — Estado Global, Navegação & Configuração da Partida | ⏳ Pendente |
+| 4.1 — Identidade Visual Bíblia Sagrada & Design System | ✅ Concluído |
+| 5 — Estado Global, Navegação & Configuração da Partida | ✅ Concluído |
 | 6 — Mural de Perguntas | ⏳ Pendente |
 | 7 — Tela de Pergunta, Cronômetro & Controles do Apresentador | ⏳ Pendente |
 | 8 — Pontuação Secreta, Roubo, Desfazer & Salvamento Automático | ⏳ Pendente |
