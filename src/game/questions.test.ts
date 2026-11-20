@@ -53,6 +53,23 @@ describe('parseQuestions', () => {
     expect(() => parseQuestions({})).toThrow('lista');
   });
 
+  it.each([
+    ['Noé', 'Noé', 'Abraão', 'Davi'],
+    ['Noé', 'NOÉ', 'Abraão', 'Davi'],
+    ['Noé', 'noe', 'Abraão', 'Davi'],
+    ['Noé', '  Noé  ', 'Abraão', 'Davi'],
+  ])('arquivo e formulário rejeitam as mesmas alternativas repetidas: %j', (...options) => {
+    const draft: QuestionDraft = {
+      text: valid.pergunta,
+      options: options as QuestionDraft['options'],
+      correctIndex: 1,
+      difficulty: 'facil',
+    };
+    const error = validateDraft(draft).options[1];
+    expect(error).toBe('A alternativa B repete outra alternativa.');
+    expect(() => parseQuestions([valid, { ...valid, alternativas: options }])).toThrow(`Pergunta 2: ${error}`);
+  });
+
   it('o arquivo padrão tem 20 perguntas válidas (7 fáceis, 7 médias, 6 difíceis)', () => {
     const questions = parseQuestions(perguntas);
     const count = (d: string) => questions.filter((q) => q.difficulty === d).length;

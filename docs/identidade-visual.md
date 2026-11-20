@@ -122,12 +122,57 @@ Para ambientes escuros ou projeção com luz apagada, o aplicativo conta com o *
 - **Rodapé Canônico:** Numeração das folhas em algarismos romanos ou arábicos tradicionais e marcadores de fitilho para navegação rápida.
 
 ### 4.2 Animação 3D & Áudio de Folhear
-- **Virada de Folha 3D:** Transformação tridimensional (`perspective(1400px) rotateY(...)`) com centro de rotação na medianiz.
+- **Virada de Folha 3D:** Transformação tridimensional com centro de rotação na medianiz. A Etapa 5.5 refina a direção visual com uma folha completa, frente e verso, curvatura discreta e sombra projetada; os critérios estão na seção 4.6.
 - **Som de Papel Bíblia:** Síntese sonora em tempo real via Web Audio API (filtro passa-faixa com envelope exponencial suave de ruído branco), funcionando 100% offline sem nenhum arquivo de áudio pesado.
 
 ### 4.3 Ferramentas e Ações
-- As ações de controle (Voltar, Nova Pergunta, Importar, Exportar, Restaurar, Pasta, Alternador de Modo Noturno) são esculpidas em uma barra de ferramentas superior discreta em tom de encadernação/couro, com botões de acabamento metálico bronze/dourado escovado.
+- As ações de controle (Voltar, Nova pergunta, Iniciar gincana, Importar, Exportar, Restaurar, Pasta e Tema) são organizadas em uma barra superior discreta, com tamanhos, bordas, tipografia e acabamento consistentes nos dois temas. As ferramentas exibidas correspondem à função de cada tela.
 - Os modais de edição e criação de perguntas assumem a forma de uma **"Ficha de Escriba / Caderno Canônico"**, mantendo a mesma estética de papel bíblia e encadernação de couro.
+
+### 4.4 Bíblia Fechada no Menu Inicial — Etapa 5.3
+
+Direção aprovada em 14/11/2026 (D41–D43), implementada e conferida nos dois temas em 1280×720 e 1920×1080, com validação do usuário na aplicação atualizada:
+
+- **Material:** couro marrom escuro com granulação fina, vincos discretos e douração envelhecida com aparência de relevo. A textura é procedural e local, produzida com SVG e CSS.
+- **Volume:** capa, contracapa, lombada arredondada e bloco de páginas com corte dourado formam um livro com espessura visível. A pose de repouso fica levemente inclinada em perspectiva de três quartos, mantendo a leitura do título e dos controles.
+- **Interação:** sobre a área da Bíblia, o ponteiro provoca uma inclinação suave de até ±5° em relação à pose de repouso, com reflexo e sombra acompanhando o movimento. Ao sair da área, o livro retorna suavemente ao repouso; não há balanço automático contínuo.
+- **Estabilidade:** o cálculo do ponteiro usa uma área que não é transformada junto com o livro. A inclinação e o giro de abertura/fechamento ficam em camadas separadas, para evitar oscilações e facilitar os cliques nos botões.
+- **Acessibilidade e navegação:** o acompanhamento do mouse é suspenso em diálogos, na navegação por teclado, em dispositivos de ponteiro impreciso e quando a redução de movimento está ativa; a perspectiva estática do livro continua visível. Durante a abertura e o fechamento, a Bíblia fica frontal para sincronizar o giro da capa. A redução de movimento também elimina as transições 3D de abertura e fechamento. Os elementos de textura e iluminação não interceptam cliques.
+- **Temas e offline:** o acabamento conserva a identidade de couro e ouro nos modos Claro e Noturno, com iluminação e sombras adequadas ao ambiente. O menu usa recursos locais e não requer uma biblioteca 3D adicional.
+
+### 4.5 Layout Único do Livro Aberto — Etapa 5.4
+
+Direção aprovada em 14/11/2026 (D44–D45), implementada e conferida nas duas telas, nos dois temas e em 1280×720 e 1920×1080; a validação visual do usuário na aplicação atualizada permanece pendente:
+
+- **Estrutura compartilhada:** Perguntas e Configuração da gincana usam o mesmo quadro de livro aberto, com dimensões, encadernação, sombras, fitilho, medianiz e rodapé comuns. Os componentes `OpenBookLayout` e `BookPage` concentram essa estrutura e recebem o conteúdo de cada função.
+- **Cabeçalho:** organização comum **Voltar → título da tela → ações da função → ação principal → tema**. Botões de mesma importância compartilham altura, borda, tipografia, foco e estados desabilitados; `BookToolbarButton` padroniza as ferramentas em ícones.
+- **Ações principais:** **Nova pergunta** e **Iniciar gincana** ocupam o mesmo canto superior direito e têm o mesmo acabamento. O resumo da partida permanece dentro da página de configuração.
+- **Ferramentas contextuais:** pasta, importar, exportar e restaurar pertencem ao cadastro de perguntas. Filtros de dificuldade e paginação ficam dentro do livro, em uma faixa organizada para essas funções.
+- **Páginas e conteúdo:** os cabeçalhos, margens e rodapés das páginas seguem o mesmo padrão, com o corpo adaptado a cada conteúdo. O cadastro mantém quatro perguntas por página e oito por folha aberta; a configuração acomoda de duas a quatro equipes e os parâmetros da partida.
+- **Continuidade de uso:** a unificação mantém a navegação atual, a virada de folhas e os fluxos de erro, restauração e salvamento. Os estados selecionados e desabilitados devem ser identificáveis nos dois temas.
+
+### 4.6 Virada Realista das Folhas — Etapa 5.5
+
+Direção aprovada em 20/11/2026 (D46–D47), implementada e conferida nas fases de frente e verso do avanço e retorno, nos dois temas e em 1280×720 e 1920×1080. A validação visual do usuário na aplicação atualizada permanece pendente:
+
+- **Movimento da folha:** no avanço, a folha direita atravessa a lombada em aproximadamente 180° e pousa à esquerda; no retorno, a folha esquerda faz o caminho inverso. O quadro do livro e seus controles permanecem estáveis.
+- **Frente e verso:** o conteúdo da folha em movimento é preservado em cada face, mantendo a leitura na orientação correta. O próximo conteúdo é revelado por baixo, sem substituição brusca de texto no meio do giro.
+- **Papel e profundidade:** uma curvatura discreta nas bordas, luz sobre a superfície e sombra projetada acompanham a posição da folha. A intensidade do acabamento respeita o papel marfim do modo Claro e a paleta do modo Noturno.
+- **Ritmo:** duração inicial de aproximadamente 650 ms, com início suave, passagem mais rápida pelo centro e acomodação no final. A volta utiliza a mesma sequência em sentido inverso.
+- **Navegação e acessibilidade:** setas, teclado e seletor de folhas continuam disponíveis, com proteção contra movimentos sobrepostos. Cópias visuais da animação ficam sem interação e ocultas para tecnologias assistivas. A preferência de redução de movimento utiliza paginação sem giro.
+- **Continuidade:** filtros, alterações no banco e saída da tela encerram a animação com segurança. O cadastro mantém quatro perguntas por página, e a configuração da gincana conserva as páginas fixas e a estrutura compartilhada da Etapa 5.4.
+
+---
+
+### 4.7 Abertura Contínua & Encaixe do Livro — Etapa 5.6
+
+Direção aprovada em 20/11/2026 (D48–D49), implementada e conferida nas fases de início, meio, encaixe e fechamento dos dois destinos, nos dois temas e em 1280×720 e 1920×1080. O usuário validou o resultado na aplicação atualizada em 20/11/2026:
+
+- **Progressão coordenada:** inclinação, capa, deslocamento e sombras acompanham a mesma abertura, com duração inicial de aproximadamente 800 ms. O movimento começa na pose visível da Bíblia, tem início suave e acomoda o livro ao final.
+- **Continuidade de enquadramento:** o livro se ajusta gradualmente à posição e ao tamanho reais das páginas de Perguntas ou Configuração, evitando uma substituição brusca por outra geometria. O conteúdo surge suavemente enquanto o livro alcança o encaixe final; papel e fitilho permanecem alinhados durante essa revelação.
+- **Conclusão e retorno:** a navegação é concluída quando a animação termina. Ao voltar ao menu, o livro percorre o caminho inverso, com fechamento coerente e liberação dos controles ao final.
+- **Interação e acessibilidade:** o couro, o volume e a inclinação pelo mouse são preservados. Os controles ficam protegidos durante a transição; cliques repetidos, redimensionamento e mudanças da preferência de movimento devem encerrar ou ajustar a animação com segurança. A redução de movimento utiliza a navegação sem giro.
+- **Temas e conferência:** abertura e fechamento foram verificados nos modos Claro e Noturno, em 1280×720 e 1920×1080, nos dois destinos, incluindo redimensionamento e o alinhamento do papel e do fitilho. O efeito usa recursos locais, sem novas dependências.
 
 ---
 
@@ -135,4 +180,4 @@ Para ambientes escuros ou projeção com luz apagada, o aplicativo conta com o *
 
 1. **Descarte do Tech Bento:** Toda a aplicação adota exclusivamente a identidade visual da Bíblia Sagrada.
 2. **Alternância Claro/Escuro Sagrada:** O Modo Claro (Papel Marfim) é o padrão de fábrica. O Modo Noturno (Códice Noturno) preserva toda a atmosfera editorial clássica do livro sagrado, invertendo suavemente a luminosidade das páginas sem romper a imersão.
-3. **Preservação de Código:** Nenhuma alteração no motor de jogo ([`src/game/engine.ts`](file:///c:/Users/Matheus/Desktop/show%20do%20crist%C3%A3o/src/game/engine.ts)), no armazenamento ([`src/services/questionStorage.ts`](file:///c:/Users/Matheus/Desktop/show%20do%20crist%C3%A3o/src/services/questionStorage.ts)) ou nos testes automatizados.
+3. **Escopo das Mudanças Visuais:** Refinamentos de aparência e interação ficam nos componentes e estilos correspondentes, preservando o motor de jogo (`src/game/engine.ts`) e o armazenamento (`src/services/questionStorage.ts`). Os testes de regressão devem acompanhar os comportamentos visuais e de navegação aprovados.

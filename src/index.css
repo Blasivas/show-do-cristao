@@ -135,130 +135,369 @@
   background: var(--color-ipb-medium);
 }
 
-/* Animação realista 3D de Virar Página Bíblica (Pivot na Medianiz / Coluna Central) */
-@keyframes pageTurnRight {
-  0% {
-    transform: perspective(2400px) rotateY(0deg) scale(1);
-    filter: brightness(1);
-    box-shadow: 0 0 0 rgba(0,0,0,0);
-  }
-  45% {
-    transform: perspective(2400px) rotateY(-48deg) scale(0.975);
-    filter: brightness(0.88);
-    box-shadow: -15px 0 25px rgba(0,0,0,0.25);
-  }
-  50% {
-    transform: perspective(2400px) rotateY(-54deg) scale(0.965);
-    filter: brightness(0.84);
-    opacity: 0.88;
-    box-shadow: -20px 0 30px rgba(0,0,0,0.32);
-  }
-  55% {
-    transform: perspective(2400px) rotateY(-48deg) scale(0.975);
-    filter: brightness(0.88);
-    opacity: 0.94;
-    box-shadow: -15px 0 25px rgba(0,0,0,0.25);
-  }
-  100% {
-    transform: perspective(2400px) rotateY(0deg) scale(1);
-    filter: brightness(1);
-    opacity: 1;
-    box-shadow: 0 0 0 rgba(0,0,0,0);
-  }
-}
-
-@keyframes pageTurnLeft {
-  0% {
-    transform: perspective(2400px) rotateY(0deg) scale(1);
-    filter: brightness(1);
-    box-shadow: 0 0 0 rgba(0,0,0,0);
-  }
-  45% {
-    transform: perspective(2400px) rotateY(48deg) scale(0.975);
-    filter: brightness(0.88);
-    box-shadow: 15px 0 25px rgba(0,0,0,0.25);
-  }
-  50% {
-    transform: perspective(2400px) rotateY(54deg) scale(0.965);
-    filter: brightness(0.84);
-    opacity: 0.88;
-    box-shadow: 20px 0 30px rgba(0,0,0,0.32);
-  }
-  55% {
-    transform: perspective(2400px) rotateY(48deg) scale(0.975);
-    filter: brightness(0.88);
-    opacity: 0.94;
-    box-shadow: 15px 0 25px rgba(0,0,0,0.25);
-  }
-  100% {
-    transform: perspective(2400px) rotateY(0deg) scale(1);
-    filter: brightness(1);
-    opacity: 1;
-    box-shadow: 0 0 0 rgba(0,0,0,0);
-  }
-}
-
-.animate-turn-next {
-  animation: pageTurnRight 0.38s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-  transform-origin: left center;
-  will-change: transform, filter, opacity;
-  z-index: 20;
-}
-
-.animate-turn-prev {
-  animation: pageTurnLeft 0.38s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-  transform-origin: right center;
-  will-change: transform, filter, opacity;
-  z-index: 20;
-}
-
 /* Componente Book Estático e Frontal */
 .book-rotate {
   transform: none;
 }
 
-/* Sombra 3D animada ao abrir a Capa da Bíblia */
-@keyframes coverFlipShadow {
-  0% {
-    opacity: 0;
-  }
-  35% {
-    opacity: 0.55;
-    background: linear-gradient(to right, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.2) 50%, transparent 100%);
-  }
-  70% {
-    opacity: 0.35;
-    background: linear-gradient(to left, rgba(0, 0, 0, 0.5) 0%, transparent 100%);
-  }
-  100% {
-    opacity: 0;
+/* A folha cruza a medianiz: oito tiras 3D mantêm a continuidade da curvatura. */
+.page-turn-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  perspective: 3600px;
+  perspective-origin: 50% 50%;
+  pointer-events: none;
+  user-select: none;
+  --turn-page-width: 0px;
+  --turn-face-bleed: 0.8px;
+}
+
+.page-turn-leaf {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.page-turn-segment {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 6.25%;
+  height: 100%;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.page-turn-layer[data-page-turn='prev'] .page-turn-segment {
+  left: auto;
+  right: 50%;
+  transform-origin: right center;
+}
+
+.page-turn-face {
+  position: absolute;
+  /* A sobreposição cobre a antisserrilha; o eixo da tira continua exato. */
+  inset: 0 calc(-1 * var(--turn-face-bleed));
+  overflow: hidden;
+  backface-visibility: hidden;
+  background: #faf7f0;
+  pointer-events: none;
+}
+
+.dark .page-turn-face {
+  background: #18130e;
+}
+
+.page-turn-front {
+  transform: translateZ(0.15px);
+}
+
+.page-turn-back {
+  transform: rotateY(180deg) translateZ(0.15px);
+}
+
+.page-turn-print {
+  position: absolute;
+  top: 0;
+  width: var(--turn-page-width);
+  height: 100%;
+  display: flex;
+  pointer-events: none;
+}
+
+.page-turn-print > * {
+  flex: none;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.page-turn-light {
+  position: absolute;
+  inset: 0;
+  background: rgb(70 46 22 / var(--turn-light, 0));
+  pointer-events: none;
+}
+
+.dark .page-turn-light {
+  background: rgb(0 0 0 / var(--turn-light, 0));
+}
+
+.page-turn-segment:last-child .page-turn-face::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 1px;
+  background: rgb(255 241 201 / 65%);
+  opacity: var(--turn-bend, 0);
+  pointer-events: none;
+}
+
+.page-turn-layer[data-page-turn='prev'] .page-turn-segment:last-child .page-turn-face::after {
+  inset: 0 auto 0 0;
+}
+
+.page-turn-shadow {
+  position: absolute;
+  top: 1%;
+  bottom: 1%;
+  left: 50%;
+  opacity: 0;
+  background: #392616;
+  filter: blur(var(--turn-shadow-blur, 5px));
+  pointer-events: none;
+}
+
+.dark .page-turn-shadow {
+  background: #000;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-turn-layer {
+    display: none;
   }
 }
 
-.animate-cover-shadow {
-  animation: coverFlipShadow 0.65s ease forwards;
+/* A cena e o destino permanecem montados até a linha do tempo terminar. */
+[data-book-menu] {
+  z-index: 2;
 }
 
-/* Sombra 3D animada ao fechar a Capa da Bíblia */
-@keyframes coverCloseShadow {
-  0% {
-    opacity: 0;
-  }
-  30% {
-    opacity: 0.45;
-    background: linear-gradient(to left, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.2) 50%, transparent 100%);
-  }
-  70% {
-    opacity: 0.6;
-    background: linear-gradient(to right, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.25) 50%, transparent 100%);
-  }
-  100% {
-    opacity: 0;
+[data-book-destination] {
+  z-index: 1;
+}
+
+[data-book-transition] [data-book-menu],
+[data-book-transition] [data-book-destination] {
+  pointer-events: none;
+  will-change: opacity;
+}
+
+[data-book-transition] .bible-tilt,
+[data-book-transition] .bible-volume,
+[data-book-transition] .bible-cover-flipper {
+  will-change: transform;
+}
+
+[data-book-cover-shadow] {
+  background: linear-gradient(to right, rgb(33 20 12 / 75%), rgb(54 34 20 / 22%) 45%, transparent 90%);
+}
+
+[data-book-ribbon] {
+  transform-origin: top center;
+}
+
+.dark [data-book-cover-shadow] {
+  background: linear-gradient(to right, rgb(0 0 0 / 90%), rgb(0 0 0 / 35%) 45%, transparent 90%);
+}
+
+/* Bíblia da capa: uma cena estável contém o volume e a inclinação, sem recortar as faces laterais. */
+.bible-stage {
+  --bible-width: 470px;
+  --bible-height: 630px;
+  --bible-depth: 40px;
+  --bible-tilt-x: 0deg;
+  --bible-tilt-y: 0deg;
+  --bible-light-x: 40%;
+  --bible-light-y: 28%;
+  --bible-shadow-x: 0px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: calc(var(--bible-width) + 100px);
+  height: calc(var(--bible-height) + 42px);
+  max-width: 100%;
+  perspective: 2400px;
+  perspective-origin: 50% 48%;
+}
+
+.bible-tilt,
+.bible-volume {
+  width: var(--bible-width);
+  height: var(--bible-height);
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.bible-tilt {
+  transform: rotateX(calc(4deg + var(--bible-tilt-x))) rotateY(calc(-10deg + var(--bible-tilt-y)));
+  transition: transform 280ms ease-out;
+}
+
+.bible-stage[data-book-busy='true'] .bible-tilt {
+  transition: none;
+}
+
+.bible-ground-shadow {
+  position: absolute;
+  left: 12%;
+  right: 7%;
+  bottom: 5px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgb(67 39 20 / 38%), transparent 70%);
+  transform: translateX(var(--bible-shadow-x));
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.dark .bible-ground-shadow {
+  background: radial-gradient(ellipse, rgb(0 0 0 / 85%), transparent 72%);
+}
+
+.bible-back-cover {
+  position: absolute;
+  inset: -2px -1px -2px 0;
+  border: 2px solid #654326;
+  border-radius: 9px 16px 16px 9px;
+  background: linear-gradient(100deg, #24150e, #40281b 12%, #24160f 90%);
+  box-shadow: 2px 3px 0 #160e0a, 0 16px 45px rgb(50 27 14 / 32%);
+  transform: translateZ(calc(-1 * var(--bible-depth) - 5px));
+  pointer-events: none;
+}
+
+.bible-spine {
+  position: absolute;
+  left: calc(-1 * var(--bible-depth) - 5px);
+  top: 0;
+  width: calc(var(--bible-depth) + 5px);
+  height: 100%;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #170d08, #6a4930 30%, #382317 65%, #1a100b);
+  transform-origin: right center;
+  transform: rotateY(-90deg);
+  pointer-events: none;
+}
+
+.bible-page-edge {
+  position: absolute;
+  pointer-events: none;
+  backface-visibility: hidden;
+  background:
+    repeating-linear-gradient(90deg, #927044 0, #dbc390 1px, #f0dfb3 2px, #c8aa70 3px, #e3cea0 4px),
+    #dbc390;
+  box-shadow: inset 0 0 7px rgb(83 50 17 / 38%);
+}
+
+.bible-page-edge-right {
+  top: 3px;
+  left: calc(100% - 3px);
+  height: calc(100% - 6px);
+  width: var(--bible-depth);
+  transform-origin: left center;
+  transform: translateZ(-3px) rotateY(90deg);
+  border-radius: 0 5px 5px 0;
+}
+
+.bible-page-edge-top {
+  left: 12px;
+  width: calc(100% - 15px);
+  top: calc(3px - var(--bible-depth));
+  height: var(--bible-depth);
+  transform-origin: center bottom;
+  transform: translateZ(-3px) rotateX(90deg);
+  background-image: repeating-linear-gradient(0deg, #967340 0, #e4cfa0 1px, #f0dfb3 2px, #bd9e62 3px);
+}
+
+.bible-page-edge-bottom {
+  left: 12px;
+  width: calc(100% - 15px);
+  top: calc(100% - 3px);
+  height: var(--bible-depth);
+  transform-origin: center top;
+  transform: translateZ(-3px) rotateX(-90deg);
+  background-image: repeating-linear-gradient(0deg, #967340 0, #e4cfa0 1px, #f0dfb3 2px, #bd9e62 3px);
+}
+
+.bible-right-page {
+  transform: translateZ(-2px);
+}
+
+.bible-cover-front {
+  border-radius: 8px 15px 15px 8px;
+  border: 2px solid #ae884c;
+  background:
+    radial-gradient(ellipse at 30% 5%, rgb(168 120 75 / 22%), transparent 65%),
+    linear-gradient(100deg, #23140d, #513322 12%, #43291c 65%, #2e1a11);
+  box-shadow: inset 0 1px 1px #ba9460, inset 0 0 3px 4px #28170f, inset 0 0 24px 7px rgb(0 0 0 / 38%);
+}
+
+.bible-cover-front::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: url('./assets/images/leather-grain.svg');
+  background-size: 142px 142px;
+  opacity: 0.42;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.bible-cover-front::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse at var(--bible-light-x) var(--bible-light-y), rgb(235 208 156 / 13%), transparent 68%);
+  box-shadow: inset 0 0 0 6px rgb(0 0 0 / 12%);
+  pointer-events: none;
+}
+
+.bible-spine-relief {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 7%;
+  background:
+    repeating-linear-gradient(180deg, transparent 0, transparent 15%, rgb(209 173 110 / 28%) 15.2%, #211209 15.7%, transparent 16.2%, transparent 21%),
+    linear-gradient(90deg, #201109 0%, #61422c 33%, #2e1b11 72%, rgb(0 0 0 / 26%) 95%, transparent);
+  box-shadow: 1px 0 1px rgb(236 200 136 / 25%), 5px 0 8px rgb(0 0 0 / 22%);
+  border-right: 1px solid rgb(18 8 3 / 70%);
+  pointer-events: none;
+}
+
+.bible-gold-title {
+  color: #e6cc8c;
+  text-shadow: 0 1px 0 #9d7438, 0 2px 0 #3c210e, 0 -1px 0 #f1deab, 0 4px 5px rgb(0 0 0 / 60%);
+}
+
+.bible-primary-action {
+  border: 1px solid #ead39b;
+  background: linear-gradient(110deg, #b58b44, #ead29a 47%, #c29a53);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 30%), inset 0 1px 0 rgb(255 245 209 / 60%);
+}
+
+.bible-cover-front button:focus-visible {
+  outline: 2px solid #f4e2ad;
+  outline-offset: 4px;
+}
+
+@media (max-height: 760px) {
+  .bible-stage {
+    --bible-height: 590px;
+    --bible-width: 440px;
+    --bible-depth: 38px;
   }
 }
 
-.animate-cover-close-shadow {
-  animation: coverCloseShadow 0.65s ease forwards;
+@media (max-width: 700px) {
+  .bible-stage {
+    --bible-width: min(360px, calc(100vw - 64px));
+    --bible-height: min(550px, calc(100vh - 100px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bible-stage .bible-tilt,
+  .bible-stage .bible-volume,
+  .bible-stage .bible-cover-flipper {
+    transition: none !important;
+  }
+
 }
 
 

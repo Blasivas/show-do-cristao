@@ -16,6 +16,8 @@ O **Show do Cristão** é um aplicativo instalável para Windows que permite ao 
 - **Tela de pódio** com revelação dramática do placar e confetes para a equipe campeã.
 - **Funcionamento 100% offline**, pensado para locais sem internet (uso em notebook espelhado na TV).
 
+O projeto está em desenvolvimento: o cadastro de perguntas, o menu e a configuração da partida estão implementados. O mural interativo e as demais telas da gincana serão construídos nas etapas seguintes; o instalador está previsto na Etapa 12.
+
 ---
 
 ## 🛠️ Stack Tecnológica
@@ -38,6 +40,16 @@ O design do **Show do Cristão** segue a metáfora visual de uma **Bíblia Sagra
 
 A especificação completa das fontes, paleta de cores e componentes está documentada em [`docs/identidade-visual.md`](docs/identidade-visual.md).
 
+Na configuração da gincana, os estandartes das quatro equipes acompanham o tema da página. A Etapa 5.2 aplica fundos suavemente coloridos em verde, âmbar, carmesim e azul no modo claro, com nomes escuros e campos brancos/marfim; numeração, legendas e setas também recebem versões para cada tema. A alternância de tema preserva os nomes e a ordem das equipes.
+
+A **Etapa 5.3** refina a Bíblia fechada do menu inicial: couro marrom escuro com granulação fina, dourado envelhecido, lombada, bloco de páginas e contracapa com espessura. O livro fica em leve perspectiva e acompanha o mouse com inclinação suave, reflexo e sombra, retornando ao repouso quando o ponteiro sai da área. A textura e o volume são produzidos localmente com SVG e CSS 3D, para manter o funcionamento offline. O acompanhamento do mouse é suspenso durante as transições e diálogos, no uso do teclado e quando a redução de movimento está ativa.
+
+A **Etapa 5.4** unifica o livro aberto das telas **Perguntas** e **Configuração da gincana**: mesma estrutura, dimensões, margens, encadernação, fitilho, cabeçalho e rodapé. A barra superior segue **Voltar → título → ações da função → ação principal → tema**. **Nova pergunta** e **Iniciar gincana** ocupam o mesmo canto superior direito e usam o mesmo acabamento; filtros e paginação ficam dentro do livro de perguntas. As ferramentas de pasta, importação, exportação e restauração continuam próprias do cadastro.
+
+A **Etapa 5.5** refina a passagem das folhas do cadastro: virada completa sobre a lombada, com frente e verso, leve curvatura e sombras acompanhando o papel. O conteúdo seguinte é revelado por baixo, mantendo o texto da folha em movimento. A animação dura aproximadamente 650 ms, com movimento inverso ao voltar; setas, teclado e seletor de folhas são preservados, e a redução de movimento utiliza paginação sem giro.
+
+A **Etapa 5.6** coordena a abertura da Bíblia em uma progressão de aproximadamente 800 ms: inclinação, capa, deslocamento e sombras acompanham o mesmo movimento. O livro se ajusta gradualmente à posição e ao tamanho das páginas de Perguntas ou Configuração, revelando o conteúdo suavemente; o retorno acompanha o caminho inverso. A navegação termina com a animação, e a redução de movimento continua respeitada.
+
 ---
 
 ## 📁 Estrutura do Projeto
@@ -53,6 +65,8 @@ show-do-cristao/
 │   ├── main.ts                  # Janela, ciclo de vida, tela cheia e segurança
 │   ├── preload.ts               # Ponte segura entre o Electron e o React
 │   └── questionsIpc.ts          # Leitura/gravação do arquivo de perguntas, importar/exportar
+├── scripts/
+│   └── test-electron.mjs         # Regressão no Electron de produção com dados temporários
 ├── src/
 │   ├── assets/
 │   │   ├── audio/               # Efeitos sonoros do quiz
@@ -100,8 +114,20 @@ npm run dev
 | `npm run build` | Valida o TypeScript e gera o build de produção (`dist/` e `dist-electron/`) |
 | `npm start` | Abre o build de produção na janela do Electron (rodar `npm run build` antes) |
 | `npm test` | Executa os testes unitários (Vitest) |
+| `npm run test:electron` | Verifica os fluxos no Electron de produção com dados temporários; executar `npm run build` antes |
 | `npm run test:watch` | Executa os testes em modo contínuo, rodando de novo a cada alteração |
 | `npm run typecheck` | Verifica a tipagem do TypeScript sem gerar build |
+
+### Verificação do cadastro no Electron
+
+```bash
+npm run build
+npm run test:electron
+```
+
+O teste abre o app com uma pasta de dados temporária e remove esse perfil ao terminar. Os fluxos de cadastro usam 1280×720; a Bíblia do menu e a comparação de layout entre Perguntas e Configuração da gincana também são conferidas em 1920×1080. As falhas de leitura e gravação e as escolhas de arquivos são simuladas apenas no processo criado pelo teste. As perguntas reais do usuário não são acessadas. Capturas dos fluxos ficam em `scratch/`, pasta ignorada pelo Git.
+
+A preferência por redução de movimento é emulada nos testes para conferir tanto o acompanhamento do mouse quanto a navegação com movimento reduzido. Essa emulação afeta somente a janela de teste, sem alterar as configurações do Windows. Ao abrir o app normalmente, o menu respeita a preferência do sistema: a perspectiva estática permanece visível, mas a inclinação pelo mouse fica desativada quando a redução de movimento está ativa.
 
 ### Atalhos da janela
 
@@ -109,6 +135,8 @@ npm run dev
 |---|---|
 | `F11` | Entra/sai da tela cheia |
 | `Esc` | Sai da tela cheia |
+
+O aplicativo permite uma única instância. Ao abri-lo novamente, a janela existente é trazida para frente; se estiver minimizada, ela é restaurada.
 
 ---
 
@@ -135,15 +163,21 @@ Na primeira abertura, o arquivo é criado com as perguntas padrão de `src/data/
 
 - `correta`: letra da alternativa certa (`A`, `B`, `C` ou `D`).
 - `dificuldade`: `facil`, `medio` ou `dificil` (acentos e maiúsculas são aceitos).
+- As quatro alternativas devem ser diferentes. A comparação ignora acentos, maiúsculas e espaços no início ou fim do texto; essa regra vale também para arquivos importados ou editados à mão. Se uma pergunta for inválida, a importação inteira é recusada, sem alterar o banco atual.
 - As perguntas são **ordenadas automaticamente**: primeiro as fáceis, depois as médias, depois as difíceis. Uma pergunta nova (ou que mudou de dificuldade) vai para o final do grupo da sua dificuldade.
-- Se o arquivo tiver algum erro, o app mostra qual pergunta tem problema e permite restaurar as perguntas padrão (guardando uma cópia do arquivo com erro).
-- Antes de substituir todas as perguntas (restaurar ou importar), o app guarda uma cópia `perguntas.backup-<data>.json` na mesma pasta.
+- Se o arquivo tiver algum erro, o app mostra o problema e permite corrigi-lo, importar outro banco ou restaurar as perguntas padrão (guardando uma cópia do arquivo com erro). A gincana fica bloqueada até que o banco seja carregado corretamente; o app não troca silenciosamente as perguntas pelas de teste.
+- Antes de substituir todas as perguntas (restaurar ou importar), o app guarda uma cópia `perguntas.backup-<data>-<id>.json` na mesma pasta. O identificador exclusivo evita colisões entre backups.
+- As operações de gravação são executadas em sequência e usam arquivos temporários exclusivos. Backup e substituição fazem parte da mesma operação.
+- A lista e o formulário só confirmam alterações após o arquivo ser salvo. Durante a gravação, o app mostra **Salvando…** e impede ações sobrepostas; em caso de falha, preserva o rascunho e permite tentar novamente.
+- Ao editar ou excluir, a folha atual é mantida enquanto existir; se ela deixar de existir, o cadastro mostra a última folha válida. Substituir todo o banco ou restaurar o padrão volta à primeira folha.
+
+Essas proteções foram implementadas na **Etapa 5.1**, antes do avanço para o mural.
 
 ---
 
 ## 📋 Regras do Jogo
 
-1. Em uma única tela, o apresentador configura a quantidade e os nomes das equipes (2 a 4), a **ordem das equipes** (arrastando; a primeira começa), o tempo do cronômetro por pergunta e se o "roubo de pergunta" está ativo.
+1. Em uma única tela, o apresentador configura a quantidade e os nomes das equipes (2 a 4), a **ordem das equipes** (com os botões subir/descer; a primeira começa), o tempo do cronômetro por pergunta e se o "roubo de pergunta" está ativo.
 2. O mural exibe os números das perguntas disponíveis. A equipe da vez escolhe um número. As equipes **se revezam a cada pergunta** na ordem definida (A, B, C, A, B, C…).
 3. A pergunta é exibida com 4 alternativas (A, B, C, D) e o cronômetro inicia.
 4. O cronômetro é **apenas indicativo**: ao chegar a zero ele sinaliza "Tempo esgotado", mas não conta como erro automaticamente.
@@ -178,8 +212,14 @@ Na primeira abertura, o arquivo é criado com as perguntas padrão de `src/data/
 ## 📅 Status de Desenvolvimento
 
 - ✅ **Etapa 0 a Etapa 4:** Infraestrutura base, Electron offline, regras puras e CRUD completo de perguntas.
-- ✅ **Etapa 4.1:** Identidade visual Bíblia Sagrada (bifólio, virada 3D ancorada na medianiz, áudio de folhear páginas, modo claro/noturno e 4 versículos por página com distribuição harmônica).
+- ✅ **Etapa 4.1 — concluída com pendência de validação visual:** Identidade visual Bíblia Sagrada (bifólio, virada 3D ancorada na medianiz, áudio de folhear páginas, modo claro/noturno e 4 versículos por página com distribuição harmônica). A melhoria de fluidez da animação foi implementada e conferida tecnicamente na Etapa 5.5; aguarda validação visual do usuário.
 - ✅ **Etapa 5:** Estado global com Context + Reducer, transições de tela, tela inicial em Capa da Bíblia Fechada, animações 3D de abertura e fechamento da Bíblia com áudio sintetizado, fundo unificado nos modos Claro e Noturno, tela de Configuração da Partida em Bíblia Aberta (bifólio), seleção e ordenação de 2 a 4 equipes com estandartes visuais, tempo do cronômetro único e regra de roubo.
+- ✅ **Etapa 5.1 — concluída tecnicamente, aguardando validação do usuário:** Gravação segura das perguntas, recuperação de erros do cadastro, validação consistente de alternativas, bloqueio de início com banco inválido e correção de paginação. Em 14/11/2026: 72 testes em 6 arquivos, tipagem, build e 14 cenários no Electron de produção aprovados. Alterações sem commit ou push.
+- ✅ **Etapa 5.2 — concluída e validada pelo usuário:** Estandartes da configuração com fundos suavemente coloridos no modo claro e cores adequadas no noturno. Em 14/11/2026: 72 testes em 6 arquivos, tipagem, build e 15 cenários no Electron de produção aprovados, incluindo contraste dos nomes e identificações e preservação dos nomes e da ordem ao alternar o tema. Alterações sem commit ou push.
+- ✅ **Etapa 5.3 — concluída e validada pelo usuário:** Bíblia 3D do menu inicial com couro marrom escuro, granulação fina, dourado envelhecido, espessura visível e movimento suave pelo mouse. Em 14/11/2026: 72 testes em 6 arquivos, tipagem, build e 19 cenários no Electron aprovados; capa conferida nos dois temas em 1280×720 e 1920×1080. Sem novas dependências, commit ou push.
+- ✅ **Etapa 5.4 — concluída tecnicamente, aguardando validação do usuário:** Layout compartilhado do livro aberto para Perguntas e Configuração da gincana, com ferramentas contextuais e ações principais padronizadas no cabeçalho. Em 14/11/2026: 72 testes em 6 arquivos, tipagem, build e 20 cenários no Electron aprovados; as duas telas foram conferidas nos dois temas em 1280×720 e 1920×1080. Alterações sem commit ou push.
+- ✅ **Etapa 5.5 — concluída tecnicamente, aguardando validação do usuário:** Virada completa das folhas do cadastro, com frente e verso, curvatura discreta, sombras e ritmo natural de aproximadamente 650 ms. Preserva a navegação atual e respeita a redução de movimento. Em 20/11/2026: 72 testes em 6 arquivos, tipagem, build e 24 cenários no Electron aprovados; 16 capturas conferidas nos dois temas em 1280×720 e 1920×1080, incluindo frente e verso no avanço e retorno. Sem novas dependências, commit ou push.
+- ✅ **Etapa 5.6 — concluída e validada pelo usuário em 20/11/2026:** Abertura contínua da Bíblia e encaixe gradual nas telas de Perguntas e Configuração, com fechamento inverso coerente e alinhamento do papel e do fitilho. Em 20/11/2026: 72 testes em 6 arquivos, tipagem, build e 27 cenários no Electron aprovados; 32 capturas finais conferidas nos dois destinos e temas, em 1280×720 e 1920×1080, incluindo início, meio, encaixe e fechamento. Sem novas dependências. O usuário autorizou o commit consolidado das alterações acumuladas das Etapas 5.1 a 5.6, sem push.
 - 🔜 **Próximas etapas:** Etapa 6 (Mural de Perguntas interativo), Etapa 7 (Tela da Pergunta Ativa & Controles), Etapas 8 a 13.
 
 > Veja o [plano de desenvolvimento](./docs/plano-desenvolvimento.md) para acompanhar o progresso detalhado de cada etapa.
@@ -193,8 +233,14 @@ Na primeira abertura, o arquivo é criado com as perguntas padrão de `src/data/
 | 2.2 — Atualização do Vite 6 → 8 | ✅ Concluído |
 | 3 — Modelagem de Dados, Motor de Regras & Perguntas | ✅ Concluído |
 | 4 — Armazenamento Local & Cadastro de Perguntas (CRUD) | ✅ Concluído |
-| 4.1 — Identidade Visual Bíblia Sagrada & Design System | ✅ Concluído |
+| 4.1 — Identidade Visual Bíblia Sagrada & Design System | ✅ Concluído; animação da 5.5 aguardando validação |
 | 5 — Estado Global, Navegação & Configuração da Partida | ✅ Concluído |
+| 5.1 — Gravação Segura das Perguntas & Recuperação de Erros | ✅ Concluído tecnicamente; aguardando validação |
+| 5.2 — Tema dos Estandartes na Configuração | ✅ Concluído e validado pelo usuário |
+| 5.3 — Bíblia 3D no Menu Inicial | ✅ Concluído e validado pelo usuário |
+| 5.4 — Layout Único do Livro Aberto | ✅ Concluído tecnicamente; aguardando validação |
+| 5.5 — Virada Realista das Folhas | ✅ Concluído tecnicamente; aguardando validação |
+| 5.6 — Abertura Contínua & Encaixe do Livro | ✅ Concluído e validado pelo usuário |
 | 6 — Mural de Perguntas | ⏳ Pendente |
 | 7 — Tela de Pergunta, Cronômetro & Controles do Apresentador | ⏳ Pendente |
 | 8 — Pontuação Secreta, Roubo, Desfazer & Salvamento Automático | ⏳ Pendente |

@@ -1,9 +1,19 @@
 import { app, BrowserWindow, Menu } from 'electron';
 import path from 'node:path';
+import { mkdirSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { registerQuestionsIpc } from './questionsIpc';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// O isolamento dos testes deve valer também para os arquivos próprios do aplicativo.
+const customUserData = app.commandLine.getSwitchValue('user-data-dir');
+if (customUserData) {
+  const userData = path.resolve(customUserData);
+  mkdirSync(userData, { recursive: true });
+  app.setPath('userData', userData);
+  app.setPath('sessionData', userData);
+}
 
 // Em desenvolvimento o vite-plugin-electron injeta a URL do servidor do Vite
 const DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL;
@@ -54,17 +64,30 @@ function createWindow() {
   }
 }
 
-Menu.setApplicationMenu(null);
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  Menu.setApplicationMenu(null);
 
-app.whenReady().then(() => {
-  registerQuestionsIpc(isTrustedUrl);
-  createWindow();
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  app.on('second-instance', () => {
+    const win = BrowserWindow.getAllWindows()[0];
+    if (win) {
+      if (win.isMinimized()) win.restore();
+      win.show();
+      win.focus();
+    }
   });
-});
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
+  app.whenReady().then(() => {
+    registerQuestionsIpc(isTrustedUrl);
+    createWindow();
+
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
+  });
+
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit();
+  });
+}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import clsx from 'clsx';
 import type { Difficulty, Question } from '@/types/game';
 import { appendQuestions, upsertQuestion } from '@/game/questions';
@@ -31,6 +31,10 @@ export default function QuestionManager({ onBack }: { onBack: () => void }) {
   const [form, setForm] = useState<FormState>(null);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [toast, setToast] = useState<Toast>(null);
+  const [busy, setBusy] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [bookRevision, setBookRevision] = useState(0);
+  const operationPending = useRef(false);
 
   const notify = (kind: 'success' | 'error', text: string) => setToast({ kind, text });
 
@@ -41,6 +45,9 @@ export default function QuestionManager({ onBack }: { onBack: () => void }) {
   }, [toast]);
 
   const reload = useCallback(async () => {
+    if (operationPending.current) return;
+    operationPending.current = true;
+    setBusy(true);
     setLoad({ status: 'loading' });
     try {
       const result = await storage.load();
@@ -49,6 +56,9 @@ export default function QuestionManager({ onBack }: { onBack: () => void }) {
       setLoad({ status: 'ok' });
     } catch (error) {
       setLoad({ status: 'invalid', error: errorMessage(error) });
+    } finally {
+      operationPending.current = false;
+      setBusy(false);
     }
   }, []);
 
@@ -56,22 +66,46 @@ export default function QuestionManager({ onBack }: { onBack: () => void }) {
     reload();
   }, [reload]);
 
-  /** Atualiza a lista e grava no arquivo */
+  const beginOperation = () => {
+    if (operationPending.current) return false;
+    operationPending.current = true;
+    setBusy(true);
+    return true;
+  };
+
+  const endOperation = () => {
+    operationPending.current = false;
+    setBusy(false);
+  };
+
+  /** A lista só muda depois da confirmação da gravação. */
   const persist = async (next: Question[], successText: string) => {
-    setQuestions(next);
+    if (!beginOperation()) return false;
+    setSaveError(null);
     try {
       await storage.save(next);
+      setQuestions(next);
       notify('success', successText);
+      return true;
     } catch (error) {
-      notify('error', `Não foi possível salvar: ${errorMessage(error)}`);
+      const message = `Não foi possível salvar: ${errorMessage(error)}`;
+      setSaveError(message);
+      notify('error', message);
+      return false;
+    } finally {
+      endOperation();
     }
   };
 
   const replaceAll = async (next: Question[], successText: string) => {
+    if (!beginOperation()) return;
     setConfirmation(null);
     try {
       const { questions: saved, backupPath } = await storage.replace(next);
       setQuestions(saved);
+      setLoad({ status: 'ok' });
+      setFilter('todas');
+      setBookRevision((revision) => revision + 1);
       notify(
         'success',
         backupPath
@@ -80,6 +114,8 @@ export default function QuestionManager({ onBack }: { onBack: () => void }) {
       );
     } catch (error) {
       notify('error', `Não foi possível substituir: ${errorMessage(error)}`);
+    } finally {
+      endOperation();
     }
   };
 
@@ -125,14 +161,16 @@ export default function QuestionManager({ onBack }: { onBack: () => void }) {
     });
   };
 
-  const onSaveQuestion = (saved: Question, addAnother: boolean) => {
+  const onSaveQuestion = async (saved: Question, addAnother: boolean) => {
     const isEdit = Boolean(form?.question);
     const next = upsertQuestion(questions, saved);
-    void persist(next, isEdit ? 'Pergunta atualizada.' : 'Pergunta adicionada.');
-    setForm(addAnother ? { key: Date.now() } : null);
+    if (await persist(next, isEdit ? 'Pergunta atualizada.' : 'Pergunta adicionada.')) {
+      setForm(addAnother ? { key: Date.now() } : null);
+    }
   };
 
   const handleImport = async () => {
+    if (!beginOperation()) return;
     try {
       const imported = await storage.importFile();
       if (!imported) return; // cancelado pelo usuário
@@ -145,9 +183,9 @@ export default function QuestionManager({ onBack }: { onBack: () => void }) {
           <div className="space-y-2 text-xs text-[#5c4738] font-serif">
             <p>Escolha como deseja aplicar as perguntas importadas:</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li>
+              {load.status === 'ok' && <li>
                 <strong className="text-[#1c1917]">Adicionar às existentes:</strong> acrescenta as perguntas novas ao final de cada nível de dificuldade.
-              </li>
+              </li>}
               <li>
                 <strong className="text-[#1c1917]">Substituir todas:</strong> substitui o banco atual pelas importadas (com backup automático).
               </li>
@@ -162,9 +200,9 @@ export default function QuestionManager({ onBack }: { onBack: () => void }) {
               void replaceAll(valid, `${count} perguntas importadas.`);
             },
           },
-          {
+          ...(load.status === 'ok' ? [{
             label: 'Adicionar às existentes',
-            variant: 'primary',
+            variant: 'primary' as const,
             onClick: () => {
               setConfirmation(null);
               void persist(
@@ -172,19 +210,24 @@ export default function QuestionManager({ onBack }: { onBack: () => void }) {
                 `${count} perguntas adicionadas ao banco.`,
               );
             },
-          },
+          }] : []),
         ],
       });
     } catch (error) {
       notify('error', `Não foi possível importar: ${errorMessage(error)}`);
+    } finally {
+      endOperation();
     }
   };
 
   const handleExport = async () => {
+    if (!beginOperation()) return;
     try {
       if (await storage.exportFile(questions)) notify('success', 'Perguntas exportadas com sucesso.');
     } catch (error) {
       notify('error', `Não foi possível exportar: ${errorMessage(error)}`);
+    } finally {
+      endOperation();
     }
   };
 
@@ -206,25 +249,31 @@ export default function QuestionManager({ onBack }: { onBack: () => void }) {
     .filter(({ q }) => filter === 'todas' || q.difficulty === filter);
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden">
+    <div className="flex h-full w-full flex-col overflow-hidden" aria-busy={busy}>
       {/* Visualização Canônica no Estilo Bíblia Sagrada */}
-      <BibleLayout
-        onBack={onBack}
-        load={load}
-        questions={questions}
-        visible={visible}
-        filter={filter}
-        counts={counts}
-        setFilter={setFilter}
-        onOpenFolder={openFolder}
-        onImport={handleImport}
-        onExport={handleExport}
-        onRestore={askRestore}
-        onNewQuestion={() => setForm({ key: Date.now() })}
-        onEditQuestion={(q) => setForm({ question: q, key: Date.now() })}
-        onDeleteQuestion={askDelete}
-        onReload={reload}
-      />
+      <fieldset disabled={busy || load.status === 'loading' || Boolean(form) || Boolean(confirmation)} className="contents">
+        <BibleLayout
+          key={bookRevision}
+          disabled={busy || Boolean(form) || Boolean(confirmation)}
+          onBack={onBack}
+          load={load}
+          questions={questions}
+          visible={visible}
+          filter={filter}
+          counts={counts}
+          setFilter={setFilter}
+          onOpenFolder={openFolder}
+          onImport={handleImport}
+          onExport={handleExport}
+          onRestore={askRestore}
+          onNewQuestion={() => { setSaveError(null); setForm({ key: Date.now() }); }}
+          onEditQuestion={(q) => { setSaveError(null); setForm({ question: q, key: Date.now() }); }}
+          onDeleteQuestion={askDelete}
+          onReload={reload}
+        />
+      </fieldset>
+
+      {busy && <p role="status" className="fixed bottom-6 left-6 z-50 rounded-lg border border-[#c5a059] bg-[#faf6ee] px-4 py-2 text-sm text-[#3d2f26] dark:bg-[#1a1410] dark:text-[#ede6d8]">Aguarde, processando perguntas…</p>}
 
       {/* Formulário Modal de Criação / Edição de Versículo */}
       {form && (
@@ -237,6 +286,8 @@ export default function QuestionManager({ onBack }: { onBack: () => void }) {
               : undefined
           }
           onSave={onSaveQuestion}
+          saving={busy}
+          saveError={saveError}
           onClose={() => setForm(null)}
         />
       )}

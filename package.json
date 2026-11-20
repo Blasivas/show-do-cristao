@@ -13,6 +13,7 @@
     "build": "tsc && vite build",
     "start": "electron .",
     "test": "vitest run",
+    "test:electron": "node scripts/test-electron.mjs",
     "test:watch": "vitest",
     "typecheck": "tsc",
     "preview": "vite preview"

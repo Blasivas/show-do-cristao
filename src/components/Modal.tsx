@@ -7,23 +7,25 @@ interface ModalProps {
   children: ReactNode;
   footer?: ReactNode;
   className?: string;
+  busy?: boolean;
 }
 
 /** Janela sobreposta no estilo Caderno de Escriba / Bíblia. Esc ou clique fora fecham. */
-export default function Modal({ title, onClose, children, footer, className }: ModalProps) {
+export default function Modal({ title, onClose, children, footer, className, busy = false }: ModalProps) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-6 backdrop-blur-xs font-serif"
-      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
+      onMouseDown={(e) => !busy && e.target === e.currentTarget && onClose()}
       onKeyDown={(e) => {
         if (e.key !== 'Escape') return;
         e.stopPropagation();
-        onClose();
+        if (!busy) onClose();
       }}
     >
       <div
         role="dialog"
         aria-modal="true"
+        aria-busy={busy}
         aria-label={title}
         className={clsx(
           'flex max-h-[90vh] w-full max-w-lg flex-col rounded-2xl border-2 border-[#c5a059]/60 bg-[#faf6ee] text-[#1c1917] dark:bg-[#1a1410] dark:text-[#ede6d8] dark:border-[#c5a059]/50 shadow-[0_25px_60px_rgba(0,0,0,0.85)] overflow-hidden',
@@ -36,6 +38,8 @@ export default function Modal({ title, onClose, children, footer, className }: M
             {title}
           </h2>
           <button
+            type="button"
+            disabled={busy}
             onClick={onClose}
             className="rounded p-1 text-[#5c4738] hover:bg-black/10 hover:text-[#1c1917] dark:text-[#a89682] dark:hover:bg-white/10 dark:hover:text-amber-200 transition-colors"
             title="Fechar"

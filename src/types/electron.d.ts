@@ -1,10 +1,10 @@
 // API exposta pelo electron/preload.ts via contextBridge
 interface QuestionsFileApi {
-  /** Conteúdo do arquivo de perguntas, ou `null` se ele ainda não existir */
-  read(): Promise<string | null>;
+  /** Lê o banco ou o cria com o conteúdo padrão, em uma única operação. */
+  readOrCreate(defaultContent: string): Promise<{ content: string; createdDefaults: boolean }>;
   write(content: string): Promise<void>;
-  /** Copia o arquivo atual para um backup e retorna o caminho (ou `null` se não houver arquivo) */
-  backup(): Promise<string | null>;
+  /** Guarda backup e substitui o banco juntos; retorna o caminho do backup, ou `null` se o banco não existia. */
+  replace(content: string): Promise<string | null>;
   /** Abre a janela "Abrir arquivo" e retorna o conteúdo escolhido, ou `null` se cancelado */
   importFile(): Promise<string | null>;
   /** Abre a janela "Salvar como"; retorna `false` se cancelado */

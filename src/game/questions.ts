@@ -17,6 +17,16 @@ const normalize = (value: string) =>
 
 const isFilledString = (value: unknown): value is string => typeof value === 'string' && value.trim() !== '';
 
+/** A importação e o formulário aplicam as mesmas regras às alternativas. */
+const validateOptions = (options: string[]) => {
+  const normalized = options.map(normalize);
+  return options.map((option, i) => {
+    if (!option.trim()) return `Preencha a alternativa ${LETTERS[i]}.`;
+    if (normalized.indexOf(normalized[i]) !== i) return `A alternativa ${LETTERS[i]} repete outra alternativa.`;
+    return undefined;
+  });
+};
+
 /**
  * Lê e valida o conteúdo do arquivo de perguntas, convertendo para o formato interno.
  * Lança um erro em português indicando o número da pergunta com problema.
@@ -36,6 +46,8 @@ export function parseQuestions(raw: unknown): Question[] {
     if (!Array.isArray(alternativas) || alternativas.length !== 4 || !alternativas.every(isFilledString)) {
       fail('são obrigatórias exatamente 4 alternativas preenchidas.');
     }
+    const optionError = validateOptions(alternativas!).find(Boolean);
+    if (optionError) fail(optionError);
 
     const correctIndex = LETTERS.indexOf(String(entry.correta ?? '').trim().toUpperCase() as (typeof LETTERS)[number]);
     if (correctIndex === -1) fail('a resposta correta deve ser "A", "B", "C" ou "D".');
@@ -100,14 +112,9 @@ export const draftFromQuestion = (q: Question): QuestionDraft => ({
 });
 
 export function validateDraft(draft: QuestionDraft): DraftErrors {
-  const trimmed = draft.options.map((o) => normalize(o));
   return {
     text: draft.text.trim() ? undefined : 'Escreva o enunciado da pergunta.',
-    options: draft.options.map((option, i) => {
-      if (!option.trim()) return `Preencha a alternativa ${LETTERS[i]}.`;
-      if (trimmed.indexOf(trimmed[i]) !== i) return `A alternativa ${LETTERS[i]} repete outra alternativa.`;
-      return undefined;
-    }),
+    options: validateOptions(draft.options),
     correct: draft.correctIndex === null ? 'Marque qual é a alternativa correta.' : undefined,
     difficulty: draft.difficulty === null ? 'Escolha a dificuldade.' : undefined,
   };

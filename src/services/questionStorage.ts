@@ -29,12 +29,7 @@ export function createQuestionStorage(api: QuestionsFileApi) {
      * Se o arquivo estiver fora de ordem (ex.: editado à mão), ele é regravado já ordenado.
      */
     async load(): Promise<LoadResult> {
-      const content = await api.read();
-      if (content === null) {
-        const questions = getDefaultQuestions();
-        await save(questions);
-        return { status: 'ok', questions, createdDefaults: true };
-      }
+      const { content, createdDefaults } = await api.readOrCreate(stringifyQuestions(getDefaultQuestions()));
       let parsed: Question[];
       try {
         parsed = parseQuestionsJson(content);
@@ -43,14 +38,13 @@ export function createQuestionStorage(api: QuestionsFileApi) {
       }
       const questions = sortByDifficulty(parsed);
       if (!sameOrder(parsed, questions)) await save(questions);
-      return { status: 'ok', questions, createdDefaults: false };
+      return { status: 'ok', questions, createdDefaults };
     },
 
     /** Substitui todas as perguntas (restaurar padrão, importar), guardando antes uma cópia do arquivo atual */
     async replace(questions: Question[]): Promise<{ questions: Question[]; backupPath: string | null }> {
-      const backupPath = await api.backup();
       const sorted = sortByDifficulty(questions);
-      await save(sorted);
+      const backupPath = await api.replace(stringifyQuestions(sorted));
       return { questions: sorted, backupPath };
     },
 
@@ -66,17 +60,18 @@ export function createQuestionStorage(api: QuestionsFileApi) {
 
 export type QuestionStorage = ReturnType<typeof createQuestionStorage>;
 
-/** Carrega as perguntas salvas para a partida com fallback automático para as perguntas padrão */
+/** Carrega o banco da partida; qualquer erro deve ser corrigido antes de iniciar a gincana. */
 export async function getGameQuestions(): Promise<Question[]> {
-  if (typeof window !== 'undefined' && window.showDoCristao?.questions) {
-    try {
-      const storage = createQuestionStorage(window.showDoCristao.questions);
-      const res = await storage.load();
-      if (res.status === 'ok') return res.questions;
-    } catch {
-      // Em caso de erro, usa as perguntas padrão
-    }
+  if (typeof window === 'undefined' || !window.showDoCristao?.questions) {
+    throw new Error('Não foi possível acessar o armazenamento de perguntas do aplicativo.');
   }
-  return getDefaultQuestions();
+  try {
+    const storage = createQuestionStorage(window.showDoCristao.questions);
+    const result = await storage.load();
+    if (result.status === 'invalid') throw new Error(result.error);
+    return result.questions;
+  } catch (error) {
+    throw new Error(`Não foi possível carregar as perguntas: ${errorMessage(error)}`);
+  }
 }
 

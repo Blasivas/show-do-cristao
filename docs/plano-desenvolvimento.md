@@ -22,6 +22,12 @@ Cada etapa também traz uma seção **"Pontos a validar"**: são dúvidas e suge
 - [x] **Etapa 4:** Armazenamento Local & Gerenciamento de Perguntas (CRUD do Apresentador) *(Concluído)*
 - [x] **Etapa 4.1:** Refinamento da Identidade Visual & Design System Bíblia Sagrada *(Concluído com pendência)*
 - [x] **Etapa 5:** Estado Global, Navegação & Tela de Configuração da Partida *(Concluído)*
+- [x] **Etapa 5.1:** Gravação Segura das Perguntas & Recuperação de Erros *(Concluído tecnicamente em 14/11/2026; aguardando validação do usuário)*
+- [x] **Etapa 5.2:** Tema dos Estandartes na Configuração *(Concluído e validado pelo usuário em 14/11/2026)*
+- [x] **Etapa 5.3:** Bíblia 3D no Menu Inicial *(Concluído e validado pelo usuário em 14/11/2026)*
+- [x] **Etapa 5.4:** Layout Único do Livro Aberto *(Concluído tecnicamente em 14/11/2026; aguardando validação do usuário)*
+- [x] **Etapa 5.5:** Virada Realista das Folhas *(Concluído tecnicamente em 20/11/2026; aguardando validação do usuário)*
+- [x] **Etapa 5.6:** Abertura Contínua & Encaixe do Livro *(Concluído e validado pelo usuário em 20/11/2026)*
 - [ ] **Etapa 6:** O Mural de Perguntas (Grade Interativa de Números)
 - [ ] **Etapa 7:** Tela de Pergunta Ativa, Cronômetro & Controles do Apresentador
 - [ ] **Etapa 8:** Pontuação Secreta, Roubo a 50%, Desfazer & Salvamento Automático
@@ -50,12 +56,12 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 | D9 | 2026-10-05 | Migração para o **Tailwind CSS 4** ainda no início do desenvolvimento (menos telas para revisar), usando o plugin `@tailwindcss/vite` no lugar do PostCSS. A configuração do tema passa a ficar no `@theme` do `src/index.css`. |
 | D10 | 2026-10-05 | Atualização para o **Vite 8** (Rolldown/Oxc) ainda no início do desenvolvimento. Remove os avisos do `vite-plugin-electron`, a dependência do `esbuild` e acelera os builds. |
 | D11 | 2026-10-06 | **Ordem das equipes:** as equipes se revezam a cada pergunta (A, B, A, B…), **independentemente de roubo**. Ex.: A erra a pergunta 1 e B rouba (acertando ou não); a pergunta 2 é de B. |
-| D12 | 2026-10-06 | O apresentador **define a ordem das equipes** na tela de configuração (arrastando para cima/baixo); a primeira da lista começa e a ordem se reveza a partir dela. |
+| D12 | 2026-10-06 | O apresentador **define a ordem das equipes** na tela de configuração; a primeira da lista começa e a ordem se reveza a partir dela. A interação inicialmente prevista por arrastar foi implementada com **botões subir/descer** na Etapa 5. |
 | D13 | 2026-10-06 | **Número de equipes configurável, de 2 a 4.** O roubo vale sempre 50%: **5, 10 ou 15 pontos** (sem arredondamento, já que as pontuações são fixas em 10/20/30). |
 | D14 | 2026-10-06 | A pergunta tem apenas **enunciado, 4 alternativas, resposta correta e dificuldade**. Sem categoria e sem referência bíblica, para facilitar a criação de perguntas. |
 | D15 | 2026-10-06 | As perguntas ficam em um **arquivo JSON separado** (`src/data/perguntas.json`), com chaves em português e a resposta correta como letra (A–D), fácil de editar à mão ou gerar por IA no futuro. As 20 perguntas atuais são dados de teste. |
 | D16 | 2026-10-06 | **Roubo sempre pela próxima equipe na ordem.** Ex. com A, B e C: A erra e B pode roubar; a próxima pergunta é de B; se B errar, C pode roubar. |
-| D17 | 2026-10-06 | A configuração da partida fica em **uma única tela**: quantidade e nomes das equipes, ordem (arrastar), roubo ativo e tempo para responder. |
+| D17 | 2026-10-06 | A configuração da partida fica em **uma única tela**: quantidade e nomes das equipes, ordem (botões subir/descer, conforme a Etapa 5), roubo ativo e tempo para responder. |
 | D18 | 2026-10-13 | **Só existirá o aplicativo instalado (Electron).** O modo navegador (`npm run dev:web`) foi removido. |
 | D19 | 2026-10-13 | **Importar e exportar** perguntas em JSON já na Etapa 4. Ao importar, o apresentador escolhe entre *substituir todas* ou *adicionar às atuais* (cada uma no final do grupo da sua dificuldade, D24). |
 | D20 | 2026-10-13 | As perguntas são **salvas automaticamente ao fechar o formulário** com Salvar (não a cada tecla digitada). Excluir, restaurar e importar salvam na hora, após confirmação. |
@@ -74,6 +80,20 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 | D33 | 2026-10-25 | **Animação 3D Realista de Abertura da Bíblia na Transição do Menu Inicial.** A transição entre o menu inicial (`MainMenu.tsx` - Capa Fechada) e as janelas de Configuração da Gincana (`GameConfig.tsx`) ou Banco de Perguntas (`QuestionManager.tsx`) ocorre mediante uma animação tridimensional física da capa se abrindo em perspectiva 3D (`perspective: 2400px`). Ao acionar "INICIAR GINCANA" ou "Configurar Perguntas", a Bíblia sincroniza um deslocamento horizontal suave (`translateX(50%)`) enquanto a capa gira $-180^\circ$ em torno da lombada (`transform-origin: left center`), acompanhada de projeção de sombra dinâmica (`animate-cover-shadow`), revelação do fitilho de cetim no centro e reprodução do efeito sonoro sintetizado de abertura solene e farfalhar de páginas (`playBookOpenSound()`). As páginas internas do bifólio revelado são folhas limpas em pergaminho/papel sagrado (sem textos preliminares), garantindo que o carregamento da tela de destino ocorra com total naturalidade sem sobreposição ou troca abrupta de texto. |
 | D34 | 2026-10-25 | **Animação 3D de Fechamento da Bíblia ao Retornar ao Menu Inicial.** Ao retornar para a tela inicial (`MainMenu.tsx`) a partir de qualquer janela (`GameConfig.tsx` ou `QuestionManager.tsx`), a Bíblia inicia no estado de bifólio aberto e executa a animação tridimensional inversa de fechamento: a capa gira de $-180^\circ$ de volta a $0^\circ$ cobrindo as páginas, a lombada translada de volta ao centro (`translateX(0)`), a sombra de fechamento (`animate-cover-close-shadow`) projeta-se sobre o volume e é disparado o efeito sonoro de fechamento solene (`playBookCloseSound()`) combinando o farfalhar das folhas ao recolher e o impacto aveludado do couro nobre se fechando. O estado prévio é rastreado automaticamente no `GameContext`, garantindo que na primeira abertura do app o livro permaneça fechado e apenas execute o fechamento quando o usuário estiver efetivamente retornando ao menu. |
 | D35 | 2026-10-25 | **Unificação do Fundo da Aplicação no Modo Claro e Noturno.** O fundo externo que envolve a Bíblia é rigorosamente padronizado em todas as telas (`MainMenu`, `GameConfig`, `QuestionManager`/`BibleLayout` e `BoardPlaceholder`), garantindo continuidade visual sem quebras de cor: no Modo Claro, adota-se o degradê quente de papel bíblia/marfim (`from-[#fdfbf7] via-[#faf7f0] to-[#f3ebd9]`) tanto com o livro fechado quanto com ele aberto, e as barras superiores adotam acabamento translúcido claro com tipografia e bordas sépia; no Modo Noturno, adota-se o degradê solene de códice escuro/madeira de púlpito (`dark:from-[#18110b] dark:via-[#120a06] dark:to-[#0a0503]`). O `html, body` do `src/index.css` foi atualizado para eliminar fundos pretos residuais no modo claro. |
+| D36 | 2026-11-14 | **Uma instância do aplicativo por vez.** Ao abrir o app novamente, a janela existente é trazida para frente e restaurada se estiver minimizada. A medida evita sobrescritas entre duas instâncias com cópias diferentes do banco de perguntas. |
+| D37 | 2026-11-14 | **Banco inválido ou inacessível bloqueia o início da gincana.** O app informa o problema e oferece acesso ao cadastro para corrigir, importar ou restaurar. As perguntas padrão só são criadas automaticamente na primeira utilização, quando o arquivo ainda não existe; falhas não substituem silenciosamente o banco pelas perguntas de teste. |
+| D38 | 2026-11-14 | **Validação de alternativas consistente entre formulário e JSON.** As quatro alternativas devem ser diferentes, comparadas sem acentos, diferenças entre maiúsculas/minúsculas ou espaços no início e fim. A regra vale na importação e na leitura de arquivos existentes; uma pergunta inválida recusa a importação inteira e informa seu número, preservando o banco atual. |
+| D39 | 2026-11-14 | **Paginação do cadastro após alterações.** Editar ou excluir mantém a folha atual enquanto ela existir; se ela deixar de existir, mostra a última folha válida. Substituir todo o banco ou restaurar o padrão volta à primeira folha. |
+| D40 | 2026-11-14 | **Estandartes da configuração acompanham o tema.** No modo claro, os cartões das equipes usam fundos suavemente coloridos em verde, âmbar, carmesim e azul, com nomes em tinta escura e campos brancos/marfim. Numeração, legendas, bordas e setas também recebem contraste adequado ao tema; no modo noturno, utilizam a paleta escura. A correção usa variantes próprias da configuração da partida. |
+| D41 | 2026-11-14 | **Acabamento da Bíblia no menu inicial.** A capa usa couro marrom escuro com granulação fina e dourado envelhecido, com vincos e relevo discretos. O acabamento é produzido com recursos locais, sem depender de texturas da internet. |
+| D42 | 2026-11-14 | **Volume e pose da Bíblia fechada.** O modelo apresenta lombada arredondada, bloco de páginas com corte dourado e contracapa com espessura visível. A posição de repouso fica levemente inclinada, em perspectiva de três quartos, mantendo a leitura do título e o acesso aos botões. |
+| D43 | 2026-11-14 | **Movimento suave pelo mouse.** A Bíblia acompanha o ponteiro sobre uma área estável com inclinação discreta de aproximadamente 4–6°, reflexo e sombra correspondentes, e retorna ao repouso ao sair da área. Não há balanço automático contínuo. O movimento é neutralizado durante as transições e diálogos e respeita a redução de movimento e a navegação por teclado. |
+| D44 | 2026-11-14 | **Layout compartilhado do livro aberto.** As telas Perguntas e Configuração da gincana usam a mesma estrutura de dimensões, margens, encadernação, sombras, fitilho, medianiz, cabeçalho e rodapé. A barra superior organiza Voltar, título, ações da função e tema nas mesmas posições; as ferramentas de pasta, importação, exportação e restauração pertencem ao cadastro. Filtros e paginação ficam dentro do livro de perguntas. Esta decisão atualiza a organização visual anterior do cabeçalho, preservando quatro perguntas por página e as funções de cada tela. |
+| D45 | 2026-11-14 | **Ações principais no mesmo lugar.** Os botões **Nova pergunta** e **Iniciar gincana** ficam no canto superior direito do cabeçalho, com o mesmo estilo e dimensões de controle. O resumo da partida permanece dentro da página de configuração. A navegação atual é mantida; não são acrescentadas abas entre as funções nesta etapa. |
+| D46 | 2026-11-20 | **Virada completa de uma folha sobre a lombada.** No cadastro de perguntas, a folha atravessa o centro em aproximadamente 180°, com frente e verso, leve curvatura e sombras que acompanham o papel. O conteúdo da folha em movimento permanece estável e o conteúdo seguinte é revelado por baixo, evitando a troca de texto no meio do giro. No avanço, a folha direita pousa à esquerda; no retorno, ocorre o movimento inverso. Esta decisão atualiza a animação e a troca de conteúdo descritas na D29. |
+| D47 | 2026-11-20 | **Ritmo natural e navegação preservada.** A virada começa com duração de aproximadamente 650 ms, com início suave, passagem mais rápida pelo centro e acomodação no final. Setas, atalhos de teclado e seletor de folhas continuam disponíveis, com proteção contra viradas sobrepostas e cancelamento seguro quando filtros, banco ou tela mudarem. A preferência de redução de movimento utiliza paginação sem giro. O efeito funciona nos dois temas, sem novas dependências. |
+| D48 | 2026-11-20 | **Abertura coordenada da Bíblia.** Inclinação, abertura da capa, deslocamento e sombras seguem a mesma progressão, com duração inicial de aproximadamente 800 ms, início suave e acomodação no final. O movimento parte da pose visível no momento do clique, e a navegação é concluída quando a animação termina. Esta decisão refina a sequência de abertura descrita na D33, preservando couro, volume e interação pelo mouse. |
+| D49 | 2026-11-20 | **Encaixe contínuo no livro de destino.** Ao abrir Perguntas ou Configuração da gincana, o livro se ajusta gradualmente à posição e ao tamanho reais das páginas de destino, com revelação suave do conteúdo. O retorno ao menu acompanha o caminho inverso de fechamento, refinando a D34. Os controles ficam protegidos durante a transição, a redução de movimento continua respeitada e o efeito funciona nos dois temas, sem novas dependências. |
 
 ---
 
@@ -214,7 +234,7 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 - **Validação:** Navegação pelas folhas de perguntas aprovada, 100% sem scrollbars e com distribuição harmônica validada via CDP e testes unitários.
 
 **Pontos em aberto / pendências:**
-- **Melhoria da animação ao virar a página:** Ficou registrado como pendência para aprimoramento futuro deixar a animação de passagem de páginas ainda mais fluida e orgânica.
+- **Melhoria da animação ao virar a página:** O refinamento foi implementado e conferido tecnicamente na Etapa 5.5, em 20/11/2026; permanece a validação visual do usuário na aplicação atualizada.
 
 ---
 
@@ -239,6 +259,244 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 - Sem persistência local de nomes entre partidas (decisão D31).
 - Identidades visuais aprovadas para as 4 equipes (Sarça Verde, Chama Dourada, Vinho Carmesim, Safira Celeste - D31).
 - Design System da Bíblia Sagrada aplicado à Capa Inicial e à Configuração da Partida (decisão D32).
+
+---
+
+### 🟩 Etapa 5.1: Gravação Segura das Perguntas & Recuperação de Erros `[CONCLUÍDO TECNICAMENTE — AGUARDANDO VALIDAÇÃO]`
+**Objetivo:** Garantir que o cadastro exibido corresponda ao arquivo salvo e permitir recuperar falhas sem perder o rascunho, antes de construir o mural da Etapa 6.
+
+**Escopo aprovado em 14/11/2026:**
+- [x] Executar as operações do banco em fila, com temporários exclusivos e limpeza em caso de erro, para impedir mistura de conteúdo em gravações simultâneas.
+- [x] Tratar backup e substituição como uma única operação; preservar o arquivo anterior se a gravação falhar e permitir que as tentativas seguintes funcionem.
+- [x] Proteger a criação inicial para que carregamentos simultâneos não disputem o arquivo padrão.
+- [x] Permitir uma única instância do app e trazer a janela existente para frente na segunda abertura (D36).
+- [x] Atualizar a lista e fechar ou limpar o formulário somente após salvar com sucesso; manter o conteúdo digitado e permitir nova tentativa em caso de erro.
+- [x] Mostrar **Salvando…** durante a gravação e impedir ações sobrepostas.
+- [x] Após restaurar ou substituir um arquivo inválido, sair do estado de erro e apresentar as perguntas carregadas.
+- [x] Bloquear o início da gincana com banco inválido ou inacessível, mostrar o erro e oferecer acesso ao cadastro; manter a criação automática do padrão quando o arquivo ainda não existir (D37).
+- [x] Rejeitar alternativas repetidas também nos arquivos JSON, com a mesma normalização do formulário, sem importar parcialmente um arquivo inválido (D38).
+- [x] Ajustar a folha atual quando o banco diminuir e voltar à primeira folha após substituição completa ou restauração (D39).
+- [x] Acrescentar testes de regressão para concorrência, falhas e recuperação; executar `npm test`, `npm run typecheck` e `npm run build`.
+- [x] Criar `scripts/test-electron.mjs` e o comando `npm run test:electron` para conferir os fluxos no Electron de produção com uma pasta de dados temporária, sem acessar as perguntas reais do usuário.
+- [x] Registrar a etapa, as decisões aprovadas, os comportamentos e os resultados das verificações no plano e no README.
+
+**Critérios de aceite:**
+- Escritas simultâneas resultam em um JSON completo e válido, sem mistura de conteúdo; uma falha não bloqueia a fila.
+- Falhar ao salvar preserva o banco anterior e o rascunho; a tentativa seguinte pode concluir normalmente.
+- Restaurar recupera o cadastro sem exigir recarregamento manual, e nenhuma folha fica fora do total disponível.
+- Uma gincana nunca começa silenciosamente com outro banco quando houver erro de carregamento.
+
+**Pontos validados:**
+- Uma instância por vez, restaurando e focando a janela existente (D36).
+- Banco inválido ou inacessível impede o início; banco ausente na primeira utilização recebe o padrão automaticamente (D37).
+- Alternativas repetidas são rejeitadas em importações e arquivos existentes, com indicação da pergunta (D38).
+- Manter a folha atual quando válida, ir à última válida quando necessário e voltar à primeira após substituir/restaurar (D39).
+
+**Validação técnica em 14/11/2026:**
+- `npm test`: **72 testes aprovados em 6 arquivos**, incluindo regressões de IPC com sistema de arquivos temporário, concorrência, recuperação após falha, criação inicial, backups, janela única e validação de perguntas.
+- `npm run typecheck` e `npm run build`: **aprovados**.
+- `npm run test:electron` (após `npm run build`): **14 cenários aprovados no Electron de produção, em 1280×720**, com perfil de dados temporário validado e removido ao terminar. Falhas de leitura/gravação e escolhas de arquivos são simuladas somente no processo de teste.
+- Cenários no Electron: primeira utilização; gravações concorrentes; falha de salvamento preservando rascunho, lista e arquivo, seguida de nova tentativa; bloqueio de ações durante **Salvando…**; confirmação de descarte bloqueando o formulário ao fundo e preservando o rascunho ao continuar; restauração de arquivo inválido com backup; exportação e recusa integral de importação com alternativas repetidas; filtro durante virada de página; substituição do banco voltando à primeira folha; exclusão da última pergunta de uma folha ajustando para a última válida; bloqueio da partida com JSON inválido; bloqueio com alternativas repetidas no banco existente; bloqueio após falha de leitura, sem usar o padrão; segunda instância encerrando e restaurando/focando a janela original.
+- Capturas para conferência visual em `scratch/etapa-5.1-formulario-erro.png`, `scratch/etapa-5.1-cadastro-restaurado.png` e `scratch/etapa-5.1-configuracao-erro.png` (pasta ignorada pelo Git).
+
+**Entrega:** Implementação e verificações técnicas concluídas, aguardando validação do usuário. Nenhuma nova dependência adicionada; alterações sem commit ou push, conforme solicitado.
+
+**Limites desta etapa:** A construção do mural, a correção da ordenação das equipes e as atualizações de dependências ficam para etapas próprias. A pendência de fluidez da virada de página da Etapa 4.1 continua aberta.
+
+---
+
+### 🟩 Etapa 5.2: Tema dos Estandartes na Configuração `[CONCLUÍDO E VALIDADO]`
+**Objetivo:** Fazer os cartões das equipes e seus controles acompanharem os modos Claro e Noturno na configuração da gincana, mantendo a identidade de cada equipe.
+
+**Escopo aprovado em 14/11/2026:**
+- [x] Usar fundos claros suavemente coloridos por equipe: verde, âmbar, carmesim e azul (D40).
+- [x] Ajustar nomes, campos, numeração de posição, legendas, bordas e setas de reordenação para cada tema.
+- [x] Usar variantes próprias da configuração, sem alterar os estilos compartilhados pelo mural provisório.
+- [x] Conferir a tela no Electron com quatro equipes nos modos Claro e Noturno, usando dados temporários.
+- [x] Executar as verificações apropriadas e registrar os resultados.
+- [x] Reabrir a aplicação atualizada para conferência do usuário, na configuração com quatro equipes e modo Claro, usando o perfil temporário de revisão.
+- [x] Registrar a decisão aprovada e o ajuste no plano e no README.
+
+**Ponto validado:** Fundos suavemente coloridos por equipe, em vez de cartões neutros com cor apenas nas bordas e identificações (D40).
+
+**Validação técnica em 14/11/2026:**
+- `npm test`: **72 testes aprovados em 6 arquivos**; `npm run typecheck` e `npm run build`: **aprovados**.
+- `npm run test:electron` após o build: **15 cenários aprovados no Electron de produção em 1280×720**, com dados temporários. O cenário adicional verifica os quatro cartões nos dois temas, contraste mínimo de **4,5:1** nos nomes e identificações e preservação dos nomes e da ordem ao alternar o tema.
+- Capturas dos modos Claro e Noturno conferidas: `scratch/etapa-5.2-equipes-claro.png` e `scratch/etapa-5.2-equipes-noturno.png` (pasta ignorada pelo Git).
+
+**Entrega:** Implementação e conferência técnica concluídas, aprovadas pelo usuário na aplicação atualizada em 14/11/2026. Alterações sem commit ou push.
+
+---
+
+### 🟩 Etapa 5.3: Bíblia 3D no Menu Inicial `[CONCLUÍDO E VALIDADO]`
+**Objetivo:** Dar volume e textura à Bíblia fechada do menu inicial, com movimento suave pelo mouse, preservando a navegação e o funcionamento offline.
+
+**Escopo aprovado em 14/11/2026:**
+- [x] Refinar a capa com couro marrom escuro, granulação fina, vincos discretos e dourado envelhecido (D41).
+- [x] Modelar lombada arredondada, contracapa e bloco de páginas com corte dourado, com espessura visível e pose de repouso levemente inclinada (D42).
+- [x] Implementar inclinação suave de aproximadamente 4–6° pelo mouse, reflexo e sombra correspondentes, e retorno ao repouso quando o ponteiro sair da área (D43).
+- [x] Usar uma área de interação estável e limitar o movimento para manter os botões fáceis de clicar.
+- [x] Separar a inclinação do livro das animações existentes de abertura e fechamento, neutralizando a interação durante as transições e diálogos.
+- [x] Respeitar a preferência por redução de movimento e a navegação por teclado.
+- [x] Produzir textura e volume com SVG local e CSS 3D, sem novas dependências ou recursos externos.
+- [x] Conferir o menu e a navegação no Electron nos dois temas, em 1280×720 e 1920×1080, usando dados temporários.
+- [x] Executar as verificações apropriadas e registrar seus resultados e capturas.
+- [x] Reabrir a aplicação atualizada no menu inicial para conferência do usuário, em modo Claro e com dados temporários.
+- [x] Registrar a proposta e as três escolhas aprovadas no plano, no README e no guia de identidade visual.
+
+**Pontos validados:**
+- Couro marrom escuro com granulação fina e dourado envelhecido (D41).
+- Posição inicial levemente inclinada, mostrando a espessura do livro (D42).
+- Movimento discreto pelo mouse sobre a Bíblia, sem balanço automático contínuo (D43).
+
+**Critérios de aceite:**
+- A capa fechada apresenta textura e espessura legíveis nos dois temas, com botões visíveis e acessíveis.
+- O movimento permanece limitado e retorna ao repouso ao sair da área, sem interferir nos cliques.
+- Abertura, fechamento, diálogos e navegação por teclado continuam funcionando; a preferência de redução de movimento é respeitada.
+- Textura, áudio e demais recursos do menu funcionam offline.
+
+**Implementação:** `src/pages/MainMenu.tsx` e `src/index.css` modelam o volume e as transições; `src/components/useBibleTilt.ts` controla a inclinação em quadros de animação, com offsets limitados a ±5° sobre a pose de repouso. A granulação de couro usa `src/assets/images/leather-grain.svg`, empacotado com o aplicativo. Nenhuma nova dependência foi adicionada.
+
+**Validação técnica em 14/11/2026:**
+- `npm test`: **72 testes aprovados em 6 arquivos**; `npm run typecheck` e `npm run build`: **aprovados**.
+- `npm run test:electron` após o build: **19 cenários aprovados no Electron de produção**, com dados temporários. Os quatro cenários adicionais verificam movimento real do mouse nos dois temas em 1280×720 e 1920×1080, cliques reais após inclinar a Bíblia e retorno com fechamento, bloqueio do movimento em diálogo e navegação por teclado, e redução de movimento aplicada em tempo real sem impedir a navegação.
+- Conferidas sete capturas: `scratch/etapa-5.3-menu-claro-720.png`, `scratch/etapa-5.3-menu-noturno-720.png`, `scratch/etapa-5.3-menu-claro-1080.png`, `scratch/etapa-5.3-menu-noturno-1080.png`, `scratch/etapa-5.3-menu-inclinado-claro.png`, `scratch/etapa-5.3-menu-inclinado-noturno.png` e `scratch/etapa-5.3-abertura.png` (pasta ignorada pelo Git). A abertura foi conferida também em um quadro intermediário, aos 240 ms.
+
+**Entrega:** Implementação e verificações técnicas concluídas e aprovadas pelo usuário em 14/11/2026, após conferência no menu inicial em modo Claro com dados temporários. A janela de revisão usa emulação temporária de movimento completo para permitir experimentar a inclinação pelo mouse; a emulação termina ao fechar a aplicação, sem alterar a preferência do Windows. Alterações sem commit ou push, conforme solicitado.
+
+**Conferência da preferência de movimento:** Os testes controlam `prefers-reduced-motion` somente na janela temporária do Electron, sem alterar o Windows. A abertura normal do aplicativo segue a preferência do sistema, mantendo o volume estático da Bíblia e desativando o acompanhamento do mouse quando a redução de movimento estiver ativa. Para a revisão interativa do usuário, a janela pode receber uma emulação temporária de movimento completo via CDP; essa emulação termina ao fechar a janela.
+
+**Limites desta etapa:** O ajuste concentra-se na Bíblia do menu inicial. O motor do jogo, o armazenamento e a construção do mural da Etapa 6 seguem seus próprios escopos. A pendência de fluidez da virada de folhas da Etapa 4.1 permanece aberta.
+
+---
+
+### 🟩 Etapa 5.4: Layout Único do Livro Aberto `[CONCLUÍDO TECNICAMENTE — AGUARDANDO VALIDAÇÃO]`
+**Objetivo:** Fazer o cadastro de perguntas e a configuração da gincana utilizarem o mesmo livro aberto, com uma estrutura visual compartilhada e ferramentas adequadas a cada função.
+
+**Escopo aprovado em 14/11/2026:**
+- [x] Criar `OpenBookLayout` para compartilhar o fundo, a barra superior, as dimensões do livro, a encadernação, as sombras, o fitilho, a medianiz e o rodapé.
+- [x] Criar `BookPage` para compartilhar cabeçalhos, margens, corpos e rodapés das páginas, recebendo o conteúdo e a animação apropriados a cada tela.
+- [x] Padronizar as ferramentas do cabeçalho com `BookToolbarButton`, incluindo tamanhos, acabamento, foco, rótulos e estados desabilitados.
+- [x] Compor Perguntas e Configuração da gincana com a mesma estrutura, mantendo a lógica de cadastro e de partida nos respectivos componentes.
+- [x] Organizar o cabeçalho como **Voltar → título → ações da função → ação principal → tema**, mantendo pasta, importação, exportação e restauração no cadastro (D44).
+- [x] Posicionar **Nova pergunta** e **Iniciar gincana** no mesmo canto superior direito, com o mesmo estilo; manter o resumo da partida dentro da página de configuração (D45).
+- [x] Colocar filtros e paginação dentro do livro de perguntas, com navegação compacta e acesso às folhas disponíveis.
+- [x] Preservar oito perguntas por folha aberta, quatro por página, filtros, animação de virada e navegação por teclado.
+- [x] Preservar a configuração de duas a quatro equipes, nomes, ordem, tempo, regra de roubo e início da gincana.
+- [x] Preservar os fluxos de erro, restauração, validação e bloqueio de ações durante o salvamento da Etapa 5.1.
+- [x] Executar testes, tipagem e build; conferir as duas telas nos modos Claro e Noturno em 1280×720 e 1920×1080, incluindo quatro equipes e quatro perguntas por página.
+- [x] Reabrir a aplicação atualizada com dados temporários para conferência do usuário.
+- [x] Registrar a proposta e os dois pontos aprovados no plano, no README e no guia de identidade visual.
+
+**Pontos validados:**
+- Uma estrutura visual compartilhada, com ferramentas específicas para cada função (D44).
+- Ações principais **Nova pergunta** e **Iniciar gincana** no canto superior direito, com o mesmo tratamento visual (D45).
+
+**Critérios de aceite:**
+- As duas telas apresentam o mesmo quadro de livro, cabeçalho, páginas, margens, fitilho e rodapé nas mesmas resoluções e temas.
+- A posição e o acabamento dos controles comuns e das ações principais são consistentes; as ferramentas do cadastro continuam acessíveis.
+- Quatro equipes e quatro perguntas por página ficam legíveis e acessíveis em 720p, sem cortes ou barras de rolagem externas.
+- A unificação preserva filtros, paginação, início da partida e as proteções de gravação e recuperação de erros já implementadas.
+
+**Implementação:** `src/components/OpenBookLayout.tsx` concentra o quadro e o cabeçalho compartilhados e exporta `BookPage` e `BookToolbarButton`. `BibleLayout` compõe o cadastro com filtros e paginação internos; `GameConfig` compõe as páginas de equipes e parâmetros, com o início da gincana no cabeçalho. As funções mantêm suas próprias regras e estados.
+
+**Validação técnica em 14/11/2026:**
+- `npm test`: **72 testes aprovados em 6 arquivos**; `npm run typecheck` e `npm run build`: **aprovados**.
+- `npm run test:electron` após o build: **20 cenários aprovados no Electron de produção**, com dados temporários. O novo cenário compara Perguntas e Configuração da gincana nos dois temas em 1280×720 e 1920×1080, verificando geometria comum, ações principais no cabeçalho, quatro perguntas por página, quatro equipes, controles acessíveis e início da partida pelo novo botão. As regressões anteriores continuam aprovadas.
+- Conferidas oito capturas: `scratch/etapa-5.4-perguntas-claro-720.png`, `scratch/etapa-5.4-perguntas-noturno-720.png`, `scratch/etapa-5.4-perguntas-claro-1080.png`, `scratch/etapa-5.4-perguntas-noturno-1080.png`, `scratch/etapa-5.4-configuracao-claro-720.png`, `scratch/etapa-5.4-configuracao-noturno-720.png`, `scratch/etapa-5.4-configuracao-claro-1080.png` e `scratch/etapa-5.4-configuracao-noturno-1080.png` (pasta ignorada pelo Git). Não foram observados cortes ou problemas de layout nos dois temas e resoluções.
+- Revisão independente de `GameConfig` e do layout compartilhado concluída sem achados acionáveis.
+
+**Entrega:** Implementação e verificações técnicas concluídas; a aplicação atualizada foi reaberta na tela Perguntas em modo Claro, com oito perguntas visíveis no bifólio e dados temporários, para validação visual do usuário. As perguntas reais foram preservadas. Alterações sem commit ou push, conforme solicitado.
+
+**Limites desta etapa:** O trabalho unifica a estrutura visual das duas telas e mantém a navegação atual, sem acrescentar abas. O motor do jogo, o armazenamento e a construção do mural da Etapa 6 seguem seus próprios escopos.
+
+---
+
+### 🟩 Etapa 5.5: Virada Realista das Folhas `[CONCLUÍDO TECNICAMENTE — AGUARDANDO VALIDAÇÃO]`
+**Objetivo:** Dar à passagem das folhas do cadastro de perguntas a aparência de papel virando sobre a lombada, com conteúdo contínuo e profundidade durante todo o movimento.
+
+**Escopo aprovado em 20/11/2026:**
+- [x] Apresentar a proposta e obter aprovação dos dois pontos recomendados antes de alterar o código.
+- [x] Implementar virada completa de aproximadamente 180°, com frente e verso, mantendo o conteúdo da folha em movimento e revelando o conteúdo seguinte por baixo (D46).
+- [x] Simular leve curvatura do papel, iluminação e sombra projetada ao longo da virada, com acabamentos próprios dos modos Claro e Noturno.
+- [x] Ajustar a duração inicial para aproximadamente 650 ms, com início suave, passagem mais rápida pelo centro e acomodação no final; inverter o movimento ao voltar (D47).
+- [x] Preservar setas, teclado, seletor de folhas, quatro perguntas por página e a estrutura visual compartilhada da Etapa 5.4.
+- [x] Impedir viradas sobrepostas e cancelar a camada de animação com segurança quando filtros, banco de perguntas ou tela mudarem.
+- [x] Manter as cópias usadas na animação sem interação e ocultas para tecnologias assistivas.
+- [x] Respeitar a redução de movimento com paginação sem giro, inclusive quando a preferência mudar durante uma virada.
+- [x] Executar testes, tipagem e build; verificar avanço, retorno, limites da paginação, cliques rápidos e cancelamentos no Electron com dados temporários.
+- [x] Conferir fases intermediárias da animação nos dois temas em 1280×720 e 1920×1080, sem texto espelhado, cortes ou flashes.
+- [x] Atualizar a documentação e reabrir a aplicação para conferência do usuário.
+
+**Pontos validados:**
+- Virada completa sobre a lombada, com frente e verso, curvatura discreta e sombras acompanhando a folha (D46).
+- Movimento natural de aproximadamente 650 ms, invertido no retorno, mantendo os controles atuais e respeitando a redução de movimento (D47).
+
+**Critérios de aceite:**
+- A folha ativa atravessa a lombada e pousa no lado oposto; o conteúdo mantém a orientação correta nas duas faces.
+- A página abaixo é revelada progressivamente, sem troca visível de texto no meio do movimento.
+- A paginação termina na folha solicitada e permanece utilizável após cliques rápidos, mudanças de filtro, alterações no banco e saída da tela.
+- O efeito preserva o alinhamento do livro compartilhado, a legibilidade e o uso dos controles nos dois temas e resoluções.
+- Com redução de movimento, a troca da folha ocorre sem giro 3D.
+
+**Implementação:** `src/components/PageTurnLayer.tsx` compõe a folha com segmentos articulados, faces de frente e verso, iluminação e sombra projetada. O acabamento mantém a continuidade entre os segmentos durante o giro. A camada visual fica sobre as páginas fixas do `OpenBookLayout`, oculta para tecnologias assistivas e sem interação. `BibleLayout` conserva o índice de origem até concluir o movimento, invalida a virada quando o banco, filtro ou estado de interação muda e respeita a redução de movimento, inclusive durante a animação.
+
+**Validação técnica em 20/11/2026:**
+- `npm test`: **72 testes aprovados em 6 arquivos**; `npm run typecheck` e `npm run build`: **aprovados**.
+- `npm run test:electron` após o acabamento final: **24 cenários aprovados no Electron de produção**, com dados temporários. A suíte mantém as regressões anteriores e verifica fases intermediárias de avanço e retorno, frente e verso, controles durante a virada, cancelamentos e redução de movimento, inclusive alterada durante a animação.
+- Conferidas **16 capturas das fases intermediárias**, em `scratch/etapa-5.5-*.png` (pasta ignorada pelo Git), cobrindo frente e verso no avanço e retorno, nos dois temas e em 1280×720 e 1920×1080. Continuidade dos segmentos e orientação do conteúdo aprovadas na conferência visual.
+- Revisão independente da integração concluída sem achados funcionais acionáveis.
+
+**Conferência da preferência de movimento:** O aplicativo segue a preferência de redução de movimento do sistema. Quando ela está ativa, a paginação troca de folha sem giro. Para o usuário conferir o efeito completo, somente a janela temporária de revisão pode receber uma emulação de movimento completo via CDP, sem alterar as configurações do Windows; essa emulação encerra ao fechar a janela.
+
+**Entrega:** Implementação e verificações técnicas concluídas; aplicação atualizada reaberta e com foco na tela Perguntas, no modo Claro e na primeira folha, com oito perguntas visíveis e dados temporários. Avanço e retorno foram conferidos nessa janela e concluíram corretamente. Como a redução de movimento está ativa no Windows, a janela de revisão recebeu emulação temporária de movimento completo para o usuário conferir a animação, sem alterar o sistema. Permanece a validação visual do usuário. Nenhuma nova dependência foi adicionada; alterações sem commit ou push, conforme solicitado.
+
+**Limites desta etapa:** A alteração concentra-se na passagem entre folhas do cadastro de perguntas e trata a pendência de animação da Etapa 4.1. A configuração da gincana mantém suas páginas fixas e o layout compartilhado da Etapa 5.4. O motor do jogo, o armazenamento e a construção do mural da Etapa 6 permanecem em seus próprios escopos.
+
+---
+
+### 🟩 Etapa 5.6: Abertura Contínua & Encaixe do Livro `[CONCLUÍDO E VALIDADO]`
+**Objetivo:** Tornar a abertura da Bíblia uma transição contínua entre a capa do menu e o livro das telas de Perguntas e Configuração, com movimento e enquadramento coordenados.
+
+**Escopo aprovado em 20/11/2026:**
+- [x] Apresentar a proposta e obter aprovação dos dois pontos recomendados antes de alterar o código.
+- [x] Coordenar inclinação, capa, deslocamento e sombras em uma progressão de aproximadamente 800 ms, partindo da pose visível no momento do clique (D48).
+- [x] Concluir a navegação quando a animação terminar, preservando o último quadro e evitando uma troca antecipada por temporizador.
+- [x] Ajustar gradualmente a posição e o tamanho do livro aos das páginas reais de Perguntas ou Configuração e revelar o conteúdo suavemente (D49).
+- [x] Aplicar o caminho inverso ao retornar ao menu, com fechamento coerente com a abertura.
+- [x] Preservar o couro, o volume, a inclinação pelo mouse e os controles existentes, protegendo ações durante a transição.
+- [x] Respeitar a redução de movimento, inclusive quando a preferência mudar durante a abertura ou o fechamento.
+- [x] Tratar redimensionamento, cliques repetidos e limpeza da animação ao sair da tela, sem navegação atrasada.
+- [x] Executar testes, tipagem e build; conferir os dois destinos e o retorno nos modos Claro e Noturno, em 1280×720 e 1920×1080, com dados temporários.
+- [x] Conferir fases intermediárias e o encaixe final do livro, incluindo abertura após inclinação pelo mouse e preservação das regressões anteriores.
+- [x] Atualizar a documentação e reabrir a aplicação para conferência do usuário.
+
+**Pontos validados:**
+- Movimento contínuo de aproximadamente 800 ms, sincronizando inclinação, capa, deslocamento e sombras e concluindo a navegação ao terminar a animação (D48).
+- Encaixe gradual nas páginas da tela de destino, com revelação suave do conteúdo e fechamento pelo caminho inverso ao voltar ao menu (D49).
+
+**Critérios de aceite:**
+- A abertura parte da pose visível da Bíblia e evolui continuamente até o livro de destino, sem salto de orientação, posição ou tamanho.
+- Perguntas e Configuração são reveladas com o enquadramento final do livro alinhado às suas páginas reais.
+- O último quadro da abertura e do fechamento é preservado antes de concluir a navegação e liberar os controles.
+- Cliques repetidos, redimensionamento e mudanças na preferência de movimento não deixam transições ou navegações pendentes.
+- O movimento é legível e consistente nos dois temas e resoluções, com alternativa sem giro quando a redução de movimento estiver ativa.
+
+**Implementação:** `src/components/useBookTransition.ts` coordena as animações da capa, do enquadramento, da iluminação e da revelação do conteúdo pelo mesmo relógio. A transição usa as dimensões reais das páginas de destino e acompanha o fim das animações, com tratamento para redimensionamento e redução de movimento. O papel e o fitilho mantêm o alinhamento durante a revelação do conteúdo. `App` mantém o destino montado durante a abertura e o fechamento, protege as camadas com `inert` e restaura o foco ao concluir. `MainMenu` fornece a pose visível no clique, preservando a continuidade da inclinação pelo mouse.
+
+**Validação técnica em 20/11/2026:**
+- `npm test`: **72 testes aprovados em 6 arquivos**; `npm run typecheck` e `npm run build`: **aprovados**.
+- `npm run test:electron` após o acabamento final: **27 cenários aprovados no Electron de produção**, com dados temporários. Os 24 cenários anteriores continuam aprovados; três novos cenários verificam abertura e fechamento dos dois destinos, continuidade da pose, encaixe das páginas e do fitilho, proteção dos controles, redimensionamento e redução de movimento.
+- Conferidas **32 capturas finais da Etapa 5.6**, em `scratch/etapa-5.6-*.png` (pasta ignorada pelo Git), nos dois destinos e temas em 1280×720 e 1920×1080, incluindo início, meio, encaixe e fechamento. O alinhamento final do papel e do fitilho foi aprovado, inclusive após redimensionamento, com diferença do fitilho de até 1 px nas verificações.
+- Revisão independente da integração concluída sem achados funcionais acionáveis.
+
+**Conferência da preferência de movimento:** O aplicativo segue a preferência de redução de movimento do sistema e conclui a navegação sem giro quando ela está ativa. Para o usuário conferir a abertura completa, somente a janela temporária de revisão pode receber uma emulação de movimento completo via CDP, sem alterar as configurações do Windows; essa emulação encerra ao fechar a janela.
+
+**Entrega:** Implementação e verificações técnicas concluídas e validadas pelo usuário em 20/11/2026. A aplicação atualizada foi reaberta no menu inicial, em modo Claro, com foco e sem transição pendente, usando dados temporários. Abertura e fechamento dos dois destinos foram conferidos nessa janela e concluíram normalmente, retornando ao menu. Como a redução de movimento está ativa no Windows, a janela de revisão recebeu emulação temporária de movimento completo, encerrada ao fechar a janela, sem alterar o sistema. Nenhuma nova dependência foi adicionada.
+
+**Versionamento autorizado em 20/11/2026:** Após validar a Etapa 5.6, o usuário autorizou o commit consolidado das alterações acumuladas das Etapas 5.1 a 5.6. O envio ao GitHub (`git push`) permanece sem autorização.
+
+**Limites desta etapa:** O trabalho refina a abertura e o fechamento entre o menu e as duas telas de livro aberto. A passagem de folhas da Etapa 5.5, o motor do jogo, o armazenamento e o mural da Etapa 6 mantêm seus próprios escopos. Nenhuma nova dependência foi adicionada; o commit consolidado foi autorizado após a validação, sem push.
 
 ---
 
