@@ -16,7 +16,7 @@ O **Show do Cristão** é um aplicativo instalável para Windows que permite ao 
 - **Tela de pódio** com revelação dramática do placar e confetes para a equipe campeã.
 - **Funcionamento 100% offline**, pensado para locais sem internet (uso em notebook espelhado na TV).
 
-O projeto está em desenvolvimento. O cadastro de perguntas, o menu, a configuração da partida e o mural interativo estão implementados. A interface completa de resposta começa na Etapa 7 e o instalador está previsto na Etapa 12.
+O projeto está em desenvolvimento. O cadastro, o menu, a configuração, o mural e a tela da pergunta estão implementados. A Etapa 8 prevê a opção de desfazer uma jogada e o salvamento automático. O instalador está previsto na Etapa 12.
 
 ---
 
@@ -118,14 +118,14 @@ npm run dev
 | `npm run test:watch` | Executa os testes em modo contínuo, rodando de novo a cada alteração |
 | `npm run typecheck` | Verifica a tipagem do TypeScript sem gerar build |
 
-### Verificação do cadastro no Electron
+### Verificação dos fluxos no Electron
 
 ```bash
 npm run build
 npm run test:electron
 ```
 
-O teste abre o app com uma pasta de dados temporária e remove esse perfil ao terminar. Os fluxos de cadastro usam 1280×720; a Bíblia do menu e a comparação de layout entre Perguntas e Configuração da gincana também são conferidas em 1920×1080. As falhas de leitura e gravação e as escolhas de arquivos são simuladas apenas no processo criado pelo teste. As perguntas reais do usuário não são acessadas. Capturas dos fluxos ficam em `scratch/`, pasta ignorada pelo Git.
+O teste abre o app com uma pasta de dados temporária e remove esse perfil ao terminar. A Bíblia do menu, o layout compartilhado entre cadastro e configuração, o mural e a pergunta ativa são conferidos em 1280×720 e 1920×1080. As falhas de leitura e gravação e as escolhas de arquivos são simuladas apenas no processo criado pelo teste. As perguntas reais do usuário são preservadas. Capturas dos fluxos ficam em `scratch/`, pasta ignorada pelo Git.
 
 A preferência por redução de movimento é emulada nos testes para conferir tanto o acompanhamento do mouse quanto a navegação com movimento reduzido. Essa emulação afeta somente a janela de teste, sem alterar as configurações do Windows. Ao abrir o app normalmente, o menu respeita a preferência do sistema: a perspectiva estática permanece visível, mas a inclinação pelo mouse fica desativada quando a redução de movimento está ativa.
 
@@ -179,17 +179,17 @@ Essas proteções foram implementadas na **Etapa 5.1**, antes do avanço para o 
 
 1. Em uma única tela, o apresentador configura a quantidade e os nomes das equipes (2 a 4), a **ordem das equipes** (com os botões subir/descer; a primeira começa), o tempo do cronômetro por pergunta e se o "roubo de pergunta" está ativo.
 2. A virada da folha revela o mural na mesma Bíblia aberta da configuração. O índice agrupa os números do cadastro por dificuldade, com uma pergunta por linha. A equipe da vez escolhe um número e a folha se abre para revelar o enunciado. As perguntas já respondidas continuam visíveis, esmaecidas e bloqueadas. As equipes **se revezam a cada pergunta** na ordem definida (A, B, C, A, B, C…).
-3. A pergunta é exibida com 4 alternativas (A, B, C, D) e o cronômetro inicia.
-4. O cronômetro é **apenas indicativo**: ao chegar a zero ele sinaliza "Tempo esgotado", mas não conta como erro automaticamente.
-5. O apresentador valida a resposta:
+3. A folha mostra as quatro alternativas (A, B, C, D). O apresentador marca a letra que a equipe disse em voz alta. A ampulheta começa ao fim da abertura da folha e fica oculta na configuração **Sem limite**.
+4. Ao chegar a zero, a ampulheta sinaliza **Tempo esgotado**. A equipe ainda pode responder, e o apresentador pode marcar e confirmar a letra.
+5. Ao clicar em **Confirmar resposta**, o aplicativo verifica a alternativa e mostra o resultado.
    - ✅ **Acerto:** A equipe ganha **100%** dos pontos da questão.
-   - ❌ **Erro + Roubo ativo:** A **próxima equipe na ordem** pode tentar e, se acertar, ganha **50%** dos pontos. O roubo **não altera a ordem**: com A, B e C, se A errou e B roubou, a próxima pergunta é de B; se B errar, quem pode roubar é C.
+   - ❌ **Erro + Roubo ativo:** A **próxima equipe na ordem** recebe o tempo completo e três alternativas disponíveis. A letra que a primeira equipe errou fica apagada e bloqueada. Um acerto no roubo vale **50% dos pontos**. A próxima pergunta continua na ordem original de equipes.
    - ❌ **Erro sem Roubo:** Ninguém pontua.
-6. A resposta correta só é revelada depois da decisão final da pergunta (inclusive após o roubo).
+6. Um erro aparece em vermelho com um X. A resposta correta é destacada em verde no fim da pergunta, inclusive após o único roubo permitido. Ao voltar ao mural após uma resposta confirmada, a pergunta fica esmaecida, marcada como **Respondida** e indisponível.
 7. A pontuação é **mantida em segredo** até o encerramento da gincana.
 8. Ao final, o placar é revelado dramaticamente com animação de confetes para a equipe vencedora.
 
-> Algumas regras ainda estão em definição (ex.: se o cronômetro reinicia no roubo, onde ficam os controles do apresentador). Veja os "Pontos a validar" no [plano de desenvolvimento](./docs/plano-desenvolvimento.md).
+Ao voltar ao mural, o resultado fica registrado no histórico da partida em andamento. A equipe da vez e a quantidade de perguntas disponíveis são atualizadas. [Plano de desenvolvimento](./docs/plano-desenvolvimento.md)
 
 ---
 
@@ -221,7 +221,8 @@ Essas proteções foram implementadas na **Etapa 5.1**, antes do avanço para o 
 - ✅ **Etapa 5.5 — concluída tecnicamente, aguardando validação do usuário:** Virada completa das folhas do cadastro, com frente e verso, curvatura discreta, sombras e ritmo natural de aproximadamente 650 ms. Preserva a navegação atual e respeita a redução de movimento. Em 20/11/2026: 72 testes em 6 arquivos, tipagem, build e 24 cenários no Electron aprovados; 16 capturas conferidas nos dois temas em 1280×720 e 1920×1080, incluindo frente e verso no avanço e retorno. Sem novas dependências, commit ou push.
 - ✅ **Etapa 5.6 — concluída e validada pelo usuário em 20/11/2026:** Abertura contínua da Bíblia e encaixe gradual nas telas de Perguntas e Configuração, com fechamento inverso coerente e alinhamento do papel e do fitilho. Em 20/11/2026: 72 testes em 6 arquivos, tipagem, build e 27 cenários no Electron aprovados; 32 capturas finais conferidas nos dois destinos e temas, em 1280×720 e 1920×1080, incluindo início, meio, encaixe e fechamento. Sem novas dependências. O usuário autorizou o commit consolidado das alterações acumuladas das Etapas 5.1 a 5.6, sem push.
 - ✅ **Etapa 6 — concluída e validada em 27/11/2026:** Índice bíblico com uma linha por pergunta, um título por dificuldade, equipe da vez e bloqueio das perguntas respondidas. A folha da configuração vira para abrir o mural, e o enunciado se abre a partir da linha escolhida.
-- 🔜 **Próximas etapas:** Etapa 7 (Tela da Pergunta Ativa & Controles), Etapas 8 a 13.
+- ✅ **Etapa 7 — concluída e validada em 27/11/2026:** Tela da pergunta com ampulheta indicativa e verificação automática. O roubo tem três alternativas disponíveis, e as perguntas respondidas ficam bloqueadas no mural.
+- 🔜 **Próximas etapas:** Etapas 8 a 13.
 
 > Veja o [plano de desenvolvimento](./docs/plano-desenvolvimento.md) para acompanhar o progresso detalhado de cada etapa.
 
@@ -243,7 +244,7 @@ Essas proteções foram implementadas na **Etapa 5.1**, antes do avanço para o 
 | 5.5 — Virada Realista das Folhas | ✅ Concluído tecnicamente; aguardando validação |
 | 5.6 — Abertura Contínua & Encaixe do Livro | ✅ Concluído e validado pelo usuário |
 | 6 — Mural de Perguntas | ✅ Concluído e validado |
-| 7 — Tela de Pergunta, Cronômetro & Controles do Apresentador | ⏳ Pendente |
+| 7 — Tela de Pergunta, Cronômetro & Controles do Apresentador | ✅ Concluído e validado |
 | 8 — Pontuação Secreta, Roubo, Desfazer & Salvamento Automático | ⏳ Pendente |
 | 9 — Pódio & Revelação Final | ⏳ Pendente |
 | 10 — Efeitos Audiovisuais & Ajustes de Projeção | ⏳ Pendente |

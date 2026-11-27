@@ -88,11 +88,15 @@ function gameReducer(state: State, action: Action): State {
     }
 
     case 'RESOLVE_QUESTION': {
-      if (!state.gameState) return state;
-      const nextGame = resolveQuestion(state.gameState, action.questionId, action.result, action.stealResult);
+      const { gameState, activeQuestionNumber } = state;
+      if (state.screen !== 'question-view' || !gameState || activeQuestionNumber === null) return state;
+      const question = gameState.questions[activeQuestionNumber - 1];
+      if (question?.id !== action.questionId) return state;
       return {
-        ...state,
-        gameState: nextGame,
+        screen: 'board',
+        previousScreen: state.screen,
+        gameState: resolveQuestion(gameState, question.id, action.result, action.stealResult),
+        activeQuestionNumber: null,
       };
     }
 

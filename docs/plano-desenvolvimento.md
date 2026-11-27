@@ -29,7 +29,7 @@ Cada etapa também traz uma seção **"Pontos a validar"**: são dúvidas e suge
 - [x] **Etapa 5.5:** Virada Realista das Folhas *(Concluído tecnicamente em 20/11/2026; aguardando validação do usuário)*
 - [x] **Etapa 5.6:** Abertura Contínua & Encaixe do Livro *(Concluído e validado pelo usuário em 20/11/2026)*
 - [x] **Etapa 6:** Mural de Perguntas (Índice Interativo) *(Concluído e validado em 27/11/2026)*
-- [ ] **Etapa 7:** Tela de Pergunta Ativa, Cronômetro & Controles do Apresentador
+- [x] **Etapa 7:** Tela de Pergunta Ativa, Cronômetro & Controles do Apresentador *(Concluído e validado em 27/11/2026)*
 - [ ] **Etapa 8:** Pontuação Secreta, Roubo a 50%, Desfazer & Salvamento Automático
 - [ ] **Etapa 9:** Tela de Encerramento & Grande Pódio (Revelação e Confetes)
 - [ ] **Etapa 10:** Efeitos Audiovisuais & Ajustes de Projeção
@@ -46,9 +46,9 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 | # | Data | Decisão |
 |---|---|---|
 | D1 | 2026-10-05 | O repositório permanece no **GitHub**. A migração/espelhamento para o GitLab será avaliada apenas na Etapa 13 (CI/CD). |
-| D2 | 2026-10-05 | O cronômetro é **apenas indicativo**: quando chega a zero, **não** conta automaticamente como erro nem dispara o roubo. Quem decide o resultado é sempre o apresentador. |
+| D2 | 2026-10-05 | O cronômetro é **apenas indicativo**. Ao chegar a zero, a equipe ainda pode responder. A verificação acontece quando o apresentador confirma a letra (D55). |
 | D3 | 2026-10-05 | O cronômetro é **por pergunta**: a contagem reinicia a cada pergunta aberta (ex.: 10 segundos para responder). |
-| D4 | 2026-10-05 | A forma de exibir os controles do apresentador (tela única, duas janelas ou atalhos de teclado) será decidida na Etapa 7. |
+| D4 | 2026-10-05 | A forma de exibir os controles do apresentador foi encaminhada para avaliação na Etapa 7 (D53). |
 | D5 | 2026-10-05 | O app será usado em **notebook espelhado em uma TV** (não em projetor). Janela mínima mantida em **1280×720**; o tamanho poderá ser revisto depois. |
 | D6 | 2026-10-05 | O app abre em **janela maximizada**; a tela cheia é ativada pelo apresentador com **F11**. |
 | D7 | 2026-10-05 | ~~Mantido o **modo navegador** para desenvolvimento rápido (`npm run dev:web`).~~ Substituída pela D18. |
@@ -96,7 +96,11 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 | D49 | 2026-11-20 | **Encaixe contínuo no livro de destino.** Ao abrir Perguntas ou Configuração da gincana, o livro se ajusta gradualmente à posição e ao tamanho reais das páginas de destino, com revelação suave do conteúdo. O retorno ao menu acompanha o caminho inverso de fechamento, refinando a D34. Os controles ficam protegidos durante a transição, a redução de movimento continua respeitada e o efeito funciona nos dois temas, sem novas dependências. |
 | D50 | 2026-11-27 | **Dificuldade visível no mural.** Cada cartão informa a dificuldade por cor e texto: Fácil, Médio ou Difícil. |
 | D51 | 2026-11-27 | **Numeração fixa.** O mural segue a ordem do cadastro (D24). Com o mesmo banco, cada número leva à mesma pergunta em qualquer partida. |
-| D52 | 2026-11-27 | **Perguntas respondidas ficam no mural.** O cartão fica esmaecido e bloqueado, com o rótulo Respondida. A equipe que acertou e a pontuação ficam ocultas. |
+| D52 | 2026-11-27 | **Perguntas respondidas ficam no mural.** Ao retornar após confirmar uma resposta, o cartão fica esmaecido e bloqueado, com o rótulo Respondida. A equipe que acertou e a pontuação ficam ocultas. |
+| D53 | 2026-11-27 | **Ações na mesma janela.** O apresentador marca a letra na folha e usa **Confirmar resposta**. Após o erro inicial, a opção de roubo aparece quando habilitada. |
+| D54 | 2026-11-27 | **Ampulheta indicativa com segundos restantes.** A contagem é automática, começa ao fim da abertura da folha, para na confirmação e volta ao tempo completo no roubo. |
+| D55 | 2026-11-27 | **Verificação automática da resposta.** O aplicativo compara a letra confirmada com o gabarito. O erro aparece em vermelho com um X. O gabarito aparece em verde ao fim da pergunta, com no máximo um roubo. |
+| D56 | 2026-11-27 | **Três alternativas disponíveis no roubo.** A letra que a primeira equipe errou fica esmaecida, riscada e bloqueada. As demais mantêm a letra e a ordem. |
 
 ---
 
@@ -521,7 +525,7 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 - Preservar a associação entre número e pergunta entre partidas com o mesmo banco.
 - Marcar apenas o estado Respondida, com o cartão esmaecido e bloqueado.
 
-**Escopo da tela de pergunta.** A seleção abre número, dificuldade e enunciado, com retorno ao mural. A Etapa 7 acrescentará alternativas, cronômetro e controles do apresentador. A marcação no mural deriva do histórico da partida, que será alimentado pelo fluxo de respostas das etapas seguintes.
+**Escopo da Etapa 6.** A seleção abre número, dificuldade e enunciado, com retorno ao mural. A marcação no mural deriva do histórico da partida, preenchido ao voltar da folha na Etapa 7.
 
 **Validação em 27/11/2026**
 
@@ -532,39 +536,32 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 
 ---
 
-### 🔹 Etapa 7: Tela da Pergunta Ativa, Cronômetro & Controles do Apresentador
-**Objetivo:** A tela de grande impacto visual que o público e as equipes veem durante a resposta, junto com os controles do apresentador.
-- [ ] Criar página `src/pages/QuestionView.tsx`:
-  - Enunciado da pergunta com tipografia grande e clara para leitura à distância (tamanhos fluidos, adaptados à resolução da TV).
-  - 4 alternativas (A, B, C, D) estilizadas.
-  - Tag visual da dificuldade com **texto + cor** (Fácil: Verde, Médio: Amarelo, Difícil: Vermelho), pensando em pessoas daltônicas.
-  - Revelação da alternativa correta **somente após** a decisão final da pergunta, inclusive após o roubo.
-- [ ] Criar componente `src/components/Timer.tsx`:
-  - Barra ou círculo regressivo com contagem visual, reiniciado a cada pergunta.
-  - Efeito de pulsar em vermelho nos últimos 5 segundos.
-  - Ao chegar a zero, apenas sinaliza "Tempo esgotado" — **não** aplica erro automaticamente (decisão D2).
-  - Controles de pausar/reiniciar o tempo pelo apresentador.
-- [ ] Criar os controles do apresentador (Correto / Incorreto / Dar chance de roubo / Voltar ao mural).
-- **Validação:** Testar a contagem regressiva, garantir que para ao chegar em zero sem alterar a pontuação, e que a resposta correta só aparece após a decisão.
+### 🟩 Etapa 7: Tela da Pergunta Ativa, Cronômetro & Controles do Apresentador `[CONCLUÍDO E VALIDADO]`
 
-**Pontos a validar (decisão D4):**
-- **Onde ficam os controles do apresentador?** Com o notebook espelhado na TV, botões como "Correto/Incorreto" ficam visíveis para o público. Opções:
-  1. Tela única com os botões visíveis (mais simples).
-  2. Duas janelas no Electron: uma para a TV (modo "estender tela" em vez de espelhar) e outra com o painel do apresentador (notebook).
-  3. Controles por **atalhos de teclado** (ex.: `C` = correto, `E` = errado, `R` = roubo), sem botões visíveis.
-- Quem marca a alternativa escolhida: a equipe responde em voz alta e o apresentador clica na alternativa?
-- No roubo, o cronômetro reinicia para a equipe adversária?
+- [x] Manter a abertura de papel a partir do mural e exibir número, dificuldade, equipe, enunciado e as quatro alternativas. O texto longo rola dentro da folha, com o tempo e os controles à vista.
+- [x] Usar uma ampulheta com areia descendente e segundos restantes (D54). O aviso dos últimos cinco segundos respeita a redução de movimento. Ao chegar a zero, a tela sinaliza **Tempo esgotado** e aguarda o apresentador (D2).
+- [x] Permitir marcar a letra e trocar a seleção até clicar em **Confirmar resposta**. O aplicativo confere a letra e mostra o resultado. Na opção **Sem limite**, a ampulheta fica oculta.
+- [x] Marcar a alternativa errada com um X vermelho. Após o erro inicial, oferecer um único roubo quando habilitado, ou revelar a resposta se o apresentador encerrar a pergunta. O roubo indica a próxima equipe, reinicia o tempo e desativa a letra que a primeira equipe errou, deixando três opções disponíveis (D56). O gabarito fica destacado em verde após a decisão final (D55).
+- [x] Registrar o resultado ao voltar para o mural. Uma tentativa confirmada basta para marcar a pergunta como **Respondida**, inclusive ao sair durante a oferta ou a tentativa de roubo. Se o apresentador voltar antes da primeira confirmação, a pergunta continua disponível (D52).
+
+**Verificação técnica em 27/11/2026**
+
+- Os 73 testes unitários, a tipagem e o build passaram.
+- Os três cenários da Etapa 7 passaram no Electron de produção com perfil temporário. Foram conferidos os dois temas em 1280×720 e 1920×1080, a confirmação após o tempo esgotado, as três opções selecionáveis no roubo, a rolagem de perguntas longas e o bloqueio no mural após acerto, erro ou roubo. Também foi conferido o retorno antes de confirmar, que preserva a pergunta disponível.
+- A janela de revisão ficou aberta no mural com a primeira pergunta marcada como **Respondida** e 19 perguntas de exemplo disponíveis.
+
+O usuário aprovou a Etapa 7 em 27/11/2026 após os ajustes do roubo e do mural, e autorizou o commit e o push.
 
 ---
 
 ### 🔹 Etapa 8: Pontuação Secreta, Roubo a 50%, Desfazer & Salvamento Automático
 **Objetivo:** Ligar o motor de regras (Etapa 3) à interface, mantendo a pontuação oculta e o jogo protegido contra erros e travamentos.
-- [ ] Ligar os controles do apresentador ao motor de jogo:
-  - **"Correto"**: soma 100% dos pontos para a equipe da vez.
-  - **"Incorreto"**: não pontua (ou abre a chance de roubo, se ativa na partida).
-  - **"Roubo"**: transfere o direito de responder para a equipe adversária; se ela acertar, credita **50% dos pontos**.
+- [x] Ligar ao motor de jogo o resultado da resposta confirmada (antecipado na Etapa 7).
+  - O acerto na primeira tentativa soma 100% dos pontos para a equipe da vez.
+  - Um erro vale zero pontos. Após o erro inicial, a próxima equipe na ordem pode tentar o roubo quando a configuração permite.
+  - O acerto no roubo credita **50% dos pontos** à equipe que o fez.
 - [ ] Garantir que **nenhum número de placar é exibido no telão** nesta fase.
-- [ ] Atualizar a lista de perguntas respondidas e alternar a equipe da vez ao retornar ao mural.
+- [x] Atualizar a lista de perguntas respondidas e alternar a equipe da vez ao retornar ao mural (antecipado na Etapa 7).
 - [ ] **Desfazer a última ação** do apresentador (um clique errado na pontuação secreta não pode ser irreversível).
 - [ ] **Salvamento automático** da partida em andamento, com opção de "Retomar partida" ao reabrir o app após fechamento inesperado.
 - **Validação:** Simular rodada completa de acerto, erro e roubo validando se os pontos internos bateram; desfazer uma ação; fechar o app no meio da partida e retomá-la.

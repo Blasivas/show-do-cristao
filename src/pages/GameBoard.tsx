@@ -9,7 +9,7 @@ import { getTeamPresetById } from '@/game/teams';
 import QuestionView from './QuestionView';
 
 export default function GameBoard() {
-  const { gameState, currentTeam, activeQuestion, openQuestion, goToScreen, resetGame, isGameOver } = useGame();
+  const { gameState, currentTeam, nextTeam, activeQuestion, openQuestion, resolveCurrentQuestion, goToScreen, resetGame, isGameOver } = useGame();
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [openingFrom, setOpeningFrom] = useState<DOMRect | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -81,10 +81,19 @@ export default function GameBoard() {
       </div>
 
       {activeQuestion && (
-        <QuestionView {...activeQuestion} openingFrom={openingFrom} onOpened={finishOpening} onBack={() => {
-          finishOpening();
-          goToScreen('board');
-        }} />
+        <QuestionView
+          {...activeQuestion}
+          team={currentTeam}
+          stealTeam={gameState.config.allowSteal ? nextTeam : null}
+          timerSeconds={gameState.config.timerSeconds}
+          openingFrom={openingFrom}
+          onOpened={finishOpening}
+          onBack={(result, stealResult) => {
+            finishOpening();
+            if (result) resolveCurrentQuestion(activeQuestion.question.id, result, stealResult);
+            else goToScreen('board');
+          }}
+        />
       )}
 
       {confirmEnd && (

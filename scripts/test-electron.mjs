@@ -1604,6 +1604,207 @@ try {
     } finally { await setReducedMotion(false); }
   });
 
+  await test('Folha da pergunta expõe quatro alternativas e ampulheta nos dois temas e resoluções', async () => {
+    const [question] = await bank();
+    await button('INICIAR GINCANA');
+    await configReady();
+    await click('[data-book-primary]');
+    await waitUi(() => Boolean(document.querySelector('[data-game-board]')), 'mural da Etapa 7');
+
+    for (const [width, height] of [[1280, 720], [1920, 1080]]) {
+      await ui.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false });
+      for (const dark of [false, true]) {
+        await setMenuTheme(dark);
+        await click('[data-question-number="1"]');
+        await waitUi(() => Boolean(document.querySelector('[data-hourglass]')) && !document.querySelector('[data-question-opening]'), 'ampulheta após a abertura da folha');
+        const view = await ui.run(() => {
+          const content = document.querySelector('[data-question-content]');
+          return {
+            options: [...content.querySelectorAll('ol button')].map(option => [...option.children].map(child => child.textContent)),
+            scrolls: content.scrollHeight > content.clientHeight + 1,
+          };
+        });
+        assert.deepEqual(view.options, question.alternativas.map((option, index) => ['ABCD'[index], option]));
+        assert.equal(view.scrolls, false, 'A pergunta de exemplo e suas quatro alternativas devem caber na folha.');
+        await screenshot(`pergunta-${dark ? 'noturno' : 'claro'}-${height}`, '7');
+        await button('Voltar ao mural');
+      }
+    }
+    await button('Encerrar Gincana');
+    await button('Sim, Encerrar', '[role="dialog"]');
+    await menuReady();
+    await ui.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 720, deviceScaleFactor: 1, mobile: false });
+    await setMenuTheme(false);
+  });
+
+  await test('Roubo bloqueia a letra eliminada e o mural bloqueia cada pergunta confirmada', async () => {
+    const questions = await bank();
+    let number = 1;
+    const time = () => ui.run(() => Number.parseInt(document.querySelector('[role="timer"]').textContent, 10));
+    const upperSand = () => ui.run(() => document.querySelector('[data-hourglass-sand]').style.height);
+    const rightLetter = () => 'ABCD'.indexOf(questions[number - 1].correta);
+    const wrongLetter = () => (rightLetter() + 1) % 4;
+    const choose = index => click(`ol[aria-label="Alternativas"] li:nth-child(${index + 1}) button`);
+    const openCurrent = async () => {
+      await click(`[data-question-number="${number}"]`);
+      await waitUi(() => Boolean(document.querySelector('#active-question-title')) && !document.querySelector('[data-question-opening]'), 'abertura da pergunta');
+    };
+    const assertBlocked = async () => {
+      await button('Voltar ao mural');
+      const blocked = await ui.run(number => {
+        const row = document.querySelector(`[data-question-number="${number}"]`);
+        row.click();
+        return row.disabled && row.textContent.includes('Respondida') && !document.querySelector('#active-question-title');
+      }, number);
+      assert.equal(blocked, true, `A pergunta ${number} deve estar marcada e bloqueada.`);
+      assert.match(await text(), new RegExp(`${questions.length - number} de ${questions.length} disponíveis`));
+    };
+    const next = async () => {
+      await assertBlocked();
+      number++;
+      await openCurrent();
+    };
+    await button('INICIAR GINCANA');
+    await configReady();
+    await button('10 seg');
+    await click('[data-book-primary]');
+    await waitUi(() => Boolean(document.querySelector('[data-game-board]')), 'mural com tempo de 10 segundos');
+    await openCurrent();
+    assert.equal(await time(), 10);
+    const controls = await ui.run(() => [...document.querySelectorAll('footer button')].map(button => [button.textContent.trim(), button.disabled]));
+    assert.deepEqual(controls, [['Confirmar resposta', true]], 'Só a confirmação deve aparecer e ela exige uma letra.');
+
+    await waitFor(async () => await time() <= 9, 'areia caindo');
+    assert.ok(Number.parseFloat(await upperSand()) < 50, 'A areia deve baixar durante a contagem.');
+    await waitFor(async () => await time() === 5, 'aviso nos últimos cinco segundos');
+    assert.match(await ui.run(() => document.querySelector('[data-hourglass]').className), /animate-pulse/);
+    await waitFor(async () => await time() === 0, 'tempo esgotado', 8000);
+    assert.equal(await upperSand(), '0%');
+    assert.match(await text(), /Tempo esgotado/);
+    assert.doesNotMatch(await text(), /Resposta correta|Resposta incorreta|pode tentar o roubo/);
+
+    await choose(rightLetter());
+    await choose(wrongLetter());
+    assert.equal(await ui.run(() => document.querySelector('ol[aria-label="Alternativas"] button[aria-pressed="true"]').firstElementChild.textContent), 'ABCD'[wrongLetter()]);
+    assert.doesNotMatch(await text(), /Resposta correta|Resposta incorreta/);
+    await button('Confirmar resposta');
+    assert.match(await text(), /Resposta incorreta/);
+    assert.match(await text(), /Chama Dourada pode tentar o roubo/);
+    assert.doesNotMatch(await text(), /Resposta correta/);
+    assert.equal(await ui.run(() => Boolean(document.querySelector('ol[aria-label="Alternativas"] button[aria-pressed="true"] .lucide-x'))), true);
+    await screenshot('erro-oferta-de-roubo', '7');
+    await button('Dar chance de roubo');
+    assert.equal(await time(), 10);
+    assert.match(await text(), /Chance de roubo para Chama Dourada/);
+    assert.equal(await ui.run(() => document.querySelectorAll('ol[aria-label="Alternativas"] button[aria-pressed="true"]').length), 0);
+    assert.doesNotMatch(await text(), /Resposta correta|Resposta incorreta/);
+    for (const dark of [false, true]) {
+      await setMenuTheme(dark);
+      const options = await ui.run(index => {
+        const buttons = [...document.querySelectorAll('ol[aria-label="Alternativas"] button')];
+        const removed = buttons[index];
+        removed.click();
+        return {
+          enabled: buttons.filter(button => !button.disabled).length,
+          selected: buttons.some(button => button.getAttribute('aria-pressed') === 'true'),
+          label: removed.textContent.includes('Eliminada'),
+          opacity: Number(getComputedStyle(removed).opacity),
+        };
+      }, wrongLetter());
+      assert.deepEqual(options, { enabled: 3, selected: false, label: true, opacity: 0.6 });
+      await screenshot(`roubo-tres-alternativas-${dark ? 'noturno' : 'claro'}`, '7');
+    }
+    await setMenuTheme(false);
+    await choose((wrongLetter() + 1) % 4);
+    await button('Confirmar resposta');
+    assert.match(await text(), /Resposta incorreta/);
+    assert.doesNotMatch(await text(), /Dar chance de roubo|Confirmar resposta/);
+    const reveal = await ui.run(() => [...document.querySelectorAll('ol[aria-label="Alternativas"] button')].map(option => option.textContent.includes('Resposta correta')));
+    assert.deepEqual(reveal, questions[0].alternativas.map((_, index) => index === rightLetter()));
+    await screenshot('erro-apos-roubo', '7');
+
+    await next();
+    assert.match(await text(), /Vez de Chama Dourada/);
+    await choose(wrongLetter());
+    await button('Confirmar resposta');
+    await button('Dar chance de roubo');
+    await choose(rightLetter());
+    await button('Confirmar resposta');
+    assert.match(await text(), /Resposta correta/);
+    assert.doesNotMatch(await text(), /Resposta incorreta|Dar chance de roubo/);
+
+    await next();
+    await choose(rightLetter());
+    await button('Confirmar resposta');
+    assert.match(await text(), /Resposta correta/);
+    assert.doesNotMatch(await text(), /Dar chance de roubo/);
+
+    await next();
+    await choose(wrongLetter());
+    await button('Confirmar resposta');
+    await button('Revelar resposta');
+    assert.match(await text(), /Resposta incorreta/);
+    assert.match(await text(), /Resposta correta/);
+    await next();
+    await choose(wrongLetter());
+    await button('Voltar ao mural');
+    assert.equal(await ui.run(number => document.querySelector(`[data-question-number="${number}"]`).disabled, number), false, 'Marcar sem confirmar deve preservar a pergunta.');
+    await openCurrent();
+    await choose(wrongLetter());
+    await button('Confirmar resposta');
+    await button('Dar chance de roubo');
+    await assertBlocked();
+    await button('Encerrar Gincana');
+    await button('Sim, Encerrar', '[role="dialog"]');
+    await menuReady();
+  });
+
+  await test('Sem limite oculta a ampulheta; pergunta longa rola e revela o gabarito sem roubo', async () => {
+    const original = await bankText();
+    const [first, ...others] = JSON.parse(original);
+    const long = {
+      ...first,
+      pergunta: first.pergunta.repeat(15),
+      alternativas: first.alternativas.map(option => `Esta alternativa apresenta a opção ${option}. `.repeat(5).trim()),
+      correta: 'D',
+    };
+    try {
+      await fs.writeFile(bankFile(), JSON.stringify([long, ...others]));
+      await setReducedMotion(true);
+      await button('INICIAR GINCANA');
+      await configReady();
+      await button('Sem limite');
+      await click('[aria-label="Permitir roubo de pergunta"]');
+      await click('[data-book-primary]');
+      await waitUi(() => Boolean(document.querySelector('[data-game-board]')), 'mural sem limite de tempo');
+      await click('[data-question-number="1"]');
+      await waitUi(() => Boolean(document.querySelector('[data-question-content]')), 'folha longa sem cronômetro');
+      assert.equal(await ui.run(() => Boolean(document.querySelector('[role="timer"]'))), false);
+      assert.equal(await ui.run(() => {
+        const content = document.querySelector('[data-question-content]');
+        const frame = content.getBoundingClientRect();
+        return content.scrollHeight > content.clientHeight && content.scrollWidth <= content.clientWidth + 1 && frame.bottom <= innerHeight;
+      }), true, 'O texto deve rolar dentro da folha, sem transbordamento horizontal.');
+      await click('ol[aria-label="Alternativas"] li:first-child button');
+      await button('Confirmar resposta');
+      assert.match(await text(), /Resposta incorreta/);
+      assert.doesNotMatch(await text(), /Dar chance de roubo/);
+      assert.equal(await ui.run(() => {
+        const content = document.querySelector('[data-question-content]');
+        const option = content.querySelector('li:last-child button');
+        return content.scrollTop > 0 && option.textContent.includes('Resposta correta') && option.getBoundingClientRect().bottom <= content.getBoundingClientRect().bottom + 1;
+      }), true, 'O gabarito deve rolar para a área visível.');
+      await button('Voltar ao mural');
+      assert.equal(await ui.run(() => document.querySelector('[data-question-number="1"]').disabled), true);
+      await button('Encerrar Gincana');
+      await button('Sim, Encerrar', '[role="dialog"]');
+      await menuReady();
+    } finally {
+      await fs.writeFile(bankFile(), original);
+      await setReducedMotion(false);
+    }
+  });
+
   await test('Banco inválido bloqueia a partida e oferece acesso ao cadastro', async () => {
     await fs.writeFile(bankFile(), '{arquivo inválido');
     await reloadMenu(); await button('INICIAR GINCANA');
@@ -1656,7 +1857,7 @@ try {
     }
   });
 
-  console.log(`\n${passed} cenários passaram no Electron de produção (1280×720; capa, cadastro, configuração e mural também em 1920×1080), com dados temporários.`);
+  console.log(`\n${passed} cenários passaram no Electron de produção (1280×720; capa, cadastro, configuração, mural e pergunta ativa também em 1920×1080), com dados temporários.`);
 } catch (error) {
   process.exitCode = 1;
   console.error(`\nFalha na regressão do Electron: ${error.stack || error.message}`);

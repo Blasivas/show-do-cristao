@@ -184,6 +184,14 @@ Direção aprovada em 20/11/2026 (D48–D49), implementada e conferida nas fases
 - A equipe da vez e o contador aparecem na mesma faixa interna usada no cadastro e na configuração. Para bancos maiores, as linhas rolam dentro de cada folha.
 - Ao selecionar uma linha, a folha da pergunta parte da sua posição, inclina levemente e se amplia até o centro. O enunciado aparece ao longo da abertura de 460 ms. A redução de movimento abre a pergunta diretamente.
 
+### 4.9 Pergunta ativa — Etapa 7
+
+- A folha amplia o enunciado e coloca as alternativas A a D em linhas distintas. Número, dificuldade e equipe permanecem no topo durante a rolagem do texto.
+- A ampulheta dourada acompanha os segundos em algarismos grandes. A areia passa da câmara superior para a inferior. Nos cinco segundos finais, o vermelho sinaliza urgência e a ampulheta pulsa quando o movimento está habilitado.
+- A alternativa marcada recebe um destaque âmbar. Ao confirmar uma letra errada, a linha fica vermelha e recebe um X. O gabarito aparece ao fim da pergunta, com destaque verde e o rótulo **Resposta correta**.
+- Durante o roubo, a letra que a primeira equipe errou fica esmaecida, riscada e marcada como **Eliminada**. A segunda equipe pode selecionar uma das três letras restantes.
+- A ação **Confirmar resposta** fica sob a folha e é habilitada ao marcar uma letra. As opções de roubo aparecem após o erro inicial quando o recurso está ativo.
+
 ## 5. Diretrizes de Implementação
 
 1. **Descarte do Tech Bento:** Toda a aplicação adota exclusivamente a identidade visual da Bíblia Sagrada.
