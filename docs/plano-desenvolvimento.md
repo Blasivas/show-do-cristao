@@ -28,7 +28,7 @@ Cada etapa também traz uma seção **"Pontos a validar"**: são dúvidas e suge
 - [x] **Etapa 5.4:** Layout Único do Livro Aberto *(Concluído tecnicamente em 14/11/2026; aguardando validação do usuário)*
 - [x] **Etapa 5.5:** Virada Realista das Folhas *(Concluído tecnicamente em 20/11/2026; aguardando validação do usuário)*
 - [x] **Etapa 5.6:** Abertura Contínua & Encaixe do Livro *(Concluído e validado pelo usuário em 20/11/2026)*
-- [ ] **Etapa 6:** O Mural de Perguntas (Grade Interativa de Números)
+- [x] **Etapa 6:** Mural de Perguntas (Índice Interativo) *(Concluído e validado em 27/11/2026)*
 - [ ] **Etapa 7:** Tela de Pergunta Ativa, Cronômetro & Controles do Apresentador
 - [ ] **Etapa 8:** Pontuação Secreta, Roubo a 50%, Desfazer & Salvamento Automático
 - [ ] **Etapa 9:** Tela de Encerramento & Grande Pódio (Revelação e Confetes)
@@ -94,6 +94,9 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 | D47 | 2026-11-20 | **Ritmo natural e navegação preservada.** A virada começa com duração de aproximadamente 650 ms, com início suave, passagem mais rápida pelo centro e acomodação no final. Setas, atalhos de teclado e seletor de folhas continuam disponíveis, com proteção contra viradas sobrepostas e cancelamento seguro quando filtros, banco ou tela mudarem. A preferência de redução de movimento utiliza paginação sem giro. O efeito funciona nos dois temas, sem novas dependências. |
 | D48 | 2026-11-20 | **Abertura coordenada da Bíblia.** Inclinação, abertura da capa, deslocamento e sombras seguem a mesma progressão, com duração inicial de aproximadamente 800 ms, início suave e acomodação no final. O movimento parte da pose visível no momento do clique, e a navegação é concluída quando a animação termina. Esta decisão refina a sequência de abertura descrita na D33, preservando couro, volume e interação pelo mouse. |
 | D49 | 2026-11-20 | **Encaixe contínuo no livro de destino.** Ao abrir Perguntas ou Configuração da gincana, o livro se ajusta gradualmente à posição e ao tamanho reais das páginas de destino, com revelação suave do conteúdo. O retorno ao menu acompanha o caminho inverso de fechamento, refinando a D34. Os controles ficam protegidos durante a transição, a redução de movimento continua respeitada e o efeito funciona nos dois temas, sem novas dependências. |
+| D50 | 2026-11-27 | **Dificuldade visível no mural.** Cada cartão informa a dificuldade por cor e texto: Fácil, Médio ou Difícil. |
+| D51 | 2026-11-27 | **Numeração fixa.** O mural segue a ordem do cadastro (D24). Com o mesmo banco, cada número leva à mesma pergunta em qualquer partida. |
+| D52 | 2026-11-27 | **Perguntas respondidas ficam no mural.** O cartão fica esmaecido e bloqueado, com o rótulo Respondida. A equipe que acertou e a pontuação ficam ocultas. |
 
 ---
 
@@ -500,18 +503,32 @@ Decisões já tomadas. Novas decisões devem ser adicionadas aqui conforme o des
 
 ---
 
-### 🔹 Etapa 6: Mural de Perguntas (Grade de Números)
-**Objetivo:** A tela central do jogo onde as equipes escolhem qual pergunta querem abrir.
-- [ ] Criar componente `src/components/QuestionBoard.tsx` (grade de cartões com números `1`, `2`, `3`...).
-- [ ] Indicar no topo de qual equipe é a vez de escolher.
-- [ ] Desabilitar e marcar visualmente números de perguntas que já foram respondidas.
-- [ ] Incluir o botão fixo no topo: **"Encerrar Gincana"** com modal de confirmação.
-- **Validação:** Clicar num número disponível e navegar para a tela de pergunta correspondente.
+### 🟩 Etapa 6: Mural de Perguntas (Índice Interativo) `[CONCLUÍDO E VALIDADO]`
+**Objetivo:** Permitir que a equipe da vez escolha uma pergunta pelo número.
 
-**Pontos a validar:**
-- O mural deve mostrar a dificuldade de cada número (cor/etiqueta), permitindo estratégia, ou manter tudo oculto?
-- Embaralhar a associação número ↔ pergunta a cada partida?
-- Marcar no cartão respondido qual equipe acertou? (Cuidado: pode revelar parte do placar secreto.)
+- [x] Distribuir os números entre as duas folhas em um índice com seções para perguntas fáceis, médias e difíceis e um único título por seção (D50 e D51).
+- [x] Virar a folha da configuração com a animação do cadastro e revelar o mural mantendo o mesmo enquadramento da Bíblia.
+- [x] Indicar a equipe da vez e quantas perguntas estão disponíveis.
+- [x] Esmaecer e desativar as linhas que constam no histórico da partida (D52).
+- [x] Manter **Encerrar Gincana** no cabeçalho, com confirmação para retornar ao menu inicial.
+- [x] Abrir o enunciado da pergunta selecionada e devolver o foco à linha ao voltar ao mural.
+- [x] Animar a folha da pergunta a partir da linha selecionada, com abertura direta quando a redução de movimento estiver ativa.
+- [x] Manter o índice rolável para bancos maiores, com o cabeçalho sempre acessível.
+
+**Decisões aprovadas em 27/11/2026**
+
+- Exibir a dificuldade com texto e cor.
+- Preservar a associação entre número e pergunta entre partidas com o mesmo banco.
+- Marcar apenas o estado Respondida, com o cartão esmaecido e bloqueado.
+
+**Escopo da tela de pergunta.** A seleção abre número, dificuldade e enunciado, com retorno ao mural. A Etapa 7 acrescentará alternativas, cronômetro e controles do apresentador. A marcação no mural deriva do histórico da partida, que será alimentado pelo fluxo de respostas das etapas seguintes.
+
+**Validação em 27/11/2026**
+
+- `npm test` aprovou 73 testes, incluindo a renderização do cartão bloqueado a partir do histórico do jogo. `npm run typecheck` e `npm run build` passaram.
+- A suíte do Electron passou com 31 cenários na versão de grade. Após o ajuste visual para índice, os quatro cenários do mural passaram novamente com dados temporários. Eles verificaram o agrupamento por dificuldade, os 20 itens em 1280×720 e 1920×1080 nos dois temas, a rolagem com 55 perguntas, as animações e a manutenção das dimensões do livro da configuração ao mural.
+- A janela de revisão foi deixada no índice da gincana, com as 20 perguntas de exemplo em um perfil temporário. O movimento completo foi habilitado nessa janela até o fechamento, preservando a preferência do Windows.
+- O usuário aprovou o índice com um título por dificuldade e autorizou o commit da Etapa 6.
 
 ---
 

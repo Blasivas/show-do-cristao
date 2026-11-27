@@ -16,7 +16,7 @@ O **Show do Cristão** é um aplicativo instalável para Windows que permite ao 
 - **Tela de pódio** com revelação dramática do placar e confetes para a equipe campeã.
 - **Funcionamento 100% offline**, pensado para locais sem internet (uso em notebook espelhado na TV).
 
-O projeto está em desenvolvimento: o cadastro de perguntas, o menu e a configuração da partida estão implementados. O mural interativo e as demais telas da gincana serão construídos nas etapas seguintes; o instalador está previsto na Etapa 12.
+O projeto está em desenvolvimento. O cadastro de perguntas, o menu, a configuração da partida e o mural interativo estão implementados. A interface completa de resposta começa na Etapa 7 e o instalador está previsto na Etapa 12.
 
 ---
 
@@ -178,7 +178,7 @@ Essas proteções foram implementadas na **Etapa 5.1**, antes do avanço para o 
 ## 📋 Regras do Jogo
 
 1. Em uma única tela, o apresentador configura a quantidade e os nomes das equipes (2 a 4), a **ordem das equipes** (com os botões subir/descer; a primeira começa), o tempo do cronômetro por pergunta e se o "roubo de pergunta" está ativo.
-2. O mural exibe os números das perguntas disponíveis. A equipe da vez escolhe um número. As equipes **se revezam a cada pergunta** na ordem definida (A, B, C, A, B, C…).
+2. A virada da folha revela o mural na mesma Bíblia aberta da configuração. O índice agrupa os números do cadastro por dificuldade, com uma pergunta por linha. A equipe da vez escolhe um número e a folha se abre para revelar o enunciado. As perguntas já respondidas continuam visíveis, esmaecidas e bloqueadas. As equipes **se revezam a cada pergunta** na ordem definida (A, B, C, A, B, C…).
 3. A pergunta é exibida com 4 alternativas (A, B, C, D) e o cronômetro inicia.
 4. O cronômetro é **apenas indicativo**: ao chegar a zero ele sinaliza "Tempo esgotado", mas não conta como erro automaticamente.
 5. O apresentador valida a resposta:
@@ -220,7 +220,8 @@ Essas proteções foram implementadas na **Etapa 5.1**, antes do avanço para o 
 - ✅ **Etapa 5.4 — concluída tecnicamente, aguardando validação do usuário:** Layout compartilhado do livro aberto para Perguntas e Configuração da gincana, com ferramentas contextuais e ações principais padronizadas no cabeçalho. Em 14/11/2026: 72 testes em 6 arquivos, tipagem, build e 20 cenários no Electron aprovados; as duas telas foram conferidas nos dois temas em 1280×720 e 1920×1080. Alterações sem commit ou push.
 - ✅ **Etapa 5.5 — concluída tecnicamente, aguardando validação do usuário:** Virada completa das folhas do cadastro, com frente e verso, curvatura discreta, sombras e ritmo natural de aproximadamente 650 ms. Preserva a navegação atual e respeita a redução de movimento. Em 20/11/2026: 72 testes em 6 arquivos, tipagem, build e 24 cenários no Electron aprovados; 16 capturas conferidas nos dois temas em 1280×720 e 1920×1080, incluindo frente e verso no avanço e retorno. Sem novas dependências, commit ou push.
 - ✅ **Etapa 5.6 — concluída e validada pelo usuário em 20/11/2026:** Abertura contínua da Bíblia e encaixe gradual nas telas de Perguntas e Configuração, com fechamento inverso coerente e alinhamento do papel e do fitilho. Em 20/11/2026: 72 testes em 6 arquivos, tipagem, build e 27 cenários no Electron aprovados; 32 capturas finais conferidas nos dois destinos e temas, em 1280×720 e 1920×1080, incluindo início, meio, encaixe e fechamento. Sem novas dependências. O usuário autorizou o commit consolidado das alterações acumuladas das Etapas 5.1 a 5.6, sem push.
-- 🔜 **Próximas etapas:** Etapa 6 (Mural de Perguntas interativo), Etapa 7 (Tela da Pergunta Ativa & Controles), Etapas 8 a 13.
+- ✅ **Etapa 6 — concluída e validada em 27/11/2026:** Índice bíblico com uma linha por pergunta, um título por dificuldade, equipe da vez e bloqueio das perguntas respondidas. A folha da configuração vira para abrir o mural, e o enunciado se abre a partir da linha escolhida.
+- 🔜 **Próximas etapas:** Etapa 7 (Tela da Pergunta Ativa & Controles), Etapas 8 a 13.
 
 > Veja o [plano de desenvolvimento](./docs/plano-desenvolvimento.md) para acompanhar o progresso detalhado de cada etapa.
 
@@ -241,7 +242,7 @@ Essas proteções foram implementadas na **Etapa 5.1**, antes do avanço para o 
 | 5.4 — Layout Único do Livro Aberto | ✅ Concluído tecnicamente; aguardando validação |
 | 5.5 — Virada Realista das Folhas | ✅ Concluído tecnicamente; aguardando validação |
 | 5.6 — Abertura Contínua & Encaixe do Livro | ✅ Concluído e validado pelo usuário |
-| 6 — Mural de Perguntas | ⏳ Pendente |
+| 6 — Mural de Perguntas | ✅ Concluído e validado |
 | 7 — Tela de Pergunta, Cronômetro & Controles do Apresentador | ⏳ Pendente |
 | 8 — Pontuação Secreta, Roubo, Desfazer & Salvamento Automático | ⏳ Pendente |
 | 9 — Pódio & Revelação Final | ⏳ Pendente |

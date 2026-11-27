@@ -5,6 +5,7 @@ import {
   getCurrentTeam,
   getNextTeam,
   getAvailableQuestions,
+  getAnsweredIds,
   getScores,
   getRanking,
   getWinners,
@@ -22,6 +23,8 @@ interface GameContextType {
   goToScreen: (screen: Screen) => void;
   gameState: GameState | null;
   startGame: (config: GameConfig, questions: Question[]) => void;
+  openQuestion: (number: number) => void;
+  activeQuestion: { number: number; question: Question } | null;
   resolveCurrentQuestion: (questionId: string, result: AnswerResult, stealResult?: AnswerResult) => void;
   undo: () => void;
   endGame: () => void;
@@ -38,6 +41,7 @@ interface GameContextType {
 type Action =
   | { type: 'SET_SCREEN'; screen: Screen }
   | { type: 'START_GAME'; config: GameConfig; questions: Question[] }
+  | { type: 'OPEN_QUESTION'; number: number }
   | { type: 'RESOLVE_QUESTION'; questionId: string; result: AnswerResult; stealResult?: AnswerResult }
   | { type: 'UNDO' }
   | { type: 'END_GAME' }
@@ -47,12 +51,14 @@ interface State {
   screen: Screen;
   previousScreen: Screen | null;
   gameState: GameState | null;
+  activeQuestionNumber: number | null;
 }
 
 const initialState: State = {
   screen: 'menu',
   previousScreen: null,
   gameState: null,
+  activeQuestionNumber: null,
 };
 
 function gameReducer(state: State, action: Action): State {
@@ -62,6 +68,7 @@ function gameReducer(state: State, action: Action): State {
         ...state,
         previousScreen: state.screen,
         screen: action.screen,
+        activeQuestionNumber: null,
       };
 
     case 'START_GAME':
@@ -69,7 +76,16 @@ function gameReducer(state: State, action: Action): State {
         screen: 'board',
         previousScreen: state.screen,
         gameState: createGame(action.config, action.questions),
+        activeQuestionNumber: null,
       };
+
+    case 'OPEN_QUESTION': {
+      const { gameState } = state;
+      if (state.screen !== 'board' || !gameState || gameState.finished || !Number.isInteger(action.number)) return state;
+      const question = gameState.questions[action.number - 1];
+      if (!question || getAnsweredIds(gameState).has(question.id)) return state;
+      return { ...state, screen: 'question-view', previousScreen: state.screen, activeQuestionNumber: action.number };
+    }
 
     case 'RESOLVE_QUESTION': {
       if (!state.gameState) return state;
@@ -94,6 +110,7 @@ function gameReducer(state: State, action: Action): State {
         screen: 'podium',
         previousScreen: state.screen,
         gameState: finishGame(state.gameState),
+        activeQuestionNumber: null,
       };
     }
 
@@ -102,6 +119,7 @@ function gameReducer(state: State, action: Action): State {
         screen: 'menu',
         previousScreen: state.screen,
         gameState: null,
+        activeQuestionNumber: null,
       };
 
     default:
@@ -117,6 +135,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const goToScreen = (screen: Screen) => dispatch({ type: 'SET_SCREEN', screen });
   const startGame = (config: GameConfig, questions: Question[]) =>
     dispatch({ type: 'START_GAME', config, questions });
+  const openQuestion = (number: number) => dispatch({ type: 'OPEN_QUESTION', number });
   const resolveCurrentQuestion = (questionId: string, result: AnswerResult, stealResult?: AnswerResult) =>
     dispatch({ type: 'RESOLVE_QUESTION', questionId, result, stealResult });
   const undo = () => dispatch({ type: 'UNDO' });
@@ -130,6 +149,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const ranking = state.gameState ? getRanking(state.gameState) : [];
   const winners = state.gameState ? getWinners(state.gameState) : [];
   const gameOver = state.gameState ? isGameOver(state.gameState) : false;
+  const number = state.activeQuestionNumber;
+  const question = number === null ? undefined : state.gameState?.questions[number - 1];
+  const activeQuestion = number !== null && question ? { number, question } : null;
 
   return (
     <GameContext.Provider
@@ -139,6 +161,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
         goToScreen,
         gameState: state.gameState,
         startGame,
+        openQuestion,
+        activeQuestion,
         resolveCurrentQuestion,
         undo,
         endGame,

@@ -3,7 +3,7 @@ import { GameProvider, useGame } from '@/contexts/GameContext';
 import MainMenu from '@/pages/MainMenu';
 import QuestionManager from '@/pages/QuestionManager';
 import GameConfig from '@/pages/GameConfig';
-import BoardPlaceholder from '@/pages/BoardPlaceholder';
+import GameBoard from '@/pages/GameBoard';
 import { useBookTransition, type BookMotion } from '@/components/useBookTransition';
 import { playBookOpenSound, playBookCloseSound } from '@/services/audioService';
 
@@ -11,7 +11,8 @@ type BookScreen = 'questions' | 'config';
 
 function GameApp() {
   const { screen, goToScreen } = useGame();
-  const menuScreen = screen !== 'questions' && screen !== 'config' && screen !== 'board';
+  const playing = screen === 'board' || screen === 'question-view';
+  const menuScreen = screen !== 'questions' && screen !== 'config' && !playing;
   const [motion, setMotion] = useState<BookMotion | null>(null);
   const activeMotion = useRef<BookMotion | null>(null);
   const focusAfterMotion = useRef<{ screen: 'menu' | BookScreen; target: BookScreen } | null>(null);
@@ -59,7 +60,7 @@ function GameApp() {
   const destination = motion?.target ?? (screen === 'questions' || screen === 'config' ? screen : null);
   const inactiveProps = motion ? { inert: '' } : {};
 
-  if (screen === 'board' && !motion) return <BoardPlaceholder />;
+  if (playing && !motion) return <GameBoard />;
 
   return (
     <div data-book-navigation="true" data-book-transition={motion?.direction} aria-busy={Boolean(motion)} className="relative h-full w-full overflow-hidden">

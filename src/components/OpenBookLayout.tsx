@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react';
 import clsx from 'clsx';
 import { ArrowLeft } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
@@ -12,6 +12,7 @@ interface PrimaryAction {
 
 interface OpenBookLayoutProps {
   title: string;
+  headingRef?: Ref<HTMLHeadingElement>;
   onBack: () => void;
   actions?: ReactNode;
   primaryAction?: PrimaryAction;
@@ -22,7 +23,7 @@ interface OpenBookLayoutProps {
 }
 
 /** Estrutura visual comum das telas em Bíblia aberta; as ações pertencem a cada tela. */
-export default function OpenBookLayout({ title, onBack, actions, primaryAction, toolbar, pagesOverlay, pagesBusy = false, children }: OpenBookLayoutProps) {
+export default function OpenBookLayout({ title, headingRef, onBack, actions, primaryAction, toolbar, pagesOverlay, pagesBusy = false, children }: OpenBookLayoutProps) {
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-gradient-to-b from-[#fdfbf7] via-[#faf7f0] to-[#f3ebd9] font-serif text-[#2c1d11] dark:from-[#18110b] dark:via-[#120a06] dark:to-[#0a0503] dark:text-[#ede6d8]">
       <header data-book-screen-header="true" className="z-20 shrink-0 border-b border-[#d5c6b0] bg-white/85 px-4 py-2 text-xs shadow-xs backdrop-blur-xs dark:border-[#2b1b11] dark:bg-[#1b1009]/90">
@@ -32,7 +33,7 @@ export default function OpenBookLayout({ title, onBack, actions, primaryAction, 
               <ArrowLeft className="h-4 w-4" />
             </BookToolbarButton>
             <span aria-hidden="true" className="h-5 w-px shrink-0 bg-[#d5c6b0] dark:bg-[#3d281a]" />
-            <h1 className="truncate text-xs font-bold uppercase tracking-wider text-[#1c120c] dark:text-amber-400/90">{title}</h1>
+            <h1 ref={headingRef} tabIndex={headingRef ? -1 : undefined} className="truncate text-xs font-bold uppercase tracking-wider text-[#1c120c] outline-none dark:text-amber-400/90">{title}</h1>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {actions && <div className="flex items-center gap-2">{actions}</div>}

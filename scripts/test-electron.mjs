@@ -721,6 +721,8 @@ try {
   child = spawn(executable, ['.', `--user-data-dir=${profile}`, `--remote-debugging-port=${rendererPort}`, '--remote-debugging-address=127.0.0.1', `--inspect=127.0.0.1:${mainPort}`], { cwd: root, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
   child.on('error', (error) => { logs += `\n${error.message}`; });
   for (const stream of [child.stdout, child.stderr]) stream.on('data', (data) => { logs = (logs + data).slice(-16000); });
+  ui = await Protocol.connect(await target(rendererPort, (item) => item.type === 'page' && item.url.startsWith('file:')));
+  await waitUi(() => document.readyState === 'complete' && Boolean(window.showDoCristao), 'inicialização do renderer');
   main = await Protocol.connect(await target(mainPort, () => true));
   const actualProfile = await main.run(async () => {
     const require = process.getBuiltinModule('module').createRequire(`${process.cwd()}/package.json`);
@@ -729,10 +731,8 @@ try {
     return globalThis.__sdc51.electron.app.getPath('userData');
   });
   assert.equal(path.resolve(actualProfile), path.resolve(profile), 'O app deve usar exclusivamente a pasta temporária de testes.');
-  ui = await Protocol.connect(await target(rendererPort, (item) => item.type === 'page' && item.url.startsWith('file:')));
   await ui.send('Page.enable');
   await ui.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 720, deviceScaleFactor: 1, mobile: false });
-  await waitUi(() => document.readyState === 'complete' && Boolean(window.showDoCristao), 'inicialização do renderer');
   // A sessão Windows pode preferir reduzir animações; cada cenário controla a preferência sem alterar o sistema.
   await ui.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] });
   const fixtures = path.join(profile, 'fixtures');
@@ -1106,9 +1106,7 @@ try {
         if (height === 720 && !dark) {
           await click('[data-book-primary]');
           await waitUi(() => document.body.textContent.includes('Mural da Gincana Bíblica'), 'nova ação principal inicia a gincana');
-          for (const name of ['Sarça Verde', 'Chama Dourada', 'Vinho Carmesim', 'Safira Celeste']) {
-            assert.ok((await text()).includes(name), `A gincana deve receber a equipe ${name}.`);
-          }
+          assert.match(await text(), /Vez de escolher\s+Sarça Verde/, 'A primeira equipe configurada deve começar.');
           await button('Encerrar Gincana');
           await button('Sim, Encerrar', '[role="dialog"]');
           await menuReady();
@@ -1409,6 +1407,203 @@ try {
     await returnToMenu();
   });
 
+  await test('Índice agrupa as perguntas por dificuldade e preserva a numeração nos dois temas', async () => {
+    const ordered = await bank();
+    await button('INICIAR GINCANA');
+    await configReady();
+    await fill('[data-team-id="equipe-2"] input', 'Equipe que começa');
+    await click('[data-team-id="equipe-2"] [title="Subir na ordem"]');
+    await click('[data-book-primary]');
+    await waitUi(() => Boolean(document.querySelector('[data-game-board]')), 'mural numerado');
+    assert.match(await text(), /Vez de escolher\s+Equipe que começa/);
+    assert.doesNotMatch(await text(), /Talentos|Pontuação/);
+
+    const expected = ordered.map((question, index) => {
+      const label = { facil: 'Fácil', medio: 'Médio', dificil: 'Difícil' }[question.dificuldade];
+      return `Pergunta ${index + 1}, ${label}`;
+    });
+    const labels = () => ui.run(() => [...document.querySelectorAll('[data-question-number]')].map(button => button.getAttribute('aria-label')));
+    assert.deepEqual(await labels(), expected);
+    const sections = ordered.map(question => ({ facil: 'Perguntas fáceis', medio: 'Perguntas médias', dificil: 'Perguntas difíceis' }[question.dificuldade]));
+    assert.deepEqual(await ui.run(() => [...document.querySelectorAll('[data-question-number]')].map(entry => entry.closest('section').getAttribute('aria-label'))), sections);
+    assert.deepEqual(await ui.run(() => [...document.querySelectorAll('[data-board-scroll] h2')].map(title => title.textContent.trim())), [...new Set(sections)], 'Cada título deve aparecer uma vez nas duas folhas.');
+    const number = ordered.length;
+    const selector = `[data-question-number="${number}"]`;
+
+    for (const [width, height] of [[1280, 720], [1920, 1080]]) {
+      await ui.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false });
+      for (const dark of [false, true]) {
+        await setMenuTheme(dark);
+        const theme = dark ? 'noturno' : 'claro';
+        assert.equal(await ui.run(() => {
+          const pages = [...document.querySelectorAll('[data-game-board] [data-board-scroll]')];
+          return pages.length === 2 && pages.every(page => page.querySelectorAll('[data-question-number]').length === 10 && page.scrollHeight <= page.clientHeight + 1);
+        }), true, 'As 20 perguntas de exemplo devem caber nas duas páginas sem rolagem.');
+        await screenshot(`mural-${theme}-${height}`, '6');
+        const source = await ui.run((selector) => {
+          const card = document.querySelector(selector);
+          const bounds = card.getBoundingClientRect();
+          card.click();
+          document.querySelector('[data-question-number="1"]').click();
+          return { x: bounds.x, y: bounds.y, width: bounds.width };
+        }, selector);
+        await waitUi(() => Boolean(document.querySelector('#active-question-title')), 'pergunta selecionada');
+        assert.equal(await ui.run(() => document.querySelector('#active-question-title').textContent), `Pergunta ${number}`);
+        assert.ok((await text()).includes(ordered[number - 1].pergunta));
+        assert.equal(await ui.run(() => document.activeElement.id), 'active-question-title');
+        const beginning = await ui.run(() => {
+          const opening = document.querySelector('[data-question-opening]');
+          const animations = opening?.getAnimations({ subtree: true });
+          const paper = animations?.find(animation => animation.id === 'question-paper-open');
+          if (!paper) throw new Error('Abertura em papel não encontrada.');
+          for (const animation of animations) { animation.pause(); animation.currentTime = 0; }
+          const bounds = paper.effect.target.getBoundingClientRect();
+          for (const animation of animations) animation.currentTime = 175;
+          return { x: bounds.x, y: bounds.y, width: bounds.width, boardInert: document.querySelector('[data-game-board]').inert };
+        });
+        try {
+          assert.ok(Math.abs(beginning.x - source.x) < 8 && Math.abs(beginning.y - source.y) < 8 && Math.abs(beginning.width - source.width) < 8, 'A folha deve partir do cartão escolhido.');
+          assert.equal(beginning.boardInert, true, 'O mural deve ficar inerte durante a abertura.');
+          if (height === 720) await screenshot(`pergunta-abrindo-${theme}-${height}`, '6');
+        } finally {
+          await ui.run(() => document.querySelector('[data-question-opening]')?.getAnimations({ subtree: true }).forEach(animation => animation.play()));
+        }
+        await waitUi(() => !document.querySelector('[data-question-opening]') && document.querySelector('[data-game-board]').hidden, 'abertura da pergunta concluída');
+        if (height === 720) await screenshot(`pergunta-${theme}-${height}`, '6');
+        await button('Voltar ao mural');
+        assert.equal(await ui.run((selector) => document.activeElement.matches(selector + ':enabled'), selector), true);
+        assert.deepEqual(await labels(), expected);
+      }
+    }
+
+    await button('Encerrar Gincana');
+    await button('Continuar Partida', '[role="dialog"]');
+    assert.equal(await ui.run(() => document.activeElement.textContent.trim()), 'Encerrar Gincana');
+    assert.deepEqual(await labels(), expected);
+    await button('Encerrar Gincana');
+    await button('Sim, Encerrar', '[role="dialog"]');
+    await menuReady();
+    await button('INICIAR GINCANA');
+    await configReady();
+    await click('[data-book-primary]');
+    await waitUi(() => Boolean(document.querySelector('[data-game-board]')), 'mural da segunda partida');
+    assert.deepEqual(await labels(), expected, 'Começar outra partida deve manter a associação de perguntas e números.');
+    await button('Encerrar Gincana');
+    await button('Sim, Encerrar', '[role="dialog"]');
+    await menuReady();
+    await setMenuTheme(false);
+    await ui.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 720, deviceScaleFactor: 1, mobile: false });
+  });
+
+  await test('Mural comporta banco grande com rolagem interna e cabeçalho acessível', async () => {
+    const original = await bankText();
+    const many = Array.from({ length: 55 }, (_, index) => ({ ...defaults[0], pergunta: `Pergunta de teste ${index + 1}` }));
+    await fs.writeFile(bankFile(), JSON.stringify(many));
+    try {
+      await button('INICIAR GINCANA');
+      await configReady();
+      await click('[data-book-primary]');
+      await waitUi(() => document.querySelectorAll('[data-question-number]').length === 55, 'banco grande no mural');
+      await ui.run(() => document.querySelector('[data-question-number="55"]').scrollIntoView({ block: 'nearest' }));
+      await waitUi(() => {
+        const button = document.querySelector('[data-question-number="55"]');
+        const grid = button.closest('[data-board-scroll]');
+        const entry = button.getBoundingClientRect();
+        return grid.scrollTop > 0 && entry.bottom <= grid.getBoundingClientRect().bottom + 1 && document.querySelector('header').getBoundingClientRect().top >= 0;
+      }, 'última linha visível dentro da folha e cabeçalho fixo');
+      await click('[data-question-number="55"]');
+      assert.match(await text(), /Pergunta de teste 55/);
+      await button('Voltar ao mural');
+      assert.equal(await ui.run(() => document.activeElement.matches('[data-question-number="55"]')), true);
+      await button('Encerrar Gincana');
+      await button('Sim, Encerrar', '[role="dialog"]');
+      await menuReady();
+    } finally { await fs.writeFile(bankFile(), original); }
+  });
+
+  await test('Abertura da pergunta respeita redução de movimento e pode ser interrompida ao voltar', async () => {
+    await button('INICIAR GINCANA');
+    await configReady();
+    await click('[data-book-primary]');
+    await waitUi(() => Boolean(document.querySelector('[data-game-board]')), 'mural para abrir a primeira pergunta');
+    const card = '[data-question-number="1"]';
+    for (const reduced of [true, false]) {
+      await setReducedMotion(reduced);
+      await click(card);
+      await waitUi(() => Boolean(document.querySelector('#active-question-title')), 'primeira pergunta');
+      assert.equal(await ui.run(() => document.getAnimations().some(animation => animation.id === 'question-paper-open')), !reduced);
+      await button('Voltar ao mural');
+      assert.equal(await ui.run(() => document.getAnimations().some(animation => animation.id === 'question-paper-open')), false);
+      assert.equal(await ui.run(() => document.activeElement.matches('[data-question-number="1"]')), true);
+    }
+    await button('Encerrar Gincana');
+    await button('Sim, Encerrar', '[role="dialog"]');
+    await menuReady();
+  });
+
+  await test('Iniciar gincana vira a folha da configuração antes de mostrar os cartões', async () => {
+    const bookGeometry = () => ui.run(() => [
+      '[data-book-screen-header]', '[data-open-book]', '[data-book-toolbar]', '[data-book-pages]',
+      '[data-book-pages] > [data-book-page="left"]', '[data-book-pages] > [data-book-page="right"]', '[data-book-screen-footer]',
+    ].map(selector => {
+      const { x, y, width, height } = document.querySelector(selector).getBoundingClientRect();
+      return [x, y, width, height];
+    }));
+    for (const dark of [false, true]) {
+      await setMenuTheme(dark);
+      await button('INICIAR GINCANA');
+      await configReady();
+      const beforeTurn = await bookGeometry();
+      await freezeTurnAt(0.41);
+      try {
+        await click('[data-book-primary]');
+        await waitTurnPhase(0.41);
+        const state = await ui.run(() => {
+          const layer = document.querySelector('[data-game-start-turn] [data-page-turn]');
+          return {
+            angle: Number(layer.dataset.turnAngle),
+            direction: layer.dataset.pageTurn,
+            segments: layer.querySelectorAll('[data-turn-segment]').length,
+            front: layer.querySelector('[data-turn-front]').textContent,
+            openingLeft: layer.querySelector('[data-turn-back] [data-board-scroll]').querySelectorAll('li').length,
+            openingRight: document.querySelector('[data-book-pages] > [data-book-page="right"] [data-board-scroll]').querySelectorAll('li').length,
+            selectableCards: document.querySelectorAll('[data-question-number]').length,
+            blocked: document.querySelector('[data-book-primary]').matches(':disabled'),
+            board: Boolean(document.querySelector('[data-game-board]')),
+          };
+        });
+        assert.equal(state.direction, 'next');
+        assert.ok(state.angle < -15 && state.angle > -165, 'A folha precisa estar visivelmente inclinada durante a transição.');
+        assert.equal(state.segments, 8);
+        assert.match(state.front, /Parâmetros da partida/);
+        assert.equal(state.openingLeft, 10);
+        assert.equal(state.openingRight, 10);
+        assert.equal(state.selectableCards, 0);
+        assert.equal(state.blocked, true);
+        assert.equal(state.board, false, 'O mural só abre depois da virada.');
+        await screenshot(`inicio-gincana-virada-${dark ? 'noturno' : 'claro'}`, '6');
+      } finally { await resumeTurnFrames(); }
+      await waitUi(() => document.querySelectorAll('[data-game-board] [data-question-number]').length === 20, 'mural com 20 cartões após a virada');
+      assert.equal(await ui.run(() => !!document.querySelector('[data-page-turn]')), false);
+      assert.deepEqual(await bookGeometry(), beforeTurn, 'O mural deve ocupar a mesma área do livro da configuração.');
+      await button('Encerrar Gincana');
+      await button('Sim, Encerrar', '[role="dialog"]');
+      await menuReady();
+    }
+    await setMenuTheme(false);
+    await setReducedMotion(true);
+    try {
+      await button('INICIAR GINCANA');
+      await configReady();
+      await click('[data-book-primary]');
+      await waitUi(() => document.querySelectorAll('[data-game-board] [data-question-number]').length === 20, 'mural em movimento reduzido');
+      assert.equal(await ui.run(() => Boolean(document.querySelector('[data-page-turn]'))), false);
+      await button('Encerrar Gincana');
+      await button('Sim, Encerrar', '[role="dialog"]');
+      await menuReady();
+    } finally { await setReducedMotion(false); }
+  });
+
   await test('Banco inválido bloqueia a partida e oferece acesso ao cadastro', async () => {
     await fs.writeFile(bankFile(), '{arquivo inválido');
     await reloadMenu(); await button('INICIAR GINCANA');
@@ -1461,7 +1656,7 @@ try {
     }
   });
 
-  console.log(`\n${passed} cenários passaram no Electron de produção (1280×720; capa, cadastro e configuração também em 1920×1080), com dados temporários.`);
+  console.log(`\n${passed} cenários passaram no Electron de produção (1280×720; capa, cadastro, configuração e mural também em 1920×1080), com dados temporários.`);
 } catch (error) {
   process.exitCode = 1;
   console.error(`\nFalha na regressão do Electron: ${error.stack || error.message}`);

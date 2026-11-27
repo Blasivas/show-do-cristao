@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Clock,
   Swords,
@@ -11,9 +11,11 @@ import {
 import { useGame } from '@/contexts/GameContext';
 import { errorMessage, getGameQuestions } from '@/services/questionStorage';
 import OpenBookLayout, { BookPage } from '@/components/OpenBookLayout';
+import PageTurnLayer from '@/components/PageTurnLayer';
+import QuestionBoard from '@/components/QuestionBoard';
 import { TEAM_PRESETS, getTeamPresetById } from '@/game/teams';
 import { playPageFlipSound } from '@/services/audioService';
-import type { Question, Team } from '@/types/game';
+import type { GameConfig as MatchConfig, Question, Team } from '@/types/game';
 
 const TIMER_OPTIONS: Array<{ label: string; value: number | null }> = [
   { label: 'Sem limite', value: null },
@@ -40,6 +42,30 @@ export default function GameConfig({ onBack }: { onBack?: () => void }) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [questionsError, setQuestionsError] = useState<string | null>(null);
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const [turning, setTurning] = useState(false);
+  const pendingStart = useRef<{ config: MatchConfig; questions: Question[] } | null>(null);
+
+  const finishStart = useCallback(() => {
+    const match = pendingStart.current;
+    if (!match) return;
+    pendingStart.current = null;
+    startGame(match.config, match.questions);
+  }, [startGame]);
+
+  useEffect(() => {
+    if (!turning) return;
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const finishIfMotionIsOff = () => {
+      if (preference.matches || document.hidden) finishStart();
+    };
+    finishIfMotionIsOff();
+    preference.addEventListener('change', finishIfMotionIsOff);
+    document.addEventListener('visibilitychange', finishIfMotionIsOff);
+    return () => {
+      preference.removeEventListener('change', finishIfMotionIsOff);
+      document.removeEventListener('visibilitychange', finishIfMotionIsOff);
+    };
+  }, [turning, finishStart]);
 
   useEffect(() => {
     let isMounted = true;
@@ -105,7 +131,7 @@ export default function GameConfig({ onBack }: { onBack?: () => void }) {
   };
 
   const handleStart = () => {
-    if (loadingQuestions || questionsError) return;
+    if (loadingQuestions || questionsError || turning || pendingStart.current) return;
     const trimmedTeams = teams.map((t) => ({ ...t, name: t.name.trim() }));
     if (trimmedTeams.some((t) => !t.name)) {
       setErrorMsg('Por favor, defina um nome para todas as equipes.');
@@ -119,37 +145,19 @@ export default function GameConfig({ onBack }: { onBack?: () => void }) {
 
     setErrorMsg(null);
     playPageFlipSound();
-    startGame(
-      {
-        teams: trimmedTeams,
-        timerSeconds,
-        allowSteal,
-      },
-      questions,
-    );
+    pendingStart.current = { config: { teams: trimmedTeams, timerSeconds, allowSteal }, questions };
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.hidden) {
+      finishStart();
+    } else {
+      setTurning(true);
+    }
   };
 
   const totalQuestions = questions.length;
   const questionsPerTeam = Math.floor(totalQuestions / teamCount);
   const remainder = totalQuestions % teamCount;
 
-  return (
-    <OpenBookLayout
-      title="Configuração da gincana"
-      onBack={handleBackToMenu}
-      primaryAction={{
-        label: 'Iniciar gincana',
-        icon: <Play className="h-4 w-4" />,
-        onClick: handleStart,
-        disabled: loadingQuestions || Boolean(questionsError) || totalQuestions === 0,
-      }}
-      toolbar={
-        <div className="flex w-full items-center justify-between gap-4 text-xs text-[#73533e] dark:text-[#bdae9c]">
-          <span>Defina as equipes e as regras da partida.</span>
-          <span className="shrink-0">{loadingQuestions ? 'Carregando perguntas…' : questionsError ? 'Banco indisponível' : `${totalQuestions} perguntas no banco`}</span>
-        </div>
-      }
-    >
+  const teamsPage = (
       <BookPage
         side="left"
         title="Livro das regras"
@@ -282,6 +290,9 @@ export default function GameConfig({ onBack }: { onBack?: () => void }) {
           </div>
         </div>
       </BookPage>
+  );
+
+  const parametersPage = (
       <BookPage
         side="right"
         title="Parâmetros da partida"
@@ -391,6 +402,33 @@ export default function GameConfig({ onBack }: { onBack?: () => void }) {
           </div>
         </div>
       </BookPage>
-    </OpenBookLayout>
+  );
+
+  return (
+    <fieldset className="contents" disabled={turning} data-game-start-turn={turning ? 'true' : undefined}>
+      <OpenBookLayout
+        title="Configuração da gincana"
+        onBack={handleBackToMenu}
+        primaryAction={{
+          label: 'Iniciar gincana',
+          icon: <Play className="h-4 w-4" />,
+          onClick: handleStart,
+          disabled: turning || loadingQuestions || Boolean(questionsError) || totalQuestions === 0,
+        }}
+        toolbar={
+          <div className="flex w-full items-center justify-between gap-4 text-xs text-[#73533e] dark:text-[#bdae9c]">
+            <span>Defina as equipes e as regras da partida.</span>
+            <span className="shrink-0">{loadingQuestions ? 'Carregando perguntas…' : questionsError ? 'Banco indisponível' : `${totalQuestions} perguntas no banco`}</span>
+          </div>
+        }
+        pagesBusy={turning}
+        pagesOverlay={turning && (
+          <PageTurnLayer direction="next" front={parametersPage} back={<QuestionBoard side="left" questions={questions} />} onComplete={finishStart} />
+        )}
+      >
+        {teamsPage}
+        {turning ? <QuestionBoard side="right" questions={questions} /> : parametersPage}
+      </OpenBookLayout>
+    </fieldset>
   );
 }

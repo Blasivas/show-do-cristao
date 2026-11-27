@@ -176,6 +176,14 @@ Direção aprovada em 20/11/2026 (D48–D49), implementada e conferida nas fases
 
 ---
 
+### 4.8 Mural de Perguntas — Etapa 6
+
+- Ao iniciar a gincana, a folha direita da configuração vira sobre a lombada com a animação de folhear do cadastro. Ela revela a grade na mesma Bíblia aberta, mantendo a moldura, as margens e a lombada no lugar. Com redução de movimento, a passagem é direta.
+- O mural segue a composição de um índice bíblico. As seções Perguntas fáceis, médias e difíceis usam os destaques verde, âmbar e carmesim. O título aparece uma vez, na primeira folha em que a seção começa. Cada pergunta ocupa uma linha clicável, com pontilhado e número à direita. Com 20 perguntas, os números 1 a 10 ficam à esquerda e 11 a 20 à direita.
+- A linha respondida mantém o número em cores neutras, recebe o rótulo Respondida e fica desativada. O mural preserva o sigilo de quem acertou e da pontuação.
+- A equipe da vez e o contador aparecem na mesma faixa interna usada no cadastro e na configuração. Para bancos maiores, as linhas rolam dentro de cada folha.
+- Ao selecionar uma linha, a folha da pergunta parte da sua posição, inclina levemente e se amplia até o centro. O enunciado aparece ao longo da abertura de 460 ms. A redução de movimento abre a pergunta diretamente.
+
 ## 5. Diretrizes de Implementação
 
 1. **Descarte do Tech Bento:** Toda a aplicação adota exclusivamente a identidade visual da Bíblia Sagrada.
